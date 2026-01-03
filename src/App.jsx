@@ -60,6 +60,7 @@ import DeliveryLocations from './pages/DeliveryLocations';
 // Dashboard
 import DashboardMetrics from './pages/DashboardMetrics';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -77,8 +78,9 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <LanguageProvider>
+      <AuthProvider>
+        <Router>
         <Toaster 
           position="top-right"
           toastOptions={{
@@ -172,7 +174,8 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
