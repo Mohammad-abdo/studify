@@ -176,52 +176,83 @@ const Layout = () => {
     if (hasChildren) {
       return (
         <div key={item.key || item.path} className="space-y-1">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => toggleMenu(item.key)}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+            className={`relative w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group ${
               isActive
-                ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-700 font-bold border border-white/30 backdrop-blur-sm shadow-lg'
-                : 'text-gray-700 hover:bg-white/30 hover:backdrop-blur-sm border border-transparent hover:border-white/20'
+                ? 'bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-pink-500/30 text-indigo-700 font-bold shadow-lg border border-white/40 backdrop-blur-md'
+                : 'text-gray-700 hover:bg-white/40 hover:backdrop-blur-md border border-transparent hover:border-white/30 hover:shadow-md'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Icon size={20} className={isActive ? 'text-indigo-600' : 'text-gray-600'} />
-              <span>{item.label}</span>
+            {/* Hover effect background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-indigo-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300"></div>
+            
+            <div className="relative z-10 flex items-center gap-3">
+              <div className={`p-1.5 rounded-lg transition-all ${
+                isActive 
+                  ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg' 
+                  : 'bg-white/50 text-gray-600 group-hover:bg-gradient-to-br group-hover:from-indigo-500 group-hover:to-purple-500 group-hover:text-white group-hover:shadow-md'
+              }`}>
+                <Icon size={18} />
+              </div>
+              <span className="font-semibold">{item.label}</span>
             </div>
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.3 }}
+              className="relative z-10"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} className={isActive ? 'text-indigo-600' : 'text-gray-500'} />
             </motion.div>
-          </button>
+          </motion.button>
           <AnimatePresence>
             {isExpanded && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                <div className="pl-4 space-y-1 border-l-2 border-white/30 ml-6">
-                  {item.children.map((child) => {
+                <div className="pl-4 space-y-1 border-l-2 border-indigo-300/50 ml-6 mt-1">
+                  {item.children.map((child, childIndex) => {
                     const ChildIcon = child.icon;
                     const isChildActive = location.pathname === child.path;
                     return (
-                      <Link
+                      <motion.div
                         key={child.path}
-                        to={child.path}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 ${
-                          isChildActive
-                            ? 'bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-indigo-700 font-bold border-l-2 border-indigo-500 -ml-[2px] backdrop-blur-sm'
-                            : 'text-gray-600 hover:bg-white/20 hover:backdrop-blur-sm'
-                        }`}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: childIndex * 0.05 }}
                       >
-                        <ChildIcon size={18} />
-                        <span className="text-sm">{child.label}</span>
-                      </Link>
+                        <Link
+                          to={child.path}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`relative flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 group ${
+                            isChildActive
+                              ? 'bg-gradient-to-r from-indigo-500/40 to-purple-500/40 text-indigo-700 font-bold shadow-md border-l-4 border-indigo-500 -ml-[2px] backdrop-blur-sm'
+                              : 'text-gray-600 hover:bg-white/30 hover:backdrop-blur-sm hover:shadow-sm'
+                          }`}
+                        >
+                          <div className={`p-1 rounded-md transition-all ${
+                            isChildActive
+                              ? 'bg-indigo-500/20 text-indigo-600'
+                              : 'text-gray-500 group-hover:bg-indigo-500/10 group-hover:text-indigo-600'
+                          }`}>
+                            <ChildIcon size={16} />
+                          </div>
+                          <span className="text-sm font-medium">{child.label}</span>
+                          {isChildActive && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="ml-auto w-2 h-2 rounded-full bg-indigo-500"
+                            />
+                          )}
+                        </Link>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -242,14 +273,36 @@ const Layout = () => {
         <Link
           to={item.path}
           onClick={() => setSidebarOpen(false)}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+          className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group ${
             isActive
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-xl scale-105'
-              : 'text-gray-700 hover:bg-white/30 hover:backdrop-blur-sm border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold shadow-2xl scale-[1.02]'
+              : 'text-gray-700 hover:bg-white/40 hover:backdrop-blur-md border border-transparent hover:border-white/30 hover:shadow-lg'
           }`}
         >
-          <Icon size={20} />
-          <span>{item.label}</span>
+          {/* Active indicator */}
+          {isActive && (
+            <motion.div
+              layoutId="activeIndicator"
+              className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            />
+          )}
+          
+          {/* Hover gradient effect */}
+          <div className={`absolute inset-0 transition-all duration-300 ${
+            isActive 
+              ? 'bg-gradient-to-r from-indigo-600/100 to-purple-600/100' 
+              : 'bg-gradient-to-r from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/10 group-hover:to-purple-500/10'
+          }`}></div>
+          
+          <div className={`relative z-10 p-1.5 rounded-lg transition-all ${
+            isActive
+              ? 'bg-white/20 text-white shadow-lg'
+              : 'bg-white/50 text-gray-600 group-hover:bg-gradient-to-br group-hover:from-indigo-500 group-hover:to-purple-500 group-hover:text-white group-hover:shadow-md'
+          }`}>
+            <Icon size={18} />
+          </div>
+          <span className="relative z-10 font-semibold">{item.label}</span>
         </Link>
       </motion.div>
     );
@@ -284,31 +337,53 @@ const Layout = () => {
           x: isMobile ? (sidebarOpen ? 0 : -320) : 0,
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed top-0 left-0 z-50 w-72 h-screen glass-card border-r border-white/30 shadow-2xl backdrop-blur-xl"
+        className="fixed top-0 left-0 z-50 w-72 h-screen bg-gradient-to-br from-white/90 via-white/70 to-white/50 backdrop-blur-2xl border-r border-white/40 shadow-2xl"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.5) 100%)',
+        }}
       >
-        <div className="flex flex-col h-full">
+        {/* Sidebar Background Pattern */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(99, 102, 241, 0.3) 1px, transparent 0)',
+            backgroundSize: '40px 40px',
+          }}></div>
+        </div>
+
+        <div className="flex flex-col h-full relative z-10">
           {/* Logo Section */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between h-20 px-6 border-b border-white/30 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 backdrop-blur-xl"
+            className="relative flex items-center justify-between h-20 px-6 border-b border-white/40 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 backdrop-blur-xl overflow-hidden"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center p-1.5 shadow-lg border border-white/30">
+            {/* Animated gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-purple-600/90 to-pink-600/90 backdrop-blur-sm"></div>
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+              backgroundSize: '200% 200%',
+              animation: 'shimmer 3s infinite',
+            }}></div>
+            
+            <div className="relative z-10 flex items-center gap-3">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-md flex items-center justify-center p-1.5 shadow-2xl border-2 border-white/40"
+              >
                 <Logo size="small" />
-              </div>
-              <span className="text-white font-bold text-lg">Studify</span>
+              </motion.div>
+              <span className="text-white font-extrabold text-xl tracking-tight drop-shadow-lg">Studify</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/20"
+              className="relative z-10 lg:hidden text-white/90 hover:text-white transition-all p-2 rounded-xl hover:bg-white/20 backdrop-blur-sm"
             >
               <X size={24} />
             </button>
           </motion.div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar-sidebar">
             <div className="space-y-1">
               {menuItems.map((item, index) => renderMenuItem(item, index))}
             </div>
@@ -318,36 +393,45 @@ const Layout = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 border-t border-white/30 glass-card"
+            className="p-4 border-t border-white/40 bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl"
           >
-            <div className="flex items-center gap-3 mb-3 p-3 rounded-xl glass border border-white/30 shadow-lg">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-white/60 backdrop-blur-md border border-white/40 shadow-xl"
+            >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full blur-md opacity-50"></div>
-                <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold shadow-lg overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                  className="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-2xl overflow-hidden ring-2 ring-white/50"
+                >
                   {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
                   ) : (
-                    <Logo variant="icon" size="small" />
+                    <User size={20} />
                   )}
-                </div>
+                </motion.div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate">
+                <p className="text-sm font-extrabold text-gray-900 truncate">
                   {user?.phone || 'Admin'}
                 </p>
-                <p className="text-xs font-semibold text-gray-600 truncate capitalize">
+                <p className="text-xs font-bold text-gray-600 truncate capitalize">
                   {user?.type?.toLowerCase() || 'Admin'}
                 </p>
               </div>
-            </div>
+            </motion.div>
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)' }}
               whileTap={{ scale: 0.98 }}
               onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl transition-all font-bold shadow-lg hover:shadow-xl"
+              className="relative w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white rounded-xl transition-all font-bold shadow-xl hover:shadow-2xl overflow-hidden group"
             >
-              <LogOut size={18} />
-              <span>Logout</span>
+              {/* Animated background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <LogOut size={18} className="relative z-10" />
+              <span className="relative z-10">Logout</span>
             </motion.button>
           </motion.div>
         </div>
