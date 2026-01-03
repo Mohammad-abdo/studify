@@ -210,32 +210,63 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="relative">
+          <div className="absolute inset-0 glass-card rounded-3xl blur-xl"></div>
+          <div className="relative glass-card p-12 rounded-3xl">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-indigo-200 rounded-full"></div>
+                <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              </div>
+              <p className="text-gray-600 font-semibold">Loading dashboard...</p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="relative glass-card p-8 flex items-center justify-between border border-white/40 shadow-2xl"
       >
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-black rounded-xl shadow-lg">
-            <Logo size="default" />
+        {/* Decorative gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl pointer-events-none"></div>
+        
+        <div className="relative flex items-center gap-6 z-10">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+            <div className="relative p-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl shadow-xl transform group-hover:scale-105 transition-transform">
+              <Logo size="default" />
+            </div>
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back! Here's an overview of your platform.</p>
+            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+              Dashboard
+            </h1>
+            <p className="text-gray-700 mt-1 font-semibold text-lg">Welcome back! Here's an overview of your platform.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Clock size={16} />
-          <span>Last updated: {new Date().toLocaleTimeString()}</span>
+        <div className="relative flex items-center gap-3 px-6 py-3 glass rounded-2xl border border-white/30 shadow-lg z-10">
+          <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+            <Clock size={18} className="text-white" />
+          </div>
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Last updated</p>
+            <span className="text-sm font-bold text-gray-800">{new Date().toLocaleTimeString()}</span>
+          </div>
         </div>
       </motion.div>
 
@@ -249,19 +280,40 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="card hover:shadow-lg transition-all duration-200 cursor-pointer"
+              className="relative glass-card p-8 glass-hover cursor-pointer group overflow-hidden border border-white/40 shadow-xl"
               onClick={() => stat.link && navigate(stat.link)}
             >
-              <div className="flex items-center justify-between">
+              {/* Animated gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              {/* Glowing border effect */}
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-xl"></div>
+              </div>
+              
+              <div className="relative flex items-center justify-between z-10">
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{stat.value.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">{stat.subtitle}</p>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 group-hover:scale-150 transition-transform"></div>
+                    <p className="text-sm font-bold text-gray-600 uppercase tracking-wider">{stat.title}</p>
+                  </div>
+                  <p className="text-5xl font-extrabold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-3 group-hover:scale-105 transition-transform inline-block">
+                    {stat.value.toLocaleString()}
+                  </p>
+                  <p className="text-xs font-semibold text-gray-600 bg-gray-100/50 px-3 py-1.5 rounded-lg inline-block">{stat.subtitle}</p>
                 </div>
-                <div className={`${stat.color} p-4 rounded-xl shadow-lg`}>
-                  <Icon className="text-white" size={28} />
+                <div className={`relative ${stat.color} p-6 rounded-3xl shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                  <div className="absolute inset-0 bg-white/30 rounded-3xl blur-sm"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent rounded-3xl"></div>
+                  <Icon className="text-white relative z-10 drop-shadow-lg" size={36} />
                 </div>
               </div>
+              
+              {/* Shine sweep effect */}
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+              
+              {/* Corner accent */}
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-white/40 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </motion.div>
           );
         })}
@@ -274,56 +326,88 @@ const Dashboard = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="card"
+          className="glass-card p-8 border border-white/40 shadow-2xl relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Orders & Revenue Trend</h2>
-            <Activity className="text-primary-600" size={20} />
+          {/* Background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)',
+              backgroundSize: '24px 24px'
+            }}></div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={orderStats}>
-              <defs>
-                <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" stroke="#6b7280" />
-              <YAxis yAxisId="left" stroke="#6b7280" />
-              <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
-                }}
-              />
-              <Legend />
-              <Area 
-                yAxisId="left"
-                type="monotone" 
-                dataKey="orders" 
-                stroke="#14b8a6" 
-                fillOpacity={1} 
-                fill="url(#colorOrders)" 
-                name="Orders"
-              />
-              <Area 
-                yAxisId="right"
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#f97316" 
-                fillOpacity={1} 
-                fill="url(#colorRevenue)" 
-                name="Revenue ($)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          
+          <div className="relative z-10 flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-extrabold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                Orders & Revenue Trend
+              </h2>
+              <p className="text-sm font-medium text-gray-600">Last 7 days performance</p>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative p-4 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl shadow-xl">
+                <Activity className="text-white drop-shadow-lg" size={28} />
+              </div>
+            </div>
+          </div>
+          <div className="relative z-10">
+            <ResponsiveContainer width="100%" height={320}>
+              <AreaChart data={orderStats}>
+                <defs>
+                  <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.4}/>
+                    <stop offset="50%" stopColor="#14b8a6" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.4}/>
+                    <stop offset="50%" stopColor="#f97316" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
+                <XAxis dataKey="name" stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <YAxis yAxisId="left" stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <YAxis yAxisId="right" orientation="right" stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    borderRadius: '16px',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+                    padding: '12px 16px'
+                  }}
+                  labelStyle={{ fontWeight: 700, color: '#1e293b' }}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                <Area 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="orders" 
+                  stroke="#14b8a6" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorOrders)" 
+                  name="Orders"
+                  dot={{ fill: '#14b8a6', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#14b8a6', strokeWidth: 2 }}
+                />
+                <Area 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#f97316" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorRevenue)" 
+                  name="Revenue ($)"
+                  dot={{ fill: '#f97316', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#f97316', strokeWidth: 2 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </motion.div>
 
         {/* User Types Distribution */}
@@ -331,31 +415,61 @@ const Dashboard = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
-          className="card"
+          className="glass-card p-8 border border-white/40 shadow-2xl relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">User Types Distribution</h2>
-            <Users className="text-primary-600" size={20} />
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)',
+              backgroundSize: '24px 24px'
+            }}></div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={userTypeData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {userTypeData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          
+          <div className="relative z-10 flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent mb-2">
+                User Types Distribution
+              </h2>
+              <p className="text-sm font-medium text-gray-600">Platform user breakdown</p>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative p-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-xl">
+                <Users className="text-white drop-shadow-lg" size={28} />
+              </div>
+            </div>
+          </div>
+          <div className="relative z-10">
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie
+                  data={userTypeData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={110}
+                  fill="#8884d8"
+                  dataKey="value"
+                  stroke="#fff"
+                  strokeWidth={3}
+                >
+                  {userTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    borderRadius: '16px',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+                    padding: '12px 16px'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </motion.div>
 
         {/* Book Approval Status */}
@@ -363,31 +477,54 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="card"
+          className="glass-card p-8 border border-white/40 shadow-2xl relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Book Approval Status</h2>
-            <CheckCircle className="text-primary-600" size={20} />
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)',
+              backgroundSize: '24px 24px'
+            }}></div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={approvalData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
-                }}
-              />
-              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                {approvalData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          
+          <div className="relative z-10 flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-extrabold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                Book Approval Status
+              </h2>
+              <p className="text-sm font-medium text-gray-600">Current approval metrics</p>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative p-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl shadow-xl">
+                <CheckCircle className="text-white drop-shadow-lg" size={28} />
+              </div>
+            </div>
+          </div>
+          <div className="relative z-10">
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={approvalData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
+                <XAxis dataKey="name" stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <YAxis stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    borderRadius: '16px',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+                    padding: '12px 16px'
+                  }}
+                  labelStyle={{ fontWeight: 700, color: '#1e293b' }}
+                />
+                <Bar dataKey="value" radius={[12, 12, 0, 0]} strokeWidth={2}>
+                  {approvalData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} strokeWidth={2} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </motion.div>
 
         {/* Category Distribution */}
@@ -395,31 +532,54 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="card"
+          className="glass-card p-8 border border-white/40 shadow-2xl relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Top Categories</h2>
-            <Package className="text-primary-600" size={20} />
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)',
+              backgroundSize: '24px 24px'
+            }}></div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryStats.slice(0, 6)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis type="number" stroke="#6b7280" />
-              <YAxis dataKey="name" type="category" width={100} stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
-                }}
-              />
-              <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-                {categoryStats.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          
+          <div className="relative z-10 flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-extrabold bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent mb-2">
+                Top Categories
+              </h2>
+              <p className="text-sm font-medium text-gray-600">Most popular categories</p>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative p-4 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl shadow-xl">
+                <Package className="text-white drop-shadow-lg" size={28} />
+              </div>
+            </div>
+          </div>
+          <div className="relative z-10">
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={categoryStats.slice(0, 6)} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
+                <XAxis type="number" stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <YAxis dataKey="name" type="category" width={120} stroke="#64748b" strokeWidth={2} tick={{ fill: '#64748b', fontWeight: 600 }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    borderRadius: '16px',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+                    padding: '12px 16px'
+                  }}
+                  labelStyle={{ fontWeight: 700, color: '#1e293b' }}
+                />
+                <Bar dataKey="value" radius={[0, 12, 12, 0]} strokeWidth={2}>
+                  {categoryStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke={COLORS[index % COLORS.length]} strokeWidth={2} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </motion.div>
       </div>
 
@@ -430,13 +590,13 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="card"
+          className="glass-card p-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
             <button
               onClick={() => navigate('/orders')}
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1"
+              className="px-4 py-2 glass rounded-xl text-indigo-600 hover:text-indigo-700 text-sm font-semibold flex items-center gap-2 transition-all hover:scale-105"
             >
               View All
               <ArrowRight size={16} />
@@ -447,24 +607,34 @@ const Dashboard = () => {
               recentOrders.map((order, index) => (
                 <div
                   key={order.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-5 glass rounded-2xl hover:bg-white/95 transition-all cursor-pointer group border border-white/40 shadow-lg hover:shadow-xl hover:scale-[1.02] relative overflow-hidden"
                   onClick={() => navigate(`/orders/${order.id}`)}
                 >
-                  <div className="flex items-center gap-3">
-                    <ShoppingCart className="text-primary-600" size={18} />
+                  {/* Hover gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <div className="relative flex items-center gap-4 z-10">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                      <div className="relative p-3 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all">
+                        <ShoppingCart className="text-white drop-shadow-md" size={20} />
+                      </div>
+                    </div>
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">Order #{order.id.slice(0, 8)}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-extrabold text-gray-900 text-sm mb-1">Order #{order.id.slice(0, 8)}</p>
+                      <p className="text-xs font-semibold text-gray-600">
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">${order.total?.toFixed(2) || '0.00'}</p>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' :
-                      order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-blue-100 text-blue-700'
+                  <div className="relative text-right z-10">
+                    <p className="font-extrabold text-xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
+                      ${order.total?.toFixed(2) || '0.00'}
+                    </p>
+                    <span className={`text-xs px-4 py-1.5 rounded-full font-bold backdrop-blur-sm ${
+                      order.status === 'DELIVERED' ? 'bg-green-500/30 text-green-800 border-2 border-green-500/50 shadow-lg' :
+                      order.status === 'PENDING' ? 'bg-yellow-500/30 text-yellow-800 border-2 border-yellow-500/50 shadow-lg' :
+                      'bg-blue-500/30 text-blue-800 border-2 border-blue-500/50 shadow-lg'
                     }`}>
                       {order.status || 'PENDING'}
                     </span>
@@ -482,13 +652,13 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="card"
+          className="glass-card p-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Books</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Recent Books</h2>
             <button
               onClick={() => navigate('/books')}
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1"
+              className="px-4 py-2 glass rounded-xl text-indigo-600 hover:text-indigo-700 text-sm font-semibold flex items-center gap-2 transition-all hover:scale-105"
             >
               View All
               <ArrowRight size={16} />
@@ -499,21 +669,28 @@ const Dashboard = () => {
               recentBooks.map((book, index) => (
                 <div
                   key={book.id}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-4 p-5 glass rounded-2xl hover:bg-white/95 transition-all cursor-pointer group border border-white/40 shadow-lg hover:shadow-xl hover:scale-[1.02] relative overflow-hidden"
                   onClick={() => navigate(`/books/${book.id}`)}
                 >
-                  <BookOpen className="text-teal-600" size={18} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm truncate">{book.title}</p>
-                    <p className="text-xs text-gray-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                    <div className="relative p-3 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all">
+                      <BookOpen className="text-white drop-shadow-md" size={20} />
+                    </div>
+                  </div>
+                  <div className="relative flex-1 min-w-0 z-10">
+                    <p className="font-extrabold text-gray-900 text-sm truncate mb-1">{book.title}</p>
+                    <p className="text-xs font-semibold text-gray-600">
                       {book.category?.name || 'No category'} • {book.totalPages || 0} pages
                     </p>
                   </div>
-                  <Eye className="text-gray-400" size={16} />
+                  <Eye className="text-gray-400 group-hover:text-indigo-600 transition-colors relative z-10" size={18} />
                 </div>
               ))
             ) : (
-              <p className="text-center text-gray-500 py-8">No recent books</p>
+              <p className="text-center text-gray-500 py-8 font-medium">No recent books</p>
             )}
           </div>
         </motion.div>
@@ -523,13 +700,13 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
-          className="card"
+          className="glass-card p-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Products</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Recent Products</h2>
             <button
               onClick={() => navigate('/products')}
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1"
+              className="px-4 py-2 glass rounded-xl text-indigo-600 hover:text-indigo-700 text-sm font-semibold flex items-center gap-2 transition-all hover:scale-105"
             >
               View All
               <ArrowRight size={16} />
@@ -540,21 +717,28 @@ const Dashboard = () => {
               recentProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-4 p-5 glass rounded-2xl hover:bg-white/95 transition-all cursor-pointer group border border-white/40 shadow-lg hover:shadow-xl hover:scale-[1.02] relative overflow-hidden"
                   onClick={() => navigate(`/products/${product.id}`)}
                 >
-                  <Package className="text-orange-600" size={18} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                    <div className="relative p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all">
+                      <Package className="text-white drop-shadow-md" size={20} />
+                    </div>
+                  </div>
+                  <div className="relative flex-1 min-w-0 z-10">
+                    <p className="font-extrabold text-gray-900 text-sm truncate mb-1">{product.name}</p>
+                    <p className="text-xs font-semibold text-gray-600">
                       {product.category?.name || 'No category'}
                     </p>
                   </div>
-                  <Eye className="text-gray-400" size={16} />
+                  <Eye className="text-gray-400 group-hover:text-indigo-600 transition-colors relative z-10" size={18} />
                 </div>
               ))
             ) : (
-              <p className="text-center text-gray-500 py-8">No recent products</p>
+              <p className="text-center text-gray-500 py-8 font-medium">No recent products</p>
             )}
           </div>
         </motion.div>
