@@ -106,34 +106,44 @@ const PrintOptions = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Print Options</h1>
-          <p className="text-gray-600 mt-1">Manage print options for books</p>
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
+            Print Options
+          </h1>
+          <p className="text-gray-700 mt-1 font-semibold">Manage print options for books</p>
         </div>
         <button
           onClick={() => navigate('/print-options/add')}
-          className="btn-primary flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
         >
           <Plus size={20} />
           Add Option
         </button>
       </motion.div>
 
-      <DataTable
-        data={filteredOptions}
-        columns={columns}
-        loading={loading}
-        searchable
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search print options..."
-      />
+      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
+        <DataTable
+          data={filteredOptions}
+          columns={columns}
+          loading={loading}
+          searchable
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search print options..."
+        />
+      </div>
     </div>
   );
 };

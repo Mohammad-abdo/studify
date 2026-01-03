@@ -47,19 +47,27 @@ const Onboarding = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-rose-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Onboarding</h1>
-          <p className="text-gray-600 mt-1">Manage onboarding screens</p>
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 bg-clip-text text-transparent">
+            Onboarding
+          </h1>
+          <p className="text-gray-700 mt-1 font-semibold">Manage onboarding screens</p>
         </div>
         <button 
           onClick={() => navigate('/onboarding/add')}
-          className="btn-primary flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
         >
           <Plus size={20} />
           Add Onboarding Item
@@ -67,23 +75,29 @@ const Onboarding = () => {
       </motion.div>
 
       {/* Search Bar */}
-      <div className="card">
-        <div className="flex items-center gap-3">
-          <Search className="text-gray-400" size={20} />
+      <div className="relative glass-card p-6 border border-white/40 shadow-2xl">
+        <div className="flex items-center gap-3 px-4 py-3 glass rounded-xl border border-white/30">
+          <Search className="text-rose-600" size={20} />
           <input
             type="text"
             placeholder="Search onboarding items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 outline-none"
+            className="flex-1 outline-none bg-transparent font-medium text-gray-900 placeholder-gray-400"
           />
         </div>
       </div>
 
       {/* Items List */}
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="relative glass-card p-12 border border-white/40 shadow-2xl flex items-center justify-center">
+          <div className="relative">
+            <div className="absolute inset-0 glass-card rounded-3xl blur-xl"></div>
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-rose-200 rounded-full"></div>
+              <div className="w-16 h-16 border-4 border-rose-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
@@ -93,11 +107,13 @@ const Onboarding = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="card hover:shadow-lg transition-shadow"
+              className="relative glass-card p-6 border border-white/40 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.01] group overflow-hidden"
             >
-              <div className="flex items-start gap-4">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="relative z-10 flex items-start gap-4">
                 {/* Image */}
-                <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                <div className="w-32 h-32 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
@@ -109,26 +125,26 @@ const Onboarding = () => {
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <GripVertical className="text-gray-400" size={20} />
-                      <span className="text-sm font-medium text-gray-500">Order: {item.order}</span>
-                      <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
+                      <GripVertical className="text-rose-600" size={20} />
+                      <span className="text-sm font-bold text-gray-600 px-3 py-1 glass rounded-lg border border-white/30">Order: {item.order}</span>
+                      <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => navigate(`/onboarding/edit/${item.id}`)}
-                        className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2.5 glass rounded-xl text-gray-600 hover:text-rose-600 hover:bg-white/80 transition-all hover:scale-110"
                       >
                         <Edit size={18} />
                       </button>
                       <button 
                         onClick={() => handleDelete(item.id)}
-                        className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2.5 glass rounded-xl text-gray-600 hover:text-red-600 hover:bg-white/80 transition-all hover:scale-110"
                       >
                         <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
-                  <p className="text-gray-600">{item.description}</p>
+                  <p className="text-gray-700 font-medium">{item.description}</p>
                 </div>
               </div>
             </motion.div>
@@ -137,9 +153,9 @@ const Onboarding = () => {
       )}
 
       {!loading && filteredItems.length === 0 && (
-        <div className="card text-center py-12">
+        <div className="relative glass-card p-12 border border-white/40 shadow-2xl text-center">
           <ArrowRight className="mx-auto text-gray-400" size={48} />
-          <p className="text-gray-600 mt-4">No onboarding items found</p>
+          <p className="text-gray-600 mt-4 font-semibold">No onboarding items found</p>
         </div>
       )}
     </div>
