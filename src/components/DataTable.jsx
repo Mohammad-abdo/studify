@@ -35,29 +35,31 @@ const DataTable = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/30 shadow-2xl overflow-hidden">
       {/* Search Bar */}
       {searchable && (
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
+        <div className="px-6 py-4 border-b border-white/30 bg-white/40 backdrop-blur-sm">
+          <div className="flex items-center gap-3 px-4 py-3 glass rounded-xl border border-white/30">
+            <input
+              type="text"
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              className="w-full bg-transparent outline-none font-medium text-gray-900 placeholder-gray-400"
+            />
+          </div>
         </div>
       )}
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-white/50 backdrop-blur-sm border-b border-white/30">
             <tr>
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                  className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider ${
                     column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
                   }`}
                   style={{ width: column.width }}
@@ -66,13 +68,13 @@ const DataTable = ({
                 </th>
               ))}
               {(onView || onEdit || onDelete) && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white/30 divide-y divide-white/20">
             {loading ? (
               <tr>
                 <td colSpan={columns.length + (onView || onEdit || onDelete ? 1 : 0)} className="px-6 py-12 text-center">
@@ -94,12 +96,12 @@ const DataTable = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: rowIndex * 0.02 }}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-white/50 transition-colors group"
                 >
                   {columns.map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${
+                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${
                         column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
                       }`}
                     >
@@ -112,7 +114,7 @@ const DataTable = ({
                         {onView && (
                           <button
                             onClick={() => onView(item)}
-                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2.5 glass rounded-xl text-gray-600 hover:text-blue-600 hover:bg-white/80 transition-all hover:scale-110"
                             title="View"
                           >
                             <Eye size={16} />
@@ -121,7 +123,7 @@ const DataTable = ({
                         {onEdit && (
                           <button
                             onClick={() => onEdit(item)}
-                            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                            className="p-2.5 glass rounded-xl text-gray-600 hover:text-indigo-600 hover:bg-white/80 transition-all hover:scale-110"
                             title="Edit"
                           >
                             <Edit size={16} />
@@ -130,7 +132,7 @@ const DataTable = ({
                         {onDelete && (
                           <button
                             onClick={() => onDelete(item)}
-                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2.5 glass rounded-xl text-gray-600 hover:text-red-600 hover:bg-white/80 transition-all hover:scale-110"
                             title="Delete"
                           >
                             <Trash2 size={16} />
@@ -148,27 +150,27 @@ const DataTable = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-            <span className="font-medium">{Math.min(endIndex, data.length)}</span> of{' '}
-            <span className="font-medium">{data.length}</span> results
+        <div className="px-6 py-4 border-t border-white/30 bg-white/40 backdrop-blur-sm flex items-center justify-between">
+          <div className="text-sm font-semibold text-gray-700">
+            Showing <span className="font-bold">{startIndex + 1}</span> to{' '}
+            <span className="font-bold">{Math.min(endIndex, data.length)}</span> of{' '}
+            <span className="font-bold">{data.length}</span> results
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2.5 glass rounded-xl hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 border border-white/30"
             >
               <ChevronLeft size={18} />
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700">
+            <span className="px-5 py-2.5 glass rounded-xl text-sm font-bold text-gray-900 border border-white/30">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2.5 glass rounded-xl hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 border border-white/30"
             >
               <ChevronRight size={18} />
             </button>

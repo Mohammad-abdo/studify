@@ -127,27 +127,37 @@ const Delivery = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-sky-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Delivery Users</h1>
-          <p className="text-gray-600 mt-1">Manage delivery user profiles</p>
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Delivery Users
+          </h1>
+          <p className="text-gray-700 mt-1 font-semibold">Manage delivery user profiles</p>
         </div>
       </motion.div>
 
-      <DataTable
-        data={filteredDeliveries}
-        columns={columns}
-        loading={loading}
-        searchable
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search delivery users..."
-      />
+      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
+        <DataTable
+          data={filteredDeliveries}
+          columns={columns}
+          loading={loading}
+          searchable
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search delivery users..."
+        />
+      </div>
     </div>
   );
 };
