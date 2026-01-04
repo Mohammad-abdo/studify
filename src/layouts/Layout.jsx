@@ -262,7 +262,7 @@ const Layout = () => {
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div 
-            className="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 border-b border-white/30"
+            className="relative flex items-center justify-center h-14 sm:h-16 px-3 sm:px-4 border-b border-white/30"
             style={{
               background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
             }}
@@ -275,7 +275,7 @@ const Layout = () => {
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-150"
+              className="absolute right-2 sm:right-3 lg:hidden p-1.5 text-gray-500 hover:text-gray-700 hover:bg-white/20 rounded-md transition-colors duration-150"
             >
               <X size={18} className="sm:w-5 sm:h-5" />
             </button>
