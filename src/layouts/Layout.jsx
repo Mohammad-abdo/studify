@@ -287,27 +287,31 @@ const Layout = () => {
           </nav>
 
           {/* User Section */}
-          <div className="p-3 sm:p-4 border-t border-gray-200">
-            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 p-2 sm:p-3 rounded-md bg-gray-50">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-medium text-xs sm:text-sm overflow-hidden flex-shrink-0">
+          <div className="p-2.5 sm:p-3 border-t border-white/20">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-2.5 p-2 sm:p-2.5 rounded-md" style={{ background: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(8px)' }}>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-medium text-xs sm:text-sm overflow-hidden flex-shrink-0 shadow-md">
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <User size={16} className="sm:w-5 sm:h-5" />
+                  <User size={14} className="sm:w-4 sm:h-4" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                   {user?.phone || 'Admin'}
                 </p>
-                <p className="text-xs text-gray-500 truncate capitalize">
+                <p className="text-xs text-gray-600 truncate capitalize">
                   {user?.type?.toLowerCase() || 'Admin'}
                 </p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-900 text-white rounded-md text-sm sm:text-base font-medium hover:bg-gray-800 transition-colors duration-150"
+              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 text-white rounded-md text-xs sm:text-sm md:text-base font-medium transition-colors duration-150"
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                boxShadow: '0 2px 8px 0 rgba(102, 126, 234, 0.3)',
+              }}
             >
               <LogOut size={14} className="sm:w-4 sm:h-4" />
               <span>Logout</span>
@@ -464,8 +468,10 @@ const Layout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="p-3 sm:p-4 lg:p-5 xl:p-6 max-w-[1920px] mx-auto">
-          <Outlet />
+        <main className="p-2.5 sm:p-3 md:p-4 lg:p-5 xl:p-6 max-w-[1920px] mx-auto">
+          <div className="container-responsive">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

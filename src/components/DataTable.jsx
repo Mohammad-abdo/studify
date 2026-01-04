@@ -39,17 +39,17 @@ const DataTable = ({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div className="card-elevated overflow-hidden">
       {/* Search Bar */}
       {searchable && (
-        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white focus-within:border-gray-900 focus-within:ring-1 focus-within:ring-gray-900 transition-all duration-150">
+        <div className="px-2.5 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 border-b border-white/20">
+          <div className="flex items-center gap-2">
             <input
               type="text"
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              className="w-full bg-transparent outline-none text-sm sm:text-base text-gray-900 placeholder-gray-400"
+              className="input-field w-full"
             />
           </div>
         </div>
@@ -149,29 +149,29 @@ const DataTable = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="px-2.5 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
           <div className="text-xs sm:text-sm font-medium text-gray-700">
             Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
             <span className="font-semibold">{Math.min(endIndex, data.length)}</span> of{' '}
             <span className="font-semibold">{data.length}</span> results
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="p-1.5 sm:p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+              className="btn-secondary p-1.5 sm:p-2 min-h-0"
             >
-              <ChevronLeft size={16} className="sm:w-4 sm:h-4" />
+              <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
             </button>
-            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-md border border-gray-300 bg-white text-xs sm:text-sm font-medium text-gray-900">
+            <span className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-md border border-white/30 bg-white/50 backdrop-blur-sm text-xs sm:text-sm font-medium text-gray-900">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="p-1.5 sm:p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+              className="btn-secondary p-1.5 sm:p-2 min-h-0"
             >
-              <ChevronRight size={16} className="sm:w-4 sm:h-4" />
+              <ChevronRight size={14} className="sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>

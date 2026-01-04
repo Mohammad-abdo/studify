@@ -187,21 +187,21 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+    <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-0.5 sm:mb-1">Dashboard</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-semibold text-gray-900 mb-0.5">Dashboard</h1>
           <p className="text-xs sm:text-sm text-gray-600">Welcome back! Here's an overview of your platform.</p>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md border border-white/30 card-mirror">
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md border border-white/30 card-mirror">
           <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success-500 rounded-full animate-pulse"></div>
           <span className="text-xs sm:text-sm text-gray-700 font-medium">Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -226,7 +226,7 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
         {/* Orders Chart */}
         <div className="card-elevated">
           <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
@@ -396,7 +396,7 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
         {/* Recent Orders */}
         <div className="card-elevated">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
