@@ -41,8 +41,8 @@ import {
   ChevronRight,
   Globe,
   User,
+  Check,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
 
@@ -55,7 +55,7 @@ const Layout = () => {
   const userDropdownRef = useRef(null);
   const languageDropdownRef = useRef(null);
   const { user, logout } = useAuth();
-  const { language, toggleLanguage } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -176,445 +176,279 @@ const Layout = () => {
     if (hasChildren) {
       return (
         <div key={item.key || item.path} className="space-y-1">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             onClick={() => toggleMenu(item.key)}
-            className={`relative w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group ${
+            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md transition-colors duration-150 ${
               isActive
-                ? 'bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-pink-500/30 text-indigo-700 font-bold shadow-lg border border-white/40 backdrop-blur-md'
-                : 'text-gray-700 hover:bg-white/40 hover:backdrop-blur-md border border-transparent hover:border-white/30 hover:shadow-md'
+                ? 'bg-gray-100 text-gray-900 font-medium'
+                : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {/* Hover effect background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-indigo-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300"></div>
-            
-            <div className="relative z-10 flex items-center gap-3">
-              <div className={`p-1.5 rounded-lg transition-all ${
-                isActive 
-                  ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg' 
-                  : 'bg-white/50 text-gray-600 group-hover:bg-gradient-to-br group-hover:from-indigo-500 group-hover:to-purple-500 group-hover:text-white group-hover:shadow-md'
-              }`}>
-                <Icon size={18} />
-              </div>
-              <span className="font-semibold">{item.label}</span>
+            <div className="flex items-center gap-3">
+              <Icon size={18} className={isActive ? 'text-gray-900' : 'text-gray-600'} />
+              <span className="text-sm">{item.label}</span>
             </div>
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.3 }}
-              className="relative z-10"
-            >
-              <ChevronRight size={16} className={isActive ? 'text-indigo-600' : 'text-gray-500'} />
-            </motion.div>
-          </motion.button>
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="pl-4 space-y-1 border-l-2 border-indigo-300/50 ml-6 mt-1">
-                  {item.children.map((child, childIndex) => {
-                    const ChildIcon = child.icon;
-                    const isChildActive = location.pathname === child.path;
-                    return (
-                      <motion.div
-                        key={child.path}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: childIndex * 0.05 }}
-                      >
-                        <Link
-                          to={child.path}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`relative flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 group ${
-                            isChildActive
-                              ? 'bg-gradient-to-r from-indigo-500/40 to-purple-500/40 text-indigo-700 font-bold shadow-md border-l-4 border-indigo-500 -ml-[2px] backdrop-blur-sm'
-                              : 'text-gray-600 hover:bg-white/30 hover:backdrop-blur-sm hover:shadow-sm'
-                          }`}
-                        >
-                          <div className={`p-1 rounded-md transition-all ${
-                            isChildActive
-                              ? 'bg-indigo-500/20 text-indigo-600'
-                              : 'text-gray-500 group-hover:bg-indigo-500/10 group-hover:text-indigo-600'
-                          }`}>
-                            <ChildIcon size={16} />
-                          </div>
-                          <span className="text-sm font-medium">{child.label}</span>
-                          {isChildActive && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="ml-auto w-2 h-2 rounded-full bg-indigo-500"
-                            />
-                          )}
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <ChevronRight
+              size={16}
+              className={`text-gray-400 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
+            />
+          </button>
+          {isExpanded && (
+            <div className="pl-4 space-y-0.5 border-l border-gray-200 ml-3">
+              {item.children.map((child) => {
+                const ChildIcon = child.icon;
+                const isChildActive = location.pathname === child.path;
+                return (
+                  <Link
+                    key={child.path}
+                    to={child.path}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors duration-150 ${
+                      isChildActive
+                        ? 'bg-gray-100 text-gray-900 font-medium'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <ChildIcon size={16} />
+                    <span className="text-sm">{child.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       );
     }
 
     return (
-      <motion.div
+      <Link
         key={item.path}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: index * 0.02 }}
+        to={item.path}
+        onClick={() => setSidebarOpen(false)}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors duration-150 ${
+          isActive
+            ? 'bg-gray-900 text-white font-medium'
+            : 'text-gray-700 hover:bg-gray-50'
+        }`}
       >
-        <Link
-          to={item.path}
-          onClick={() => setSidebarOpen(false)}
-          className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group ${
-            isActive
-              ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold shadow-2xl scale-[1.02]'
-              : 'text-gray-700 hover:bg-white/40 hover:backdrop-blur-md border border-transparent hover:border-white/30 hover:shadow-lg'
-          }`}
-        >
-          {/* Active indicator */}
-          {isActive && (
-            <motion.div
-              layoutId="activeIndicator"
-              className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            />
-          )}
-          
-          {/* Hover gradient effect */}
-          <div className={`absolute inset-0 transition-all duration-300 ${
-            isActive 
-              ? 'bg-gradient-to-r from-indigo-600/100 to-purple-600/100' 
-              : 'bg-gradient-to-r from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/10 group-hover:to-purple-500/10'
-          }`}></div>
-          
-          <div className={`relative z-10 p-1.5 rounded-lg transition-all ${
-            isActive
-              ? 'bg-white/20 text-white shadow-lg'
-              : 'bg-white/50 text-gray-600 group-hover:bg-gradient-to-br group-hover:from-indigo-500 group-hover:to-purple-500 group-hover:text-white group-hover:shadow-md'
-          }`}>
-            <Icon size={18} />
-          </div>
-          <span className="relative z-10 font-semibold">{item.label}</span>
-        </Link>
-      </motion.div>
+        <Icon size={18} />
+        <span className="text-sm">{item.label}</span>
+      </Link>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50">
       {/* Mobile Sidebar Overlay */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-md z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{
-          x: isMobile ? (sidebarOpen ? 0 : -320) : 0,
-        }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed top-0 left-0 z-50 w-72 h-screen bg-gradient-to-br from-white/90 via-white/70 to-white/50 backdrop-blur-2xl border-r border-white/40 shadow-2xl"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.5) 100%)',
-        }}
+      <aside
+        className={`fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-gray-200 transition-transform duration-150 ${
+          isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'
+        }`}
       >
-        {/* Sidebar Background Pattern */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(99, 102, 241, 0.3) 1px, transparent 0)',
-            backgroundSize: '40px 40px',
-          }}></div>
-        </div>
-
-        <div className="flex flex-col h-full relative z-10">
+        <div className="flex flex-col h-full">
           {/* Logo Section */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative flex items-center justify-between h-20 px-6 border-b border-white/40 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 backdrop-blur-xl overflow-hidden"
-          >
-            {/* Animated gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-purple-600/90 to-pink-600/90 backdrop-blur-sm"></div>
-            <div className="absolute inset-0 opacity-20" style={{
-              backgroundImage: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
-              backgroundSize: '200% 200%',
-              animation: 'shimmer 3s infinite',
-            }}></div>
-            
-            <div className="relative z-10 flex items-center gap-3">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-md flex items-center justify-center p-1.5 shadow-2xl border-2 border-white/40"
-              >
+          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center">
                 <Logo size="small" />
-              </motion.div>
-              <span className="text-white font-extrabold text-xl tracking-tight drop-shadow-lg">Studify</span>
+              </div>
+              <span className="text-lg font-semibold text-gray-900">Studify</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="relative z-10 lg:hidden text-white/90 hover:text-white transition-all p-2 rounded-xl hover:bg-white/20 backdrop-blur-sm"
+              className="lg:hidden p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-150"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
-          </motion.div>
+          </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar-sidebar">
-            <div className="space-y-1">
-              {menuItems.map((item, index) => renderMenuItem(item, index))}
-            </div>
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+            {menuItems.map((item, index) => renderMenuItem(item, index))}
           </nav>
 
           {/* User Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 border-t border-white/40 bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl"
-          >
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-white/60 backdrop-blur-md border border-white/40 shadow-xl"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-2xl overflow-hidden ring-2 ring-white/50"
-                >
-                  {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <User size={20} />
-                  )}
-                </motion.div>
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center gap-3 mb-3 p-3 rounded-md bg-gray-50">
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-medium text-sm overflow-hidden">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={20} />
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-extrabold text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.phone || 'Admin'}
                 </p>
-                <p className="text-xs font-bold text-gray-600 truncate capitalize">
+                <p className="text-xs text-gray-500 truncate capitalize">
                   {user?.type?.toLowerCase() || 'Admin'}
                 </p>
               </div>
-            </motion.div>
-            <motion.button
-              whileHover={{ scale: 1.02, boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)' }}
-              whileTap={{ scale: 0.98 }}
+            </div>
+            <button
               onClick={handleLogout}
-              className="relative w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white rounded-xl transition-all font-bold shadow-xl hover:shadow-2xl overflow-hidden group"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition-colors duration-150"
             >
-              {/* Animated background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <LogOut size={18} className="relative z-10" />
-              <span className="relative z-10">Logout</span>
-            </motion.button>
-          </motion.div>
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
-      </motion.aside>
+      </aside>
 
       {/* Main Content */}
-      <div className="lg:pl-72">
+      <div className="lg:pl-64">
         {/* Top Bar */}
-        <motion.header
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          className="sticky top-0 z-30 glass-card border-b border-white/30 shadow-2xl backdrop-blur-xl"
-        >
-          <div className="flex items-center justify-between h-20 px-4 lg:px-8">
+        <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-4 lg:px-6">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2.5 glass rounded-xl text-gray-700 hover:bg-white/50 transition-all"
+              className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-150"
             >
-              <Menu size={24} />
+              <Menu size={20} />
             </button>
 
-            <div className="flex-1 flex items-center justify-end gap-3">
+            <div className="flex-1 flex items-center justify-end gap-2">
               {/* Search */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="hidden md:flex items-center gap-3 px-4 py-2.5 glass rounded-xl border border-white/30 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all"
-              >
-                <Search size={18} className="text-indigo-600" />
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white focus-within:border-gray-900 focus-within:ring-1 focus-within:ring-gray-900 transition-all duration-150">
+                <Search size={16} className="text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="bg-transparent outline-none text-sm w-64 placeholder-gray-400 font-medium text-gray-900"
+                  className="bg-transparent outline-none text-sm w-64 text-gray-900 placeholder-gray-400"
                 />
-              </motion.div>
+              </div>
 
               {/* Language Toggle */}
               <div className="relative" ref={languageDropdownRef}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
-                  className="relative p-2.5 glass rounded-xl border border-white/30 text-gray-700 hover:bg-white/50 transition-all flex items-center gap-2"
+                  className="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
-                  <Globe size={20} className="text-indigo-600" />
-                  <span className="font-bold text-sm">{language === 'en' ? 'EN' : 'AR'}</span>
-                  <ChevronDown size={16} className={`transition-transform ${languageDropdownOpen ? 'rotate-180' : ''}`} />
-                </motion.button>
+                  <Globe size={16} />
+                  <span className="text-sm font-medium">{language === 'en' ? 'EN' : 'AR'}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-150 ${languageDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
 
-                <AnimatePresence>
-                  {languageDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-40 glass-card rounded-xl border border-white/30 shadow-2xl overflow-hidden backdrop-blur-xl z-50"
+                {languageDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50">
+                    <button
+                      onClick={() => {
+                        setLanguage('en');
+                        setLanguageDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-left flex items-center justify-between text-sm transition-colors duration-150 ${
+                        language === 'en'
+                          ? 'bg-gray-50 text-gray-900 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
                     >
-                      <button
-                        onClick={() => {
-                          if (language !== 'en') toggleLanguage();
-                          setLanguageDropdownOpen(false);
-                        }}
-                        className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-all ${
-                          language === 'en'
-                            ? 'bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-indigo-700 font-bold'
-                            : 'text-gray-700 hover:bg-white/30'
-                        }`}
-                      >
-                        <Globe size={18} />
-                        <span>English</span>
-                        {language === 'en' && <span className="ml-auto">✓</span>}
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (language !== 'ar') toggleLanguage();
-                          setLanguageDropdownOpen(false);
-                        }}
-                        className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-all border-t border-white/20 ${
-                          language === 'ar'
-                            ? 'bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-indigo-700 font-bold'
-                            : 'text-gray-700 hover:bg-white/30'
-                        }`}
-                      >
-                        <Globe size={18} />
-                        <span>العربية</span>
-                        {language === 'ar' && <span className="ml-auto">✓</span>}
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <span>English</span>
+                      {language === 'en' && <Check size={16} className="text-gray-900" />}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLanguage('ar');
+                        setLanguageDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-left flex items-center justify-between text-sm border-t border-gray-100 transition-colors duration-150 ${
+                        language === 'ar'
+                          ? 'bg-gray-50 text-gray-900 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>العربية</span>
+                      {language === 'ar' && <Check size={16} className="text-gray-900" />}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Notifications */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative p-2.5 glass rounded-xl border border-white/30 text-gray-700 hover:bg-white/50 transition-all"
-              >
-                <Bell size={20} className="text-indigo-600" />
-                <span className="absolute top-1 right-1 w-3 h-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-full ring-2 ring-white shadow-lg"></span>
-              </motion.button>
+              <button className="relative p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150">
+                <Bell size={18} />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
+              </button>
 
               {/* User Dropdown */}
               <div className="relative" ref={userDropdownRef}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-3 pl-3 pr-2 py-2 glass rounded-xl border border-white/30 hover:bg-white/50 transition-all"
+                  className="flex items-center gap-2 pl-2 pr-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors duration-150"
                 >
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full blur-md opacity-50"></div>
-                    <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow-lg overflow-hidden">
-                      {user?.avatarUrl ? (
-                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                      ) : (
-                        <User size={20} />
-                      )}
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-medium overflow-hidden">
+                    {user?.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={16} />
+                    )}
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-150 ${userDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50">
+                    <div className="p-4 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user?.phone || 'Admin'}</p>
+                      <p className="text-xs text-gray-500 capitalize mt-0.5">
+                        {user?.type?.toLowerCase() || 'Admin'}
+                      </p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        to="/settings"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <UserCircle size={16} />
+                        <span>Profile</span>
+                      </Link>
+                      <Link
+                        to="/settings"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <Settings size={16} />
+                        <span>Settings</span>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 border-t border-gray-100 mt-1"
+                      >
+                        <LogOut size={16} />
+                        <span>Logout</span>
+                      </button>
                     </div>
                   </div>
-                  <ChevronDown size={16} className={`text-gray-700 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
-                </motion.button>
-
-                <AnimatePresence>
-                  {userDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-56 glass-card rounded-xl border border-white/30 shadow-2xl overflow-hidden backdrop-blur-xl z-50"
-                    >
-                      <div className="p-4 border-b border-white/20">
-                        <p className="font-bold text-gray-900 text-sm">{user?.phone || 'Admin'}</p>
-                        <p className="text-xs font-semibold text-gray-600 capitalize mt-1">{user?.type?.toLowerCase() || 'Admin'}</p>
-                      </div>
-                      <div className="py-2">
-                        <Link
-                          to="/settings"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-white/30 transition-all"
-                        >
-                          <UserCircle size={18} />
-                          <span className="font-medium">Profile</span>
-                        </Link>
-                        <Link
-                          to="/settings"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-white/30 transition-all"
-                        >
-                          <Settings size={18} />
-                          <span className="font-medium">Settings</span>
-                        </Link>
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setUserDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50/50 transition-all border-t border-white/20 mt-2"
-                        >
-                          <LogOut size={18} />
-                          <span className="font-bold">Logout</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                )}
               </div>
             </div>
           </div>
-        </motion.header>
+        </header>
 
         {/* Page Content */}
-        <main className="p-4 lg:p-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Outlet />
-          </motion.div>
+        <main className="p-4 lg:p-6">
+          <Outlet />
         </main>
       </div>
-
     </div>
   );
 };
