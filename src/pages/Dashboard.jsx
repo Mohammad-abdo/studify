@@ -177,31 +177,31 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-sm">Loading dashboard...</p>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border-3 sm:border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-3 sm:mb-4"></div>
+          <p className="text-gray-600 text-xs sm:text-sm">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Dashboard</h1>
-          <p className="text-sm text-gray-600">Welcome back! Here's an overview of your platform.</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-0.5 sm:mb-1">Dashboard</h1>
+          <p className="text-xs sm:text-sm text-gray-600">Welcome back! Here's an overview of your platform.</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 bg-white">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-sm text-gray-600">Last updated: {new Date().toLocaleTimeString()}</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md border border-white/30 card-mirror">
+          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success-500 rounded-full animate-pulse"></div>
+          <span className="text-xs sm:text-sm text-gray-700 font-medium">Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -210,14 +210,14 @@ const Dashboard = () => {
               className="card-elevated cursor-pointer transition-all duration-150 hover:shadow-md"
               onClick={() => stat.link && navigate(stat.link)}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{stat.title}</p>
-                  <p className="text-3xl font-semibold text-gray-900 mb-2">{stat.value.toLocaleString()}</p>
-                  <p className="text-xs text-gray-600">{stat.subtitle}</p>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 sm:mb-2">{stat.title}</p>
+                  <p className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">{stat.value.toLocaleString()}</p>
+                  <p className="text-xs text-gray-600 truncate">{stat.subtitle}</p>
                 </div>
-                <div className="p-3 rounded-md bg-gray-100">
-                  <Icon className="text-gray-700" size={24} />
+                <div className="p-2 sm:p-3 rounded-md bg-gray-100 flex-shrink-0">
+                  <Icon className="text-gray-700" size={20} />
                 </div>
               </div>
             </div>
@@ -226,19 +226,19 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {/* Orders Chart */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Orders & Revenue Trend</h2>
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Orders & Revenue Trend</h2>
               <p className="text-xs text-gray-600">Last 7 days performance</p>
             </div>
-            <div className="p-2 rounded-md bg-gray-100">
-              <Activity className="text-gray-700" size={20} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <Activity className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={orderStats}>
               <defs>
                 <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
@@ -289,16 +289,16 @@ const Dashboard = () => {
 
         {/* User Types Distribution */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">User Types Distribution</h2>
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">User Types Distribution</h2>
               <p className="text-xs text-gray-600">Platform user breakdown</p>
             </div>
-            <div className="p-2 rounded-md bg-gray-100">
-              <Users className="text-gray-700" size={20} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <Users className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={userTypeData}
@@ -330,16 +330,16 @@ const Dashboard = () => {
 
         {/* Book Approval Status */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Book Approval Status</h2>
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Book Approval Status</h2>
               <p className="text-xs text-gray-600">Current approval metrics</p>
             </div>
-            <div className="p-2 rounded-md bg-gray-100">
-              <AlertCircle className="text-gray-700" size={20} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <AlertCircle className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={approvalData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
@@ -363,16 +363,16 @@ const Dashboard = () => {
 
         {/* Category Distribution */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Top Categories</h2>
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Top Categories</h2>
               <p className="text-xs text-gray-600">Most popular categories</p>
             </div>
-            <div className="p-2 rounded-md bg-gray-100">
-              <Package className="text-gray-700" size={20} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <Package className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={categoryStats.slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis type="number" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
@@ -396,43 +396,43 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Recent Orders */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Recent Orders</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Orders</h2>
             <button
               onClick={() => navigate('/orders')}
-              className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
+              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
             >
               View All
-              <ArrowRight size={14} />
+              <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             {recentOrders.length > 0 ? (
               recentOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="flex items-center justify-between p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                   onClick={() => navigate(`/orders/${order.id}`)}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-md bg-gray-100">
-                      <ShoppingCart className="text-gray-700" size={16} />
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
+                      <ShoppingCart className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Order #{order.id.slice(0, 8)}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">Order #{order.id.slice(0, 8)}</p>
                       <p className="text-xs text-gray-500">
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900 mb-1">
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">
                       ${order.total?.toFixed(2) || '0.00'}
                     </p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
                       order.status === 'DELIVERED' ? 'bg-green-50 text-green-700 border border-green-200' :
                       order.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
                       'bg-blue-50 text-blue-700 border border-blue-200'
@@ -450,76 +450,76 @@ const Dashboard = () => {
 
         {/* Recent Books */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Recent Books</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Books</h2>
             <button
               onClick={() => navigate('/books')}
-              className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
+              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
             >
               View All
-              <ArrowRight size={14} />
+              <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             {recentBooks.length > 0 ? (
               recentBooks.map((book) => (
                 <div
                   key={book.id}
-                  className="flex items-center gap-3 p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                   onClick={() => navigate(`/books/${book.id}`)}
                 >
-                  <div className="p-2 rounded-md bg-gray-100">
-                    <BookOpen className="text-gray-700" size={16} />
+                  <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
+                    <BookOpen className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{book.title}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{book.title}</p>
+                    <p className="text-xs text-gray-500 truncate">
                       {book.category?.name || 'No category'} • {book.totalPages || 0} pages
                     </p>
                   </div>
-                  <Eye className="text-gray-400" size={16} />
+                  <Eye className="text-gray-400 flex-shrink-0" size={14} className="sm:w-4 sm:h-4" />
                 </div>
               ))
             ) : (
-              <p className="text-center text-gray-500 py-8 text-sm">No recent books</p>
+              <p className="text-center text-gray-500 py-6 sm:py-8 text-xs sm:text-sm">No recent books</p>
             )}
           </div>
         </div>
 
         {/* Recent Products */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Recent Products</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Products</h2>
             <button
               onClick={() => navigate('/products')}
-              className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
+              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
             >
               View All
-              <ArrowRight size={14} />
+              <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             {recentProducts.length > 0 ? (
               recentProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="flex items-center gap-3 p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                   onClick={() => navigate(`/products/${product.id}`)}
                 >
-                  <div className="p-2 rounded-md bg-gray-100">
-                    <Package className="text-gray-700" size={16} />
+                  <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
+                    <Package className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs text-gray-500 truncate">
                       {product.category?.name || 'No category'}
                     </p>
                   </div>
-                  <Eye className="text-gray-400" size={16} />
+                  <Eye className="text-gray-400 flex-shrink-0" size={14} className="sm:w-4 sm:h-4" />
                 </div>
               ))
             ) : (
-              <p className="text-center text-gray-500 py-8 text-sm">No recent products</p>
+              <p className="text-center text-gray-500 py-6 sm:py-8 text-xs sm:text-sm">No recent products</p>
             )}
           </div>
         </div>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { BookOpen, Plus } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
@@ -55,8 +54,9 @@ const Books = () => {
     {
       header: 'Image',
       accessor: 'imageUrls',
-      width: '100px',
+      width: '80px',
       align: 'center',
+      hideOnMobile: true,
       render: (book) => {
         const images = book.imageUrls || [];
         const firstImage = images[0];
@@ -66,14 +66,14 @@ const Books = () => {
               <img
                 src={firstImage.startsWith('http') ? firstImage : `${api.defaults.baseURL.replace('/api', '')}${firstImage}`}
                 alt={book.title}
-                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-md border border-gray-200"
                 onError={(e) => {
                   e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(book.title)}&background=4f46e5&color=fff&size=64`;
                 }}
               />
             ) : (
-              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                <BookOpen className="text-gray-400" size={24} />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-md flex items-center justify-center">
+                <BookOpen className="text-gray-400" size={18} />
               </div>
             )}
           </div>
@@ -84,35 +84,38 @@ const Books = () => {
       header: 'Title',
       accessor: 'title',
       render: (book) => (
-        <div>
-          <div className="font-medium text-gray-900">{book.title}</div>
-          <div className="text-sm text-gray-500">{book.category?.name}</div>
+        <div className="min-w-0">
+          <div className="font-medium text-sm sm:text-base text-gray-900 truncate">{book.title}</div>
+          <div className="text-xs sm:text-sm text-gray-500 truncate">{book.category?.name}</div>
         </div>
       ),
     },
     {
       header: 'Description',
       accessor: 'description',
+      hideOnMobile: true,
       render: (book) => (
-        <div className="max-w-md">
-          <p className="text-sm text-gray-600 line-clamp-2">{book.description}</p>
+        <div className="max-w-xs">
+          <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{book.description}</p>
         </div>
       ),
     },
     {
       header: 'Doctor',
       accessor: 'doctor.user.phone',
+      hideOnMobile: true,
       render: (book) => (
-        <div className="text-sm text-gray-600">{book.doctor?.user?.phone || 'N/A'}</div>
+        <div className="text-xs sm:text-sm text-gray-600 truncate">{book.doctor?.user?.phone || 'N/A'}</div>
       ),
     },
     {
       header: 'College/Dept',
       accessor: 'college',
+      hideOnMobile: true,
       render: (book) => (
-        <div className="text-sm">
-          <div className="text-gray-900">{book.college?.name || '—'}</div>
-          <div className="text-gray-500">{book.department?.name || ''}</div>
+        <div className="text-xs sm:text-sm min-w-0">
+          <div className="text-gray-900 truncate">{book.college?.name || '—'}</div>
+          <div className="text-gray-500 truncate">{book.department?.name || ''}</div>
         </div>
       ),
     },
@@ -122,12 +125,12 @@ const Books = () => {
       align: 'center',
       render: (book) => (
         <span
-          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          className={`badge ${
             book.approvalStatus === 'APPROVED'
-              ? 'bg-green-100 text-green-800'
+              ? 'badge-success'
               : book.approvalStatus === 'PENDING'
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-red-100 text-red-800'
+              ? 'badge-warning'
+              : 'badge-danger'
           }`}
         >
           {book.approvalStatus}
@@ -137,8 +140,9 @@ const Books = () => {
     {
       header: 'Created',
       accessor: 'createdAt',
+      hideOnMobile: true,
       render: (book) => (
-        <div className="text-sm text-gray-600">
+        <div className="text-xs sm:text-sm text-gray-600">
           {new Date(book.createdAt).toLocaleDateString()}
         </div>
       ),
@@ -146,47 +150,35 @@ const Books = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Books
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage all books in the system</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-0.5 sm:mb-1">Books</h1>
+          <p className="text-xs sm:text-sm text-gray-600">Manage all books in the system</p>
         </div>
         <button 
           onClick={() => navigate('/books/add')}
-          className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
         >
-          <Plus size={20} />
-          Add Book
+          <Plus size={16} className="sm:w-5 sm:h-5" />
+          <span>Add Book</span>
         </button>
-      </motion.div>
-
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredBooks}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchPlaceholder="Search books by title, category, or description..."
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          onView={(book) => navigate(`/books/${book.id}`)}
-          onEdit={(book) => navigate(`/books/edit/${book.id}`)}
-          onDelete={handleDelete}
-        />
       </div>
+
+      {/* Data Table */}
+      <DataTable
+        data={filteredBooks}
+        columns={columns}
+        loading={loading}
+        searchable
+        searchPlaceholder="Search books..."
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        onView={(book) => navigate(`/books/${book.id}`)}
+        onEdit={(book) => navigate(`/books/edit/${book.id}`)}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };

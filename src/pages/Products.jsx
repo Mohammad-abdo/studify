@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Package, Plus } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
@@ -55,32 +54,33 @@ const Products = () => {
     {
       header: 'Images',
       accessor: 'imageUrls',
-      width: '120px',
+      width: '100px',
       align: 'center',
+      hideOnMobile: true,
       render: (product) => {
         const images = product.imageUrls || [];
         return (
           <div className="flex justify-center gap-1">
             {images.length > 0 ? (
-              images.slice(0, 3).map((img, idx) => (
+              images.slice(0, 2).map((img, idx) => (
                 <img
                   key={idx}
                   src={img.startsWith('http') ? img : `${api.defaults.baseURL.replace('/api', '')}${img}`}
                   alt={`${product.name} ${idx + 1}`}
-                  className="w-12 h-12 object-cover rounded border border-gray-200"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded border border-gray-200"
                   onError={(e) => {
                     e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=f97316&color=fff&size=48`;
                   }}
                 />
               ))
             ) : (
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <Package className="text-gray-400" size={20} />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-md flex items-center justify-center">
+                <Package className="text-gray-400" size={16} />
               </div>
             )}
-            {images.length > 3 && (
-              <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-xs font-medium text-gray-600">
-                +{images.length - 3}
+            {images.length > 2 && (
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-md flex items-center justify-center text-xs font-medium text-gray-600">
+                +{images.length - 2}
               </div>
             )}
           </div>
@@ -91,18 +91,19 @@ const Products = () => {
       header: 'Name',
       accessor: 'name',
       render: (product) => (
-        <div>
-          <div className="font-medium text-gray-900">{product.name}</div>
-          <div className="text-sm text-gray-500">{product.category?.name}</div>
+        <div className="min-w-0">
+          <div className="font-medium text-sm sm:text-base text-gray-900 truncate">{product.name}</div>
+          <div className="text-xs sm:text-sm text-gray-500 truncate">{product.category?.name}</div>
         </div>
       ),
     },
     {
       header: 'Description',
       accessor: 'description',
+      hideOnMobile: true,
       render: (product) => (
-        <div className="max-w-md">
-          <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+        <div className="max-w-xs">
+          <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{product.description}</p>
         </div>
       ),
     },
@@ -110,12 +111,12 @@ const Products = () => {
       header: 'Pricing',
       accessor: 'pricing',
       render: (product) => (
-        <div className="text-sm">
+        <div className="text-xs sm:text-sm">
           {product.pricing && product.pricing.length > 0 ? (
             <div>
               <div className="font-medium text-gray-900">${product.pricing[0].price}</div>
               {product.pricing.length > 1 && (
-                <div className="text-gray-500">{product.pricing.length} tiers</div>
+                <div className="text-gray-500 text-xs">{product.pricing.length} tiers</div>
               )}
             </div>
           ) : (
@@ -127,8 +128,9 @@ const Products = () => {
     {
       header: 'Created',
       accessor: 'createdAt',
+      hideOnMobile: true,
       render: (product) => (
-        <div className="text-sm text-gray-600">
+        <div className="text-xs sm:text-sm text-gray-600">
           {new Date(product.createdAt).toLocaleDateString()}
         </div>
       ),
@@ -136,47 +138,35 @@ const Products = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
-            Products
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage all products in the system</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-0.5 sm:mb-1">Products</h1>
+          <p className="text-xs sm:text-sm text-gray-600">Manage all products in the system</p>
         </div>
         <button 
           onClick={() => navigate('/products/add')}
-          className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
         >
-          <Plus size={20} />
-          Add Product
+          <Plus size={16} className="sm:w-5 sm:h-5" />
+          <span>Add Product</span>
         </button>
-      </motion.div>
-
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredProducts}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchPlaceholder="Search products by name, category, or description..."
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          onView={(product) => navigate(`/products/${product.id}`)}
-          onEdit={(product) => navigate(`/products/edit/${product.id}`)}
-          onDelete={handleDelete}
-        />
       </div>
+
+      {/* Data Table */}
+      <DataTable
+        data={filteredProducts}
+        columns={columns}
+        loading={loading}
+        searchable
+        searchPlaceholder="Search products..."
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        onView={(product) => navigate(`/products/${product.id}`)}
+        onEdit={(product) => navigate(`/products/edit/${product.id}`)}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };

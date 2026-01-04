@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DataTable = ({
   data = [],
@@ -34,114 +33,114 @@ const DataTable = ({
     return value;
   };
 
+  // Filter columns for mobile (hide some columns on small screens)
+  const getVisibleColumns = () => {
+    return columns.filter(col => col.hideOnMobile !== true);
+  };
+
   return (
-    <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/30 shadow-2xl overflow-hidden">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       {/* Search Bar */}
       {searchable && (
-        <div className="px-6 py-4 border-b border-white/30 bg-white/40 backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-3 glass rounded-xl border border-white/30">
+        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white focus-within:border-gray-900 focus-within:ring-1 focus-within:ring-gray-900 transition-all duration-150">
             <input
               type="text"
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              className="w-full bg-transparent outline-none font-medium text-gray-900 placeholder-gray-400"
+              className="w-full bg-transparent outline-none text-sm sm:text-base text-gray-900 placeholder-gray-400"
             />
           </div>
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-white/50 backdrop-blur-sm border-b border-white/30">
+      {/* Table - Responsive wrapper */}
+      <div className="table-wrapper overflow-x-auto">
+        <table className="table min-w-full">
+          <thead>
             <tr>
-              {columns.map((column, index) => (
+              {getVisibleColumns().map((column, index) => (
                 <th
                   key={index}
-                  className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider ${
+                  className={`${
                     column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
-                  }`}
+                  } ${column.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
                   style={{ width: column.width }}
                 >
                   {column.header}
                 </th>
               ))}
               {(onView || onEdit || onDelete) && (
-                <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  Actions
+                <th className="text-right">
+                  <span className="hidden sm:inline">Actions</span>
+                  <span className="sm:hidden">Act</span>
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white/30 divide-y divide-white/20">
+          <tbody>
             {loading ? (
               <tr>
-                <td colSpan={columns.length + (onView || onEdit || onDelete ? 1 : 0)} className="px-6 py-12 text-center">
+                <td colSpan={getVisibleColumns().length + (onView || onEdit || onDelete ? 1 : 0)} className="px-4 py-8 sm:py-12 text-center">
                   <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 border-3 sm:border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
                   </div>
                 </td>
               </tr>
             ) : currentData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + (onView || onEdit || onDelete ? 1 : 0)} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={getVisibleColumns().length + (onView || onEdit || onDelete ? 1 : 0)} className="px-4 py-8 sm:py-12 text-center text-gray-500 text-sm">
                   No data available
                 </td>
               </tr>
             ) : (
               currentData.map((item, rowIndex) => (
-                <motion.tr
-                  key={item.id || rowIndex}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: rowIndex * 0.02 }}
-                  className="hover:bg-white/50 transition-colors group"
-                >
-                  {columns.map((column, colIndex) => (
+                <tr key={item.id || rowIndex} className="hover:bg-gray-50 transition-colors duration-100">
+                  {getVisibleColumns().map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${
+                      className={`${
                         column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
-                      }`}
+                      } ${column.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
                     >
                       {column.render ? column.render(item) : getValue(item, column.accessor)}
                     </td>
                   ))}
                   {(onView || onEdit || onDelete) && (
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
                         {onView && (
                           <button
                             onClick={() => onView(item)}
-                            className="p-2.5 glass rounded-xl text-gray-600 hover:text-blue-600 hover:bg-white/80 transition-all hover:scale-110"
+                            className="p-1.5 sm:p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-150"
                             title="View"
                           >
-                            <Eye size={16} />
+                            <Eye size={14} className="sm:w-4 sm:h-4" />
                           </button>
                         )}
                         {onEdit && (
                           <button
                             onClick={() => onEdit(item)}
-                            className="p-2.5 glass rounded-xl text-gray-600 hover:text-indigo-600 hover:bg-white/80 transition-all hover:scale-110"
+                            className="p-1.5 sm:p-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors duration-150"
                             title="Edit"
                           >
-                            <Edit size={16} />
+                            <Edit size={14} className="sm:w-4 sm:h-4" />
                           </button>
                         )}
                         {onDelete && (
                           <button
                             onClick={() => onDelete(item)}
-                            className="p-2.5 glass rounded-xl text-gray-600 hover:text-red-600 hover:bg-white/80 transition-all hover:scale-110"
+                            className="p-1.5 sm:p-2 rounded-md text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
                             title="Delete"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
                           </button>
                         )}
                       </div>
                     </td>
                   )}
-                </motion.tr>
+                </tr>
               ))
             )}
           </tbody>
@@ -150,29 +149,29 @@ const DataTable = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-white/30 bg-white/40 backdrop-blur-sm flex items-center justify-between">
-          <div className="text-sm font-semibold text-gray-700">
-            Showing <span className="font-bold">{startIndex + 1}</span> to{' '}
-            <span className="font-bold">{Math.min(endIndex, data.length)}</span> of{' '}
-            <span className="font-bold">{data.length}</span> results
+        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="text-xs sm:text-sm font-medium text-gray-700">
+            Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
+            <span className="font-semibold">{Math.min(endIndex, data.length)}</span> of{' '}
+            <span className="font-semibold">{data.length}</span> results
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="p-2.5 glass rounded-xl hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 border border-white/30"
+              className="p-1.5 sm:p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={16} className="sm:w-4 sm:h-4" />
             </button>
-            <span className="px-5 py-2.5 glass rounded-xl text-sm font-bold text-gray-900 border border-white/30">
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-md border border-gray-300 bg-white text-xs sm:text-sm font-medium text-gray-900">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="p-2.5 glass rounded-xl hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 border border-white/30"
+              className="p-1.5 sm:p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={16} className="sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
@@ -182,5 +181,3 @@ const DataTable = ({
 };
 
 export default DataTable;
-
-
