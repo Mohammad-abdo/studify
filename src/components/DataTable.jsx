@@ -42,7 +42,7 @@ const DataTable = ({
     <div className="card-elevated overflow-hidden">
       {/* Search Bar */}
       {searchable && (
-        <div className="px-2.5 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 border-b border-white/20">
+        <div className="px-4 md:px-5 lg:px-6 xl:px-7 py-3 md:py-3.5 lg:py-4 border-b border-blue-200">
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -149,29 +149,29 @@ const DataTable = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-2.5 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
-          <div className="text-xs sm:text-sm font-medium text-gray-700">
+        <div className="px-4 md:px-5 lg:px-6 xl:px-7 py-3 md:py-3.5 lg:py-4 border-t border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-sm md:text-base font-medium text-gray-700">
             Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
             <span className="font-semibold">{Math.min(endIndex, data.length)}</span> of{' '}
             <span className="font-semibold">{data.length}</span> results
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="btn-secondary p-1.5 sm:p-2 min-h-0"
+              className="btn-secondary p-2 min-h-0"
             >
-              <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
+              <ChevronLeft size={16} />
             </button>
-            <span className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-md border border-white/30 bg-white/50 backdrop-blur-sm text-xs sm:text-sm font-medium text-gray-900">
+            <span className="px-3 py-2 rounded-md border border-blue-200 bg-white text-sm font-medium text-gray-900">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="btn-secondary p-1.5 sm:p-2 min-h-0"
+              className="btn-secondary p-2 min-h-0"
             >
-              <ChevronRight size={14} className="sm:w-4 sm:h-4" />
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>

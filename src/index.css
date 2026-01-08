@@ -22,26 +22,12 @@
 
   body {
     @apply text-gray-900 antialiased;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 20s ease infinite;
+    background: #f8fafc;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-size: 0.875rem; /* 14px base - reduced for compactness */
     line-height: 1.5;
     min-height: 100vh;
-  }
-
-  @keyframes gradientShift {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
   }
 
   /* Responsive typography - mobile-first, compact */
@@ -76,80 +62,45 @@
 }
 
 @layer components {
-  /* Glassmorphism Card Components - Responsive padding */
+  /* Simple Card Components - Calm blue and white */
   .card {
-    @apply rounded-lg border border-white/20;
-    @apply p-2.5 sm:p-3 md:p-4 lg:p-5 xl:p-6;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+    @apply rounded-lg border border-blue-200;
+    @apply p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8;
+    background: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   }
 
   .card-elevated {
-    @apply rounded-lg border border-white/30;
-    @apply p-2.5 sm:p-3 md:p-4 lg:p-5 xl:p-6;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    @apply rounded-lg border border-blue-200;
+    @apply p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8;
+    background: #ffffff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   }
 
-  /* Mirror Effect Card */
   .card-mirror {
-    @apply rounded-lg border border-white/40;
-    @apply p-3 sm:p-4 lg:p-6;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(16px) saturate(200%);
-    -webkit-backdrop-filter: blur(16px) saturate(200%);
-    box-shadow: 
-      0 8px 32px 0 rgba(31, 38, 135, 0.37),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-      inset 0 1px 2px rgba(255, 255, 255, 0.4);
-    position: relative;
-    overflow: hidden;
+    @apply rounded-lg border border-blue-200;
+    @apply p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8;
+    background: #ffffff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   }
 
-  .card-mirror::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent
-    );
-    transition: left 0.5s;
-  }
-
-  .card-mirror:hover::before {
-    left: 100%;
-  }
-
-  /* Button Components - compact sizing with glass effect */
+  /* Button Components - Calm blue theme */
   .btn-primary {
     @apply text-white font-medium rounded-md transition-colors duration-150;
     @apply py-1.5 px-2.5 sm:py-2 sm:px-3 md:px-4;
     @apply text-xs sm:text-sm md:text-base;
     @apply min-h-[36px] sm:min-h-[40px];
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 0 2px 8px 0 rgba(102, 126, 234, 0.3);
-    @apply hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+    background: #3b82f6;
+    @apply hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply text-gray-700 font-medium rounded-md border border-white/30 transition-colors duration-150;
+    @apply text-gray-700 font-medium rounded-md border border-blue-200 transition-colors duration-150;
     @apply py-1.5 px-2.5 sm:py-2 sm:px-3 md:px-4;
     @apply text-xs sm:text-sm md:text-base;
     @apply min-h-[36px] sm:min-h-[40px];
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    @apply hover:bg-white/90 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+    background: #ffffff;
+    @apply hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
@@ -157,9 +108,8 @@
     @apply py-1.5 px-2.5 sm:py-2 sm:px-3 md:px-4;
     @apply text-xs sm:text-sm md:text-base;
     @apply min-h-[36px] sm:min-h-[40px];
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    box-shadow: 0 2px 8px 0 rgba(239, 68, 68, 0.3);
-    @apply hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+    background: #ef4444;
+    @apply hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
@@ -169,43 +119,38 @@
     @apply hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* Input Components - balanced height with glass effect */
+  /* Input Components - Calm blue theme */
   .input-field {
     @apply w-full rounded-md text-gray-900 placeholder-gray-400;
     @apply px-2.5 py-1.5 sm:px-3 sm:py-2;
     @apply text-xs sm:text-sm md:text-base;
     @apply min-h-[36px] sm:min-h-[40px];
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all duration-150;
-    box-shadow: 0 1px 4px 0 rgba(31, 38, 135, 0.08);
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-150;
   }
 
   .input-field-error {
     @apply border-red-300 focus:ring-red-500;
   }
 
-  /* Table Components - responsive */
+  /* Table Components - Calm blue theme */
   .table {
     @apply w-full border-collapse;
     @apply text-xs sm:text-sm;
   }
 
   .table th {
-    @apply text-left font-semibold text-gray-700 uppercase tracking-wider border-b border-white/20;
-    @apply px-2 py-1.5 sm:px-2.5 sm:py-2 md:px-3 md:py-2.5 lg:px-4 lg:py-3;
-    @apply text-xs;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    @apply text-left font-semibold text-gray-700 uppercase tracking-wider border-b border-blue-200;
+    @apply px-3 py-2 md:px-4 md:py-2.5 lg:px-5 lg:py-3 xl:px-6 xl:py-3.5;
+    @apply text-xs md:text-sm;
+    background: #eff6ff;
   }
 
   .table td {
-    @apply text-gray-900 border-b border-white/10;
-    @apply px-2 py-1.5 sm:px-2.5 sm:py-2 md:px-3 md:py-2.5 lg:px-4 lg:py-3;
-    @apply text-xs sm:text-sm;
+    @apply text-gray-900 border-b border-blue-100;
+    @apply px-3 py-2 md:px-4 md:py-2.5 lg:px-5 lg:py-3 xl:px-6 xl:py-3.5;
+    @apply text-xs sm:text-sm md:text-base;
   }
 
   .table tbody tr {
@@ -234,37 +179,35 @@
   @apply min-w-full;
 }
 
-  /* Badge Components with glass effect */
+  /* Badge Components - Calm blue theme */
   .badge {
     @apply inline-flex items-center rounded-full font-medium;
     @apply px-2 py-0.5 text-xs;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .badge-success {
-    @apply text-success-700 border border-success-300;
-    background: rgba(34, 197, 94, 0.2);
+    @apply text-green-700 border border-green-200;
+    background: #dcfce7;
   }
 
   .badge-warning {
-    @apply text-warning-700 border border-warning-300;
-    background: rgba(245, 158, 11, 0.2);
+    @apply text-amber-700 border border-amber-200;
+    background: #fef3c7;
   }
 
   .badge-danger {
-    @apply text-danger-700 border border-danger-300;
-    background: rgba(239, 68, 68, 0.2);
+    @apply text-red-700 border border-red-200;
+    background: #fee2e2;
   }
 
   .badge-info {
-    @apply text-secondary-700 border border-secondary-300;
-    background: rgba(14, 165, 233, 0.2);
+    @apply text-blue-700 border border-blue-200;
+    background: #dbeafe;
   }
 
   .badge-neutral {
-    @apply text-gray-700 border border-gray-300;
-    background: rgba(255, 255, 255, 0.5);
+    @apply text-gray-700 border border-gray-200;
+    background: #f3f4f6;
   }
 }
 
@@ -301,24 +244,42 @@ body {
 
 /* Container max-width for large screens */
 .container-responsive {
-  @apply w-full mx-auto px-2.5 sm:px-3 md:px-4 lg:px-5 xl:px-6;
-  max-width: 1280px;
+  @apply w-full mx-auto;
+  max-width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .container-responsive {
+    max-width: 1400px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container-responsive {
+    max-width: 1600px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container-responsive {
+    max-width: 1800px;
+  }
 }
 
 /* Responsive grid utilities - compact spacing */
 .grid-responsive {
-  @apply grid grid-cols-1 gap-2.5 sm:gap-3 md:gap-4 lg:gap-5;
+  @apply grid grid-cols-1 gap-3 md:gap-4 lg:gap-5 xl:gap-6;
 }
 
 .grid-responsive-2 {
-  @apply grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 lg:gap-5;
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:gap-5 xl:gap-6;
 }
 
 .grid-responsive-3 {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4 lg:gap-5;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-5 xl:gap-6;
 }
 
-/* Subtle animations */
+/* Subtle animations only */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -328,58 +289,6 @@ body {
   }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
 .animate-fade-in {
   animation: fadeIn 0.15s ease-out;
-}
-
-/* Glass shimmer effect */
-.glass-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.glass-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  animation: shimmer 3s infinite;
-}
-
-/* Mirror reflection effect */
-.mirror-effect {
-  position: relative;
-}
-
-.mirror-effect::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 50%
-  );
-  pointer-events: none;
-  border-radius: inherit;
 }

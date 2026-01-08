@@ -167,7 +167,7 @@ const Layout = () => {
     navigate('/login');
   };
 
-  const renderMenuItem = (item, index) => {
+  const renderMenuItem = (item) => {
     const Icon = item.icon;
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedMenus[item.key];
@@ -184,13 +184,13 @@ const Layout = () => {
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Icon size={16} className={`sm:w-[18px] sm:h-[18px] ${isActive ? 'text-gray-900' : 'text-gray-600'}`} />
-              <span className="text-xs sm:text-sm">{item.label}</span>
+            <div className="flex items-center gap-3">
+              <Icon size={18} className={isActive ? 'text-gray-900' : 'text-gray-600'} />
+              <span className="text-sm">{item.label}</span>
             </div>
             <ChevronRight
-              size={14}
-              className={`text-gray-400 transition-transform duration-150 sm:w-4 sm:h-4 ${isExpanded ? 'rotate-90' : ''}`}
+              size={16}
+              className={`text-gray-400 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
             />
           </button>
           {isExpanded && (
@@ -203,14 +203,14 @@ const Layout = () => {
                     key={child.path}
                     to={child.path}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md transition-colors duration-150 ${
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors duration-150 ${
                       isChildActive
                         ? 'bg-gray-100 text-gray-900 font-medium'
                         : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
-                    <ChildIcon size={14} className="sm:w-4 sm:h-4" />
-                    <span className="text-xs sm:text-sm">{child.label}</span>
+                    <ChildIcon size={16} />
+                    <span className="text-sm">{child.label}</span>
                   </Link>
                 );
               })}
@@ -225,14 +225,14 @@ const Layout = () => {
         key={item.path}
         to={item.path}
         onClick={() => setSidebarOpen(false)}
-        className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-md transition-colors duration-150 ${
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors duration-150 ${
           isActive
             ? 'bg-gray-900 text-white font-medium'
             : 'text-gray-700 hover:bg-gray-50'
         }`}
       >
-        <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
-        <span className="text-xs sm:text-sm">{item.label}</span>
+        <Icon size={18} />
+        <span className="text-sm">{item.label}</span>
       </Link>
     );
   };
@@ -242,36 +242,30 @@ const Layout = () => {
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 w-56 sm:w-64 h-screen border-r border-white/30 transition-transform duration-150 ${
+        className={`fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-blue-200 transition-transform duration-150 ${
           isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'
         }`}
         style={{
-          background: 'rgba(255, 255, 255, 0.7)',
-          backdropFilter: 'blur(16px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37), inset 0 0 0 1px rgba(255, 255, 255, 0.3)',
+          boxShadow: '2px 0 8px 0 rgba(0, 0, 0, 0.05)',
         }}
       >
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div 
-            className="relative flex items-center justify-center h-14 sm:h-16 px-3 sm:px-4 border-b border-white/30"
-            style={{
-              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))',
-            }}
+            className="relative flex items-center justify-center h-16 px-4 border-b border-blue-200 bg-blue-50"
           >
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center">
                 <Logo size="small" />
               </div>
-              <span className="text-base sm:text-lg font-semibold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Studify</span>
+              <span className="text-lg font-semibold text-blue-600">Studify</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -282,22 +276,22 @@ const Layout = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-2 sm:px-3 py-3 sm:py-4 space-y-0.5 sm:space-y-1 overflow-y-auto custom-scrollbar">
-            {menuItems.map((item, index) => renderMenuItem(item, index))}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+            {menuItems.map((item) => renderMenuItem(item))}
           </nav>
 
           {/* User Section */}
-          <div className="p-2.5 sm:p-3 border-t border-white/20">
-            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-2.5 p-2 sm:p-2.5 rounded-md" style={{ background: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(8px)' }}>
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-medium text-xs sm:text-sm overflow-hidden flex-shrink-0 shadow-md">
+          <div className="p-3 border-t border-blue-200 bg-blue-50">
+            <div className="flex items-center gap-3 mb-2.5 p-2.5 rounded-md bg-white">
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm overflow-hidden flex-shrink-0">
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <User size={14} className="sm:w-4 sm:h-4" />
+                  <User size={16} />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.phone || 'Admin'}
                 </p>
                 <p className="text-xs text-gray-600 truncate capitalize">
@@ -307,13 +301,9 @@ const Layout = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 text-white rounded-md text-xs sm:text-sm md:text-base font-medium transition-colors duration-150"
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                boxShadow: '0 2px 8px 0 rgba(102, 126, 234, 0.3)',
-              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md text-sm font-medium transition-colors duration-150 hover:bg-blue-700"
             >
-              <LogOut size={14} className="sm:w-4 sm:h-4" />
+              <LogOut size={16} />
               <span>Logout</span>
             </button>
           </div>
@@ -321,18 +311,15 @@ const Layout = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="lg:pl-56 xl:pl-64">
+      <div className="lg:pl-64">
         {/* Top Bar */}
         <header 
-          className="sticky top-0 z-30 border-b border-white/30"
+          className="sticky top-0 z-30 bg-white border-b border-blue-200"
           style={{
-            background: 'rgba(255, 255, 255, 0.7)',
-            backdropFilter: 'blur(16px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
           }}
         >
-          <div className="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16 px-4 lg:px-6 xl:px-8">
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-150"
@@ -342,12 +329,12 @@ const Layout = () => {
 
             <div className="flex-1 flex items-center justify-end gap-1.5 sm:gap-2">
               {/* Search */}
-              <div className="hidden md:flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md border border-gray-300 bg-white focus-within:border-gray-900 focus-within:ring-1 focus-within:ring-gray-900 transition-all duration-150">
-                <Search size={14} className="sm:w-4 sm:h-4 text-gray-400" />
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white focus-within:border-gray-900 focus-within:ring-1 focus-within:ring-gray-900 transition-all duration-150">
+                <Search size={16} className="text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="bg-transparent outline-none text-xs sm:text-sm w-40 sm:w-48 lg:w-64 text-gray-900 placeholder-gray-400"
+                  className="bg-transparent outline-none text-sm w-48 lg:w-64 xl:w-80 text-gray-900 placeholder-gray-400"
                 />
               </div>
 
@@ -355,13 +342,13 @@ const Layout = () => {
               <div className="relative" ref={languageDropdownRef}>
                 <button
                   onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
-                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                 >
-                  <Globe size={14} className="sm:w-4 sm:h-4" />
-                  <span className="text-xs sm:text-sm font-medium">{language === 'en' ? 'EN' : 'AR'}</span>
+                  <Globe size={16} />
+                  <span className="text-sm font-medium">{language === 'en' ? 'EN' : 'AR'}</span>
                   <ChevronDown
-                    size={12}
-                    className={`text-gray-400 transition-transform duration-150 sm:w-3.5 sm:h-3.5 ${languageDropdownOpen ? 'rotate-180' : ''}`}
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-150 ${languageDropdownOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
 
@@ -400,27 +387,27 @@ const Layout = () => {
               </div>
 
               {/* Notifications */}
-              <button className="relative p-1.5 sm:p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                <Bell size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-600 rounded-full"></span>
+              <button className="relative p-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150">
+                <Bell size={18} />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
               </button>
 
               {/* User Dropdown */}
               <div className="relative" ref={userDropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 pr-2 sm:pr-3 py-1.5 sm:py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors duration-150"
+                  className="flex items-center gap-2 pl-2 pr-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors duration-150"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-medium overflow-hidden flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-medium overflow-hidden flex-shrink-0">
                     {user?.avatarUrl ? (
                       <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <User size={14} className="sm:w-4 sm:h-4" />
+                      <User size={16} />
                     )}
                   </div>
                   <ChevronDown
-                    size={12}
-                    className={`hidden sm:block text-gray-400 transition-transform duration-150 w-3.5 h-3.5 ${userDropdownOpen ? 'rotate-180' : ''}`}
+                    size={14}
+                    className={`hidden md:block text-gray-400 transition-transform duration-150 ${userDropdownOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
 
@@ -468,7 +455,7 @@ const Layout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="p-2.5 sm:p-3 md:p-4 lg:p-5 xl:p-6 max-w-[1920px] mx-auto">
+        <main className="p-4 md:p-5 lg:p-6 xl:p-8 max-w-[1920px] mx-auto">
           <div className="container-responsive">
             <Outlet />
           </div>

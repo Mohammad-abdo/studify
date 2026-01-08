@@ -11,6 +11,8 @@ import AddProduct from './pages/AddProduct';
 import EditProduct from './pages/EditProduct';
 import Orders from './pages/Orders';
 import Users from './pages/Users';
+import UserDetail from './pages/UserDetail';
+import EditUser from './pages/EditUser';
 import Settings from './pages/Settings';
 import PendingApprovals from './pages/PendingApprovals';
 import Colleges from './pages/Colleges';
@@ -124,6 +126,8 @@ function App() {
             <Route path="products/edit/:id" element={<EditProduct />} />
             <Route path="products/:id" element={<ProductDetail />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="users/edit/:id" element={<EditUser />} />
+            <Route path="users/:id" element={<UserDetail />} />
             <Route path="users" element={<Users />} />
             <Route path="approvals" element={<PendingApprovals />} />
             <Route path="colleges" element={<Colleges />} />

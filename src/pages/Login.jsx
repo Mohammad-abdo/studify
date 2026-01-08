@@ -42,7 +42,7 @@ const Login = () => {
       >
         <div className="card-elevated">
           <div className="text-center mb-5 sm:mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-primary-600 to-accent-600 rounded-full mb-3 sm:mb-4 p-3 sm:p-4 shadow-lg">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 rounded-full mb-3 sm:mb-4 p-3 sm:p-4">
               <Logo size="small" />
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Welcome Back</h1>
