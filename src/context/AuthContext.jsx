@@ -31,16 +31,9 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.data);
       setIsAuthenticated(true);
     } catch (error) {
-      // Only clear token on 401, not on 429 (rate limit)
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        setIsAuthenticated(false);
-        setUser(null);
-      } else if (error.response?.status === 429) {
-        // Rate limit - keep token but don't set user
-        // Will retry automatically via interceptor
-        console.warn('Rate limit reached, will retry...');
-      }
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -55,19 +48,9 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      let errorMessage = 'Login failed';
-      
-      if (error.response?.status === 429) {
-        errorMessage = 'Too many requests. Please wait a moment and try again.';
-      } else if (error.response?.data?.error?.message) {
-        errorMessage = error.response.data.error.message;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-      
       return {
         success: false,
-        error: errorMessage,
+        error: error.response?.data?.error?.message || 'Login failed',
       };
     }
   };

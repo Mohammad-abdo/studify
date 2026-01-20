@@ -12,6 +12,13 @@ import {
   Eye,
   ArrowRight,
   Activity,
+  Building2,
+  GraduationCap,
+  Truck,
+  Store,
+  ShoppingBag,
+  Image,
+  FileText,
 } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
@@ -42,42 +49,9 @@ const Dashboard = () => {
   const [categoryStats, setCategoryStats] = useState([]);
   const [orderStats, setOrderStats] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pieRadius, setPieRadius] = useState(100);
-  const [chartFontSize, setChartFontSize] = useState(12);
-  const [yAxisWidth, setYAxisWidth] = useState(100);
-  const [chartHeight, setChartHeight] = useState(280);
 
   useEffect(() => {
     fetchDashboardData();
-    
-    const updateChartSizes = () => {
-      const width = window.innerWidth;
-      if (width >= 1920) {
-        setPieRadius(120);
-        setChartFontSize(15);
-        setYAxisWidth(140);
-        setChartHeight(320);
-      } else if (width >= 1536) {
-        setPieRadius(110);
-        setChartFontSize(14);
-        setYAxisWidth(120);
-        setChartHeight(300);
-      } else if (width >= 1280) {
-        setPieRadius(100);
-        setChartFontSize(12);
-        setYAxisWidth(100);
-        setChartHeight(280);
-      } else {
-        setPieRadius(90);
-        setChartFontSize(12);
-        setYAxisWidth(100);
-        setChartHeight(250);
-      }
-    };
-    
-    updateChartSizes();
-    window.addEventListener('resize', updateChartSizes);
-    return () => window.removeEventListener('resize', updateChartSizes);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -91,27 +65,21 @@ const Dashboard = () => {
         const ordersResponse = await api.get('/orders?page=1&limit=5');
         setRecentOrders(ordersResponse.data.data || ordersResponse.data || []);
       } catch (error) {
-        if (error.response?.status !== 429) {
-          console.error('Error fetching orders:', error);
-        }
+        console.error('Error fetching orders:', error);
       }
 
       try {
         const booksResponse = await api.get('/books?page=1&limit=5');
         setRecentBooks(booksResponse.data.data || booksResponse.data || []);
       } catch (error) {
-        if (error.response?.status !== 429) {
-          console.error('Error fetching books:', error);
-        }
+        console.error('Error fetching books:', error);
       }
 
       try {
         const productsResponse = await api.get('/products?page=1&limit=5');
         setRecentProducts(productsResponse.data.data || productsResponse.data || []);
       } catch (error) {
-        if (error.response?.status !== 429) {
-          console.error('Error fetching products:', error);
-        }
+        console.error('Error fetching products:', error);
       }
 
       try {
@@ -147,12 +115,8 @@ const Dashboard = () => {
       setOrderStats(last7Days);
 
     } catch (error) {
-      if (error.response?.status === 429) {
-        toast.error('Too many requests. Please wait a moment and try again.');
-      } else {
-        toast.error('Failed to load dashboard data');
-        console.error(error);
-      }
+      toast.error('Failed to load dashboard data');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -165,47 +129,55 @@ const Dashboard = () => {
       icon: Users,
       subtitle: `${stats?.users?.doctors || 0} Doctors, ${stats?.users?.students || 0} Students`,
       link: '/users',
-      color: 'blue',
-      bgColor: 'bg-blue-50',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      borderColor: 'border-blue-200',
     },
     {
       title: 'Total Books',
       value: stats?.books?.total || 0,
       icon: BookOpen,
-      subtitle: `${stats?.books?.pending || 0} Pending approval`,
+      subtitle: `${stats?.books?.pending || 0} Pending, ${stats?.books?.rejected || 0} Rejected`,
       link: '/books',
-      color: 'indigo',
-      bgColor: 'bg-indigo-50',
-      iconBg: 'bg-indigo-100',
-      iconColor: 'text-indigo-600',
-      borderColor: 'border-indigo-200',
     },
     {
       title: 'Total Products',
       value: stats?.products?.total || 0,
       icon: Package,
-      subtitle: 'Active products',
+      subtitle: `${stats?.categories?.products || 0} Categories`,
       link: '/products',
-      color: 'purple',
-      bgColor: 'bg-purple-50',
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600',
-      borderColor: 'border-purple-200',
     },
     {
       title: 'Total Orders',
-      value: stats?.orders?.total || 0,
+      value: (stats?.orders?.total || 0) + (stats?.orders?.wholesale || 0),
       icon: ShoppingCart,
-      subtitle: 'All time orders',
+      subtitle: `${stats?.orders?.total || 0} Regular, ${stats?.orders?.wholesale || 0} Wholesale`,
       link: '/orders',
-      color: 'green',
-      bgColor: 'bg-green-50',
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-600',
-      borderColor: 'border-green-200',
+    },
+    {
+      title: 'Total Revenue',
+      value: `$${(stats?.revenue?.total || 0).toLocaleString()}`,
+      icon: DollarSign,
+      subtitle: `Orders: $${(stats?.revenue?.orders || 0).toLocaleString()}`,
+      link: '/financial-transactions',
+    },
+    {
+      title: 'Colleges',
+      value: stats?.colleges?.total || 0,
+      icon: Building2,
+      subtitle: `${stats?.departments?.total || 0} Departments`,
+      link: '/colleges',
+    },
+    {
+      title: 'Delivery Personnel',
+      value: stats?.users?.delivery || 0,
+      icon: Truck,
+      subtitle: 'Active delivery staff',
+      link: '/delivery',
+    },
+    {
+      title: 'Wholesale Customers',
+      value: stats?.users?.customers || 0,
+      icon: Store,
+      subtitle: 'Registered customers',
+      link: '/customers',
     },
     {
       title: 'Pending Approvals',
@@ -213,11 +185,6 @@ const Dashboard = () => {
       icon: AlertCircle,
       subtitle: `${stats?.approvals?.pendingDoctors || 0} Doctors, ${stats?.approvals?.pendingBooks || 0} Books`,
       link: '/approvals',
-      color: 'amber',
-      bgColor: 'bg-amber-50',
-      iconBg: 'bg-amber-100',
-      iconColor: 'text-amber-600',
-      borderColor: 'border-amber-200',
     },
     {
       title: 'Active Reviews',
@@ -225,11 +192,48 @@ const Dashboard = () => {
       icon: Star,
       subtitle: 'User reviews',
       link: '/reviews',
-      color: 'pink',
-      bgColor: 'bg-pink-50',
-      iconBg: 'bg-pink-100',
-      iconColor: 'text-pink-600',
-      borderColor: 'border-pink-200',
+    },
+    {
+      title: 'Book Categories',
+      value: stats?.categories?.books || 0,
+      icon: GraduationCap,
+      subtitle: 'Available categories',
+      link: '/categories',
+    },
+    {
+      title: 'Recent Activity',
+      value: (stats?.recent?.orders || 0) + (stats?.recent?.books || 0) + (stats?.recent?.products || 0),
+      icon: Activity,
+      subtitle: `Last 7 days: ${stats?.recent?.orders || 0} orders, ${stats?.recent?.books || 0} books`,
+      link: null,
+    },
+    {
+      title: 'Materials',
+      value: stats?.materials?.total || 0,
+      icon: FileText,
+      subtitle: 'Study materials available',
+      link: '/materials',
+    },
+    {
+      title: 'Active Carts',
+      value: stats?.carts?.total || 0,
+      icon: ShoppingBag,
+      subtitle: `${stats?.carts?.items || 0} items in carts`,
+      link: null,
+    },
+    {
+      title: 'Sliders',
+      value: stats?.sliders?.total || 0,
+      icon: Image,
+      subtitle: 'Homepage banners',
+      link: '/sliders',
+    },
+    {
+      title: 'Print Options',
+      value: stats?.printOptions?.total || 0,
+      icon: TrendingUp,
+      subtitle: 'Available print options',
+      link: '/print-options',
     },
   ];
 
@@ -246,7 +250,7 @@ const Dashboard = () => {
     { name: 'Rejected', value: stats?.books?.rejected || 0 },
   ].filter(item => item.value > 0);
 
-  const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
+  const COLORS = ['#525252', '#737373', '#a3a3a3', '#d4d4d4', '#404040', '#262626', '#171717', '#e5e5e5'];
 
   if (loading) {
     return (
@@ -260,37 +264,39 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-5 lg:space-y-6 xl:space-y-7 2xl:space-y-8">
+    <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4 lg:gap-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-4xl font-semibold text-gray-900 mb-1">Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600">Welcome back! Here's an overview of your platform.</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-semibold text-gray-900 mb-0.5">Dashboard</h1>
+          <p className="text-xs sm:text-sm text-gray-600">Welcome back! Here's an overview of your platform.</p>
         </div>
-        <div className="flex items-center gap-2 px-3 md:px-4 lg:px-5 py-2 md:py-2.5 rounded-md border border-blue-200 bg-white">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <span className="text-sm md:text-base text-gray-700 font-medium">Last updated: {new Date().toLocaleTimeString()}</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md border border-blue-200 bg-white">
+          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <span className="text-xs sm:text-sm text-gray-700 font-medium">Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5 xl:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.title}
-              className={`card-elevated cursor-pointer transition-all duration-150 hover:shadow-md border-2 ${stat.borderColor} ${stat.bgColor}`}
+              className="card-elevated cursor-pointer transition-all duration-150 hover:shadow-md"
               onClick={() => stat.link && navigate(stat.link)}
             >
-              <div className="flex items-center justify-between gap-3 lg:gap-4">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs md:text-sm font-medium text-gray-600 uppercase tracking-wide mb-2 md:mb-2.5">{stat.title}</p>
-                  <p className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-semibold text-gray-900 mb-1.5 md:mb-2">{stat.value.toLocaleString()}</p>
-                  <p className="text-xs md:text-sm text-gray-600 truncate">{stat.subtitle}</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 sm:mb-2">{stat.title}</p>
+                  <p className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">
+                    {typeof stat.value === 'string' ? stat.value : stat.value.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-gray-600 truncate">{stat.subtitle}</p>
                 </div>
-                <div className={`p-2.5 sm:p-3 md:p-3.5 rounded-md ${stat.iconBg} flex-shrink-0`}>
-                  <Icon className={stat.iconColor} size={20} />
+                <div className="p-2 sm:p-3 rounded-md bg-gray-100 flex-shrink-0">
+                  <Icon className="text-gray-700" size={20} />
                 </div>
               </div>
             </div>
@@ -299,34 +305,34 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-3 md:gap-4 lg:gap-5 xl:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-3 md:gap-4 lg:gap-5">
         {/* Orders Chart */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 md:mb-5 lg:mb-6 xl:mb-7">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-1">Orders & Revenue Trend</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Last 7 days performance</p>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Orders & Revenue Trend</h2>
+              <p className="text-xs text-gray-600">Last 7 days performance</p>
             </div>
-            <div className="p-2 md:p-2.5 rounded-md bg-blue-100 flex-shrink-0 ml-2">
-              <Activity className="text-blue-600" size={18} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <Activity className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={chartHeight}>
+          <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={orderStats}>
               <defs>
                 <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#525252" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#525252" stopOpacity={0}/>
                 </linearGradient>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#737373" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#737373" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
-              <YAxis yAxisId="left" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
-              <YAxis yAxisId="right" orientation="right" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
+              <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
+              <YAxis yAxisId="left" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
+              <YAxis yAxisId="right" orientation="right" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#ffffff', 
@@ -340,7 +346,7 @@ const Dashboard = () => {
                 yAxisId="left"
                 type="monotone" 
                 dataKey="orders" 
-                stroke="#3b82f6" 
+                stroke="#525252" 
                 strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorOrders)" 
@@ -350,7 +356,7 @@ const Dashboard = () => {
                 yAxisId="right"
                 type="monotone" 
                 dataKey="revenue" 
-                stroke="#10b981" 
+                stroke="#737373" 
                 strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorRevenue)" 
@@ -362,16 +368,16 @@ const Dashboard = () => {
 
         {/* User Types Distribution */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 md:mb-5 lg:mb-6 xl:mb-7">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-1">User Types Distribution</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Platform user breakdown</p>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">User Types Distribution</h2>
+              <p className="text-xs text-gray-600">Platform user breakdown</p>
             </div>
-            <div className="p-2 md:p-2.5 rounded-md bg-indigo-100 flex-shrink-0 ml-2">
-              <Users className="text-indigo-600" size={18} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <Users className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={chartHeight}>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={userTypeData}
@@ -379,7 +385,7 @@ const Dashboard = () => {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={pieRadius}
+                outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
                 stroke="#fff"
@@ -403,20 +409,20 @@ const Dashboard = () => {
 
         {/* Book Approval Status */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 md:mb-5 lg:mb-6 xl:mb-7">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-1">Book Approval Status</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Current approval metrics</p>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Book Approval Status</h2>
+              <p className="text-xs text-gray-600">Current approval metrics</p>
             </div>
-            <div className="p-2 md:p-2.5 rounded-md bg-amber-100 flex-shrink-0 ml-2">
-              <AlertCircle className="text-amber-600" size={18} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <AlertCircle className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={chartHeight}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={approvalData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
-              <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
+              <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
+              <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#ffffff', 
@@ -436,20 +442,20 @@ const Dashboard = () => {
 
         {/* Category Distribution */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 md:mb-5 lg:mb-6 xl:mb-7">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-1">Top Categories</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Most popular categories</p>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Top Categories</h2>
+              <p className="text-xs text-gray-600">Most popular categories</p>
             </div>
-            <div className="p-2 md:p-2.5 rounded-md bg-purple-100 flex-shrink-0 ml-2">
-              <Package className="text-purple-600" size={18} />
+            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
+              <Package className="text-gray-700" size={18} />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={chartHeight}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={categoryStats.slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis type="number" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
-              <YAxis dataKey="name" type="category" width={yAxisWidth} stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: chartFontSize }} />
+              <XAxis type="number" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
+              <YAxis dataKey="name" type="category" width={100} stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#ffffff', 
@@ -469,11 +475,11 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-3 md:gap-4 lg:gap-5 xl:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-3 gap-3 md:gap-4 lg:gap-5">
         {/* Recent Orders */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-3 md:mb-4 lg:mb-5">
-            <h2 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900">Recent Orders</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Orders</h2>
             <button
               onClick={() => navigate('/orders')}
               className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
@@ -491,8 +497,8 @@ const Dashboard = () => {
                   onClick={() => navigate(`/orders/${order.id}`)}
                 >
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                    <div className="p-1.5 sm:p-2 rounded-md bg-green-100 flex-shrink-0">
-                      <ShoppingCart className="text-green-600" size={14} className="sm:w-4 sm:h-4" />
+                    <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
+                      <ShoppingCart className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">Order #{order.id.slice(0, 8)}</p>
@@ -523,8 +529,8 @@ const Dashboard = () => {
 
         {/* Recent Books */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-3 md:mb-4 lg:mb-5">
-            <h2 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900">Recent Books</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Books</h2>
             <button
               onClick={() => navigate('/books')}
               className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
@@ -541,8 +547,8 @@ const Dashboard = () => {
                   className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                   onClick={() => navigate(`/books/${book.id}`)}
                 >
-                  <div className="p-1.5 sm:p-2 rounded-md bg-indigo-100 flex-shrink-0">
-                    <BookOpen className="text-indigo-600" size={14} className="sm:w-4 sm:h-4" />
+                  <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
+                    <BookOpen className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{book.title}</p>
@@ -561,8 +567,8 @@ const Dashboard = () => {
 
         {/* Recent Products */}
         <div className="card-elevated">
-          <div className="flex items-center justify-between mb-3 md:mb-4 lg:mb-5">
-            <h2 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900">Recent Products</h2>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Products</h2>
             <button
               onClick={() => navigate('/products')}
               className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
@@ -579,8 +585,8 @@ const Dashboard = () => {
                   className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                   onClick={() => navigate(`/products/${product.id}`)}
                 >
-                  <div className="p-1.5 sm:p-2 rounded-md bg-purple-100 flex-shrink-0">
-                    <Package className="text-purple-600" size={14} className="sm:w-4 sm:h-4" />
+                  <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
+                    <Package className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{product.name}</p>

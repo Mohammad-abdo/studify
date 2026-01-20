@@ -61,6 +61,7 @@ import DeliveryWallets from './pages/DeliveryWallets';
 import DeliveryLocations from './pages/DeliveryLocations';
 // Dashboard
 import DashboardMetrics from './pages/DashboardMetrics';
+import Sliders from './pages/Sliders';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 
@@ -174,6 +175,7 @@ function App() {
             <Route path="delivery-locations" element={<DeliveryLocations />} />
             {/* Dashboard */}
             <Route path="dashboard-metrics" element={<DashboardMetrics />} />
+            <Route path="sliders" element={<Sliders />} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>

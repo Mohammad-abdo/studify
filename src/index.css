@@ -260,12 +260,6 @@ body {
   }
 }
 
-@media (min-width: 1920px) {
-  .container-responsive {
-    max-width: 1800px;
-  }
-}
-
 /* Responsive grid utilities - compact spacing */
 .grid-responsive {
   @apply grid grid-cols-1 gap-3 md:gap-4 lg:gap-5 xl:gap-6;

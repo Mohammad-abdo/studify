@@ -17,6 +17,10 @@ const UsersPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [limit] = useState(20);
 
+  useEffect(() => {
+    fetchUsers();
+  }, [page, filterType, filterStatus, searchTerm]);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -40,32 +44,11 @@ const UsersPage = () => {
       setTotal(response.data.pagination?.total || 0);
     } catch (error) {
       console.error('Failed to load users:', error);
-      if (error.response?.status === 429) {
-        toast.error('Too many requests. Please wait a moment and try again.');
-      } else {
-        toast.error(error.response?.data?.message || 'Failed to load users');
-      }
+      toast.error(error.response?.data?.message || 'Failed to load users');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Debounce search term to reduce API calls
-    const timeoutId = searchTerm 
-      ? setTimeout(() => {
-          fetchUsers();
-        }, 500)
-      : null;
-
-    if (!searchTerm) {
-      fetchUsers();
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [page, filterType, filterStatus, searchTerm]);
 
   const handleView = (user) => {
     navigate(`/users/${user.id}`);
