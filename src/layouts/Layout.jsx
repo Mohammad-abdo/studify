@@ -97,6 +97,7 @@ const Layout = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: BookOpen, label: 'Books', path: '/books' },
+    { icon: FileText, label: 'Materials', path: '/materials' },
     { icon: Package, label: 'Products', path: '/products' },
     { icon: ShoppingCart, label: 'Orders', path: '/orders' },
     {

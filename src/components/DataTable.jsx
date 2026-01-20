@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
+/**
+ * Enhanced DataTable Component
+ * Supports both client-side and server-side pagination
+ */
 const DataTable = ({
   data = [],
   columns = [],
@@ -12,14 +16,26 @@ const DataTable = ({
   searchPlaceholder = 'Search...',
   searchValue = '',
   onSearchChange,
+  // Server-side pagination props
+  serverSide = false,
+  total = 0,
+  page = 1,
+  limit = 10,
+  onPageChange,
+  // Custom empty state
+  emptyState,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  // Use server-side pagination if enabled, otherwise use client-side
+  const isServerSide = serverSide && onPageChange;
+  const itemsPerPage = isServerSide ? limit : 10;
+
+  useEffect(() => {
+    if (isServerSide) {
+      setCurrentPage(page);
+    }
+  }, [page, isServerSide]);
 
   const getValue = (item, key) => {
     if (typeof key === 'function') {
@@ -36,6 +52,32 @@ const DataTable = ({
   // Filter columns for mobile (hide some columns on small screens)
   const getVisibleColumns = () => {
     return columns.filter(col => col.hideOnMobile !== true);
+  };
+
+  // Calculate pagination for client-side
+  const totalPages = isServerSide 
+    ? Math.ceil(total / limit)
+    : Math.ceil(data.length / itemsPerPage);
+  
+  const startIndex = isServerSide
+    ? (page - 1) * limit
+    : (currentPage - 1) * itemsPerPage;
+  
+  const endIndex = isServerSide
+    ? Math.min(page * limit, total)
+    : startIndex + itemsPerPage;
+  
+  const currentData = isServerSide ? data : data.slice(startIndex, endIndex);
+  const displayTotal = isServerSide ? total : data.length;
+  const displayStart = isServerSide ? startIndex + 1 : startIndex + 1;
+  const displayEnd = isServerSide ? endIndex : Math.min(endIndex, data.length);
+
+  const handlePageChange = (newPage) => {
+    if (isServerSide) {
+      onPageChange?.(newPage);
+    } else {
+      setCurrentPage(newPage);
+    }
   };
 
   return (
@@ -58,7 +100,7 @@ const DataTable = ({
       {/* Table - Responsive wrapper */}
       <div className="table-wrapper overflow-x-auto">
         <table className="table min-w-full">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr>
               {getVisibleColumns().map((column, index) => (
                 <th
@@ -90,8 +132,10 @@ const DataTable = ({
               </tr>
             ) : currentData.length === 0 ? (
               <tr>
-                <td colSpan={getVisibleColumns().length + (onView || onEdit || onDelete ? 1 : 0)} className="px-4 py-8 sm:py-12 text-center text-gray-500 text-sm">
-                  No data available
+                <td colSpan={getVisibleColumns().length + (onView || onEdit || onDelete ? 1 : 0)} className="px-4 py-8 sm:py-12 text-center">
+                  {emptyState || (
+                    <div className="text-gray-500 text-sm">No data available</div>
+                  )}
                 </td>
               </tr>
             ) : (
@@ -151,25 +195,25 @@ const DataTable = ({
       {totalPages > 1 && (
         <div className="px-4 md:px-5 lg:px-6 xl:px-7 py-3 md:py-3.5 lg:py-4 border-t border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm md:text-base font-medium text-gray-700">
-            Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
-            <span className="font-semibold">{Math.min(endIndex, data.length)}</span> of{' '}
-            <span className="font-semibold">{data.length}</span> results
+            Showing <span className="font-semibold">{displayStart}</span> to{' '}
+            <span className="font-semibold">{displayEnd}</span> of{' '}
+            <span className="font-semibold">{displayTotal}</span> results
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="btn-secondary p-2 min-h-0"
+              onClick={() => handlePageChange(isServerSide ? page - 1 : currentPage - 1)}
+              disabled={isServerSide ? page === 1 : currentPage === 1}
+              className="btn-secondary p-2 min-h-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={16} />
             </button>
             <span className="px-3 py-2 rounded-md border border-blue-200 bg-white text-sm font-medium text-gray-900">
-              Page {currentPage} of {totalPages}
+              Page {isServerSide ? page : currentPage} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="btn-secondary p-2 min-h-0"
+              onClick={() => handlePageChange(isServerSide ? page + 1 : currentPage + 1)}
+              disabled={isServerSide ? page >= totalPages : currentPage >= totalPages}
+              className="btn-secondary p-2 min-h-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight size={16} />
             </button>

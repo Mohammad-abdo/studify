@@ -62,6 +62,17 @@ import DeliveryLocations from './pages/DeliveryLocations';
 // Dashboard
 import DashboardMetrics from './pages/DashboardMetrics';
 import Sliders from './pages/Sliders';
+// Materials
+import Materials from './pages/Materials';
+import AddMaterial from './pages/AddMaterial';
+import EditMaterial from './pages/EditMaterial';
+import MaterialDetail from './pages/MaterialDetail';
+// Order & Print Option Details
+import OrderDetail from './pages/OrderDetail';
+import PrintOptionDetail from './pages/PrintOptionDetail';
+// General Pages
+import NotFound from './pages/NotFound';
+import Unauthorized from './pages/Unauthorized';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 
@@ -127,6 +138,7 @@ function App() {
             <Route path="products/edit/:id" element={<EditProduct />} />
             <Route path="products/:id" element={<ProductDetail />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="orders/:id" element={<OrderDetail />} />
             <Route path="users/edit/:id" element={<EditUser />} />
             <Route path="users/:id" element={<UserDetail />} />
             <Route path="users" element={<Users />} />
@@ -161,9 +173,15 @@ function App() {
             <Route path="doctors" element={<Doctors />} />
             <Route path="customers" element={<Customers />} />
             <Route path="delivery" element={<Delivery />} />
+            {/* Materials */}
+            <Route path="materials" element={<Materials />} />
+            <Route path="materials/add" element={<AddMaterial />} />
+            <Route path="materials/edit/:id" element={<EditMaterial />} />
+            <Route path="materials/:id" element={<MaterialDetail />} />
             {/* Pricing */}
             <Route path="book-pricing" element={<BookPricing />} />
             <Route path="print-options" element={<PrintOptions />} />
+            <Route path="print-options/:id" element={<PrintOptionDetail />} />
             <Route path="product-pricing" element={<ProductPricing />} />
             {/* Financial & Reports */}
             <Route path="financial-transactions" element={<FinancialTransactions />} />
@@ -177,6 +195,9 @@ function App() {
             <Route path="dashboard-metrics" element={<DashboardMetrics />} />
             <Route path="sliders" element={<Sliders />} />
             <Route path="settings" element={<Settings />} />
+            {/* General Pages */}
+            <Route path="unauthorized" element={<Unauthorized />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </Router>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Plus } from 'lucide-react';
+import { Package, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import EmptyState, { EmptyStates } from '../components/EmptyState';
+import LoadingState from '../components/LoadingState';
 
 const Products = () => {
   const navigate = useNavigate();
@@ -11,20 +14,42 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [limit] = useState(10);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
     fetchProducts();
-  }, [page]);
+  }, [page, searchTerm]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/products?page=${page}&limit=100`);
-      setProducts(response.data.data || []);
-      setTotal(response.data.pagination?.total || 0);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      if (searchTerm) params.append('search', searchTerm);
+
+      const response = await api.get(`/products?${params}`);
+      const data = response.data.data || response.data;
+      
+      // Parse imageUrls if it's a string
+      const productsWithParsedImages = Array.isArray(data) ? data.map(product => {
+        if (product.imageUrls && typeof product.imageUrls === 'string') {
+          try {
+            product.imageUrls = JSON.parse(product.imageUrls);
+          } catch (e) {
+            product.imageUrls = [];
+          }
+        }
+        return product;
+      }) : [];
+      
+      setProducts(productsWithParsedImages);
+      setTotal(response.data.pagination?.total || productsWithParsedImages.length || 0);
     } catch (error) {
       toast.error('Failed to load products');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -44,12 +69,6 @@ const Products = () => {
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const columns = [
     {
       header: 'Images',
@@ -58,7 +77,7 @@ const Products = () => {
       align: 'center',
       hideOnMobile: true,
       render: (product) => {
-        const images = product.imageUrls || [];
+        const images = Array.isArray(product.imageUrls) ? product.imageUrls : [];
         return (
           <div className="flex justify-center gap-1">
             {images.length > 0 ? (
@@ -110,11 +129,12 @@ const Products = () => {
     {
       header: 'Pricing',
       accessor: 'pricing',
+      align: 'right',
       render: (product) => (
         <div className="text-xs sm:text-sm">
           {product.pricing && product.pricing.length > 0 ? (
             <div>
-              <div className="font-medium text-gray-900">${product.pricing[0].price}</div>
+              <div className="font-medium text-gray-900">${product.pricing[0].price?.toFixed(2) || '0.00'}</div>
               {product.pricing.length > 1 && (
                 <div className="text-gray-500 text-xs">{product.pricing.length} tiers</div>
               )}
@@ -138,35 +158,81 @@ const Products = () => {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-0.5 sm:mb-1">Products</h1>
-          <p className="text-xs sm:text-sm text-gray-600">Manage all products in the system</p>
+    <div className="space-y-6">
+      <PageHeader
+        title="Products"
+        subtitle="Manage all products in the system"
+        breadcrumbs={[
+          { label: 'Dashboard', path: '/' },
+          { label: 'Products' },
+        ]}
+        actionLabel="Add Product"
+        actionPath="/products/add"
+      />
+
+      {/* Filters */}
+      <div className="card-elevated">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+              className="input-field w-full"
+            />
+          </div>
         </div>
-        <button 
-          onClick={() => navigate('/products/add')}
-          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
-        >
-          <Plus size={16} className="sm:w-5 sm:h-5" />
-          <span>Add Product</span>
-        </button>
+
+        {/* Active Filters */}
+        {searchTerm && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="badge badge-info flex items-center gap-1">
+              Search: {searchTerm}
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setPage(1);
+                }}
+                className="ml-1 hover:text-blue-800"
+              >
+                <X size={12} />
+              </button>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Data Table */}
-      <DataTable
-        data={filteredProducts}
-        columns={columns}
-        loading={loading}
-        searchable
-        searchPlaceholder="Search products..."
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        onView={(product) => navigate(`/products/${product.id}`)}
-        onEdit={(product) => navigate(`/products/edit/${product.id}`)}
-        onDelete={handleDelete}
-      />
+      {loading ? (
+        <LoadingState message="Loading products..." />
+      ) : products.length === 0 ? (
+        searchTerm ? (
+          <EmptyStates.Search searchTerm={searchTerm} />
+        ) : (
+          <EmptyStates.Products />
+        )
+      ) : (
+        <>
+          <DataTable
+            data={products}
+            columns={columns}
+            loading={false}
+            searchable={false}
+            serverSide={true}
+            total={total}
+            page={page}
+            limit={limit}
+            onPageChange={setPage}
+            onView={(product) => navigate(`/products/${product.id}`)}
+            onEdit={(product) => navigate(`/products/edit/${product.id}`)}
+            onDelete={handleDelete}
+          />
+        </>
+      )}
     </div>
   );
 };

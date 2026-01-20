@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Plus } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import EmptyState, { EmptyStates } from '../components/EmptyState';
+import LoadingState from '../components/LoadingState';
 
 const Books = () => {
   const navigate = useNavigate();
@@ -11,20 +14,44 @@ const Books = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [limit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [filterStatus, setFilterStatus] = useState('');
 
   useEffect(() => {
     fetchBooks();
-  }, [page]);
+  }, [page, searchTerm, filterStatus]);
 
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/books?page=${page}&limit=100`);
-      setBooks(response.data.data || []);
-      setTotal(response.data.pagination?.total || 0);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      if (searchTerm) params.append('search', searchTerm);
+      if (filterStatus) params.append('approvalStatus', filterStatus);
+
+      const response = await api.get(`/books?${params}`);
+      const data = response.data.data || response.data;
+      
+      // Parse imageUrls if it's a string
+      const booksWithParsedImages = Array.isArray(data) ? data.map(book => {
+        if (book.imageUrls && typeof book.imageUrls === 'string') {
+          try {
+            book.imageUrls = JSON.parse(book.imageUrls);
+          } catch (e) {
+            book.imageUrls = [];
+          }
+        }
+        return book;
+      }) : [];
+      
+      setBooks(booksWithParsedImages);
+      setTotal(response.data.pagination?.total || booksWithParsedImages.length || 0);
     } catch (error) {
       toast.error('Failed to load books');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -44,11 +71,14 @@ const Books = () => {
     }
   };
 
-  const filteredBooks = books.filter((book) =>
-    book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getStatusBadge = (status) => {
+    const badges = {
+      APPROVED: 'badge-success',
+      PENDING: 'badge-warning',
+      REJECTED: 'badge-danger',
+    };
+    return badges[status] || 'badge-neutral';
+  };
 
   const columns = [
     {
@@ -58,7 +88,7 @@ const Books = () => {
       align: 'center',
       hideOnMobile: true,
       render: (book) => {
-        const images = book.imageUrls || [];
+        const images = Array.isArray(book.imageUrls) ? book.imageUrls : [];
         const firstImage = images[0];
         return (
           <div className="flex justify-center">
@@ -124,15 +154,7 @@ const Books = () => {
       accessor: 'approvalStatus',
       align: 'center',
       render: (book) => (
-        <span
-          className={`badge ${
-            book.approvalStatus === 'APPROVED'
-              ? 'badge-success'
-              : book.approvalStatus === 'PENDING'
-              ? 'badge-warning'
-              : 'badge-danger'
-          }`}
-        >
+        <span className={`badge ${getStatusBadge(book.approvalStatus)}`}>
           {book.approvalStatus}
         </span>
       ),
@@ -150,35 +172,110 @@ const Books = () => {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-0.5 sm:mb-1">Books</h1>
-          <p className="text-xs sm:text-sm text-gray-600">Manage all books in the system</p>
+    <div className="space-y-6">
+      <PageHeader
+        title="Books"
+        subtitle="Manage all books in the system"
+        breadcrumbs={[
+          { label: 'Dashboard', path: '/' },
+          { label: 'Books' },
+        ]}
+        actionLabel="Add Book"
+        actionPath="/books/add"
+      />
+
+      {/* Filters */}
+      <div className="card-elevated">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search books..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+              className="input-field w-full"
+            />
+          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setPage(1);
+            }}
+            className="input-field"
+          >
+            <option value="">All Status</option>
+            <option value="APPROVED">Approved</option>
+            <option value="PENDING">Pending</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
         </div>
-        <button 
-          onClick={() => navigate('/books/add')}
-          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
-        >
-          <Plus size={16} className="sm:w-5 sm:h-5" />
-          <span>Add Book</span>
-        </button>
+
+        {/* Active Filters */}
+        {(searchTerm || filterStatus) && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {searchTerm && (
+              <span className="badge badge-info flex items-center gap-1">
+                Search: {searchTerm}
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setPage(1);
+                  }}
+                  className="ml-1 hover:text-blue-800"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+            {filterStatus && (
+              <span className="badge badge-info flex items-center gap-1">
+                Status: {filterStatus}
+                <button
+                  onClick={() => {
+                    setFilterStatus('');
+                    setPage(1);
+                  }}
+                  className="ml-1 hover:text-blue-800"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Data Table */}
-      <DataTable
-        data={filteredBooks}
-        columns={columns}
-        loading={loading}
-        searchable
-        searchPlaceholder="Search books..."
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        onView={(book) => navigate(`/books/${book.id}`)}
-        onEdit={(book) => navigate(`/books/edit/${book.id}`)}
-        onDelete={handleDelete}
-      />
+      {loading ? (
+        <LoadingState message="Loading books..." />
+      ) : books.length === 0 ? (
+        searchTerm || filterStatus ? (
+          <EmptyStates.Search searchTerm={searchTerm} />
+        ) : (
+          <EmptyStates.Books />
+        )
+      ) : (
+        <>
+          <DataTable
+            data={books}
+            columns={columns}
+            loading={false}
+            searchable={false}
+            serverSide={true}
+            total={total}
+            page={page}
+            limit={limit}
+            onPageChange={setPage}
+            onView={(book) => navigate(`/books/${book.id}`)}
+            onEdit={(book) => navigate(`/books/edit/${book.id}`)}
+            onDelete={handleDelete}
+          />
+        </>
+      )}
     </div>
   );
 };
