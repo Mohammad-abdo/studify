@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { GraduationCap, Plus, Search, Edit, Trash2, Filter } from 'lucide-react';
+import { GraduationCap, Plus, X } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import EmptyState, { EmptyStates } from '../components/EmptyState';
+import LoadingState from '../components/LoadingState';
 
 const Departments = () => {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ const Departments = () => {
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const url = selectedCollege 
+      const url = selectedCollege
         ? `/departments?collegeId=${selectedCollege}`
         : '/departments';
       const response = await api.get(url);
@@ -60,57 +63,59 @@ const Departments = () => {
     }
   };
 
-  const filteredDepartments = departments.filter((dept) =>
-    dept.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDepartments = departments.filter((dept) => {
+    const matchesSearch = dept.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
+
+  const columns = [
+    {
+      header: 'Name',
+      accessor: 'name',
+    },
+    {
+      header: 'College',
+      accessor: 'college.name',
+      render: (dept) => dept.college?.name || '—',
+    },
+    {
+      header: 'Created',
+      accessor: 'createdAt',
+      hideOnMobile: true,
+      render: (dept) => new Date(dept.createdAt).toLocaleDateString(),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-violet-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-fuchsia-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-            Departments
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage all departments in the system</p>
-        </div>
-        <button 
-          onClick={() => navigate('/departments/add')}
-          className="px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Department
-        </button>
-      </motion.div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Departments"
+        subtitle="Manage all departments in the system"
+        breadcrumbs={[
+          { label: 'Dashboard', path: '/' },
+          { label: 'Departments' },
+        ]}
+        actionLabel="Add Department"
+        actionPath="/departments/add"
+      />
 
       {/* Filters */}
-      <div className="relative glass-card p-6 border border-white/40 shadow-2xl">
+      <div className="card-elevated">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 flex items-center gap-3 px-4 py-3 glass rounded-xl border border-white/30">
-            <Search className="text-violet-600" size={20} />
+          <div className="flex-1">
             <input
               type="text"
               placeholder="Search departments..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 outline-none bg-transparent font-medium text-gray-900 placeholder-gray-400"
+              className="input-field w-full"
             />
           </div>
-          <div className="flex items-center gap-3 px-4 py-3 glass rounded-xl border border-white/30">
-            <Filter className="text-violet-600" size={20} />
+          <div className="flex-1 flex gap-2">
             <select
               value={selectedCollege}
               onChange={(e) => setSelectedCollege(e.target.value)}
-              className="flex-1 outline-none bg-transparent font-medium text-gray-900"
+              className="input-field w-full"
             >
               <option value="">All Colleges</option>
               {colleges.map((college) => (
@@ -121,69 +126,55 @@ const Departments = () => {
             </select>
           </div>
         </div>
+
+        {(searchTerm || selectedCollege) && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {searchTerm && (
+              <span className="badge badge-info flex items-center gap-1">
+                Search: {searchTerm}
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="ml-1 hover:text-blue-800"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+            {selectedCollege && (
+              <span className="badge badge-info flex items-center gap-1">
+                College: {colleges.find((c) => c.id === selectedCollege)?.name || 'Selected'}
+                <button
+                  onClick={() => setSelectedCollege('')}
+                  className="ml-1 hover:text-blue-800"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Departments List */}
+      {/* Data Table */}
       {loading ? (
-        <div className="relative glass-card p-12 border border-white/40 shadow-2xl flex items-center justify-center">
-          <div className="relative">
-            <div className="absolute inset-0 glass-card rounded-3xl blur-xl"></div>
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-violet-200 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-violet-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
-            </div>
-          </div>
-        </div>
+        <LoadingState message="Loading departments..." />
+      ) : filteredDepartments.length === 0 ? (
+        <EmptyState
+          icon={GraduationCap}
+          title="No departments found"
+          description="Try adjusting your filters or add a new department."
+          actionLabel="Add Department"
+          onAction={() => navigate('/departments/add')}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDepartments.map((dept, index) => (
-            <motion.div
-              key={dept.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              className="relative glass-card p-6 border border-white/40 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02] group overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <div className="relative z-10 flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                    <div className="relative p-4 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                      <GraduationCap className="text-white drop-shadow-md" size={24} />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-900">{dept.name}</h3>
-                    <p className="text-sm font-semibold text-gray-600 mt-1">{dept.college?.name}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="relative z-10 flex items-center justify-end gap-2 pt-4 border-t border-white/30">
-                <button 
-                  onClick={() => navigate(`/departments/edit/${dept.id}`)}
-                  className="p-2.5 glass rounded-xl text-gray-600 hover:text-violet-600 hover:bg-white/80 transition-all hover:scale-110"
-                >
-                  <Edit size={18} />
-                </button>
-                <button 
-                  onClick={() => handleDelete(dept.id)}
-                  className="p-2.5 glass rounded-xl text-gray-600 hover:text-red-600 hover:bg-white/80 transition-all hover:scale-110"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {!loading && filteredDepartments.length === 0 && (
-        <div className="relative glass-card p-12 border border-white/40 shadow-2xl text-center">
-          <GraduationCap className="mx-auto text-gray-400" size={48} />
-          <p className="text-gray-600 mt-4 font-semibold">No departments found</p>
-        </div>
+        <DataTable
+          data={filteredDepartments}
+          columns={columns}
+          loading={false}
+          searchable={false}
+          onEdit={(dept) => navigate(`/departments/edit/${dept.id}`)}
+          onDelete={(dept) => handleDelete(dept.id)}
+        />
       )}
     </div>
   );
