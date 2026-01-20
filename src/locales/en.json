@@ -1,0 +1,186 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "search": "Search",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "actions": "Actions",
+    "status": "Status",
+    "created": "Created",
+    "updated": "Updated",
+    "logout": "Logout",
+    "settings": "Settings"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "books": "Books",
+    "materials": "Materials",
+    "products": "Products",
+    "orders": "Orders",
+    "users": "Users",
+    "students": "Students",
+    "doctors": "Doctors",
+    "delivery": "Delivery",
+    "customers": "Customers",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "userRoles": "User Roles",
+    "colleges": "Colleges",
+    "departments": "Departments",
+    "categories": "Categories",
+    "bookPricing": "Book Pricing",
+    "printOptions": "Print Options",
+    "productPricing": "Product Pricing",
+    "reviews": "Reviews",
+    "transactions": "Transactions",
+    "reports": "Reports",
+    "importLogs": "Import Logs",
+    "assignments": "Assignments",
+    "wallets": "Wallets",
+    "locations": "Locations",
+    "onboarding": "Onboarding",
+    "sliders": "Sliders",
+    "staticPages": "Static Pages",
+    "approvals": "Approvals",
+    "dashboardMetrics": "Dashboard Metrics"
+  },
+  "pages": {
+    "books": {
+      "title": "Books",
+      "subtitle": "Manage all books in the system",
+      "addBook": "Add Book",
+      "search": "Search books...",
+      "allStatus": "All Status",
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "materials": {
+      "title": "Materials",
+      "subtitle": "Manage study materials",
+      "addMaterial": "Add Material",
+      "search": "Search materials...",
+      "allStatus": "All Status"
+    },
+    "products": {
+      "title": "Products",
+      "subtitle": "Manage all products in the system",
+      "addProduct": "Add Product",
+      "search": "Search products..."
+    },
+    "orders": {
+      "title": "Orders",
+      "subtitle": "View and manage all orders",
+      "allStatus": "All Status",
+      "allTypes": "All Types",
+      "created": "Created",
+      "paid": "Paid",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "product": "Product",
+      "content": "Content",
+      "print": "Print"
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Manage all users",
+      "allTypes": "All Types",
+      "allStatus": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "students": {
+      "title": "Students",
+      "subtitle": "Manage students"
+    },
+    "doctors": {
+      "title": "Doctors",
+      "subtitle": "Manage doctors"
+    },
+    "colleges": {
+      "title": "Colleges",
+      "subtitle": "Manage all colleges in the system",
+      "addCollege": "Add College",
+      "search": "Search colleges..."
+    },
+    "departments": {
+      "title": "Departments",
+      "subtitle": "Manage all departments in the system",
+      "addDepartment": "Add Department",
+      "search": "Search departments...",
+      "allColleges": "All Colleges"
+    },
+    "categories": {
+      "title": "Categories",
+      "subtitle": "Manage book and product categories",
+      "addCategory": "Add Category",
+      "bookCategories": "Book Categories",
+      "productCategories": "Product Categories",
+      "search": "Search categories..."
+    },
+    "reviews": {
+      "title": "Reviews",
+      "subtitle": "Manage all reviews and ratings",
+      "all": "All",
+      "book": "Book",
+      "product": "Product",
+      "search": "Search reviews..."
+    },
+    "onboarding": {
+      "title": "Onboarding",
+      "subtitle": "Manage onboarding screens",
+      "addItem": "Add Onboarding Item",
+      "search": "Search onboarding items..."
+    },
+    "printOptions": {
+      "title": "Print Options",
+      "subtitle": "Manage print options"
+    }
+  },
+  "status": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "active": "Active",
+    "inactive": "Inactive",
+    "created": "Created",
+    "paid": "Paid",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "table": {
+    "name": "Name",
+    "title": "Title",
+    "description": "Description",
+    "category": "Category",
+    "doctor": "Doctor",
+    "college": "College",
+    "department": "Department",
+    "status": "Status",
+    "created": "Created",
+    "actions": "Actions",
+    "user": "User",
+    "items": "Items",
+    "total": "Total",
+    "date": "Date",
+    "type": "Type",
+    "order": "Order",
+    "image": "Image",
+    "images": "Images",
+    "pricing": "Pricing",
+    "downloads": "Downloads",
+    "rating": "Rating",
+    "comment": "Comment"
+  }
+}
+

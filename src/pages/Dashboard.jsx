@@ -62,7 +62,7 @@ const Dashboard = () => {
       setStats(statsResponse.data.data || statsResponse.data);
 
       try {
-        const ordersResponse = await api.get('/orders?page=1&limit=5');
+        const ordersResponse = await api.get('/admin/orders?page=1&limit=5');
         setRecentOrders(ordersResponse.data.data || ordersResponse.data || []);
       } catch (error) {
         console.error('Error fetching orders:', error);

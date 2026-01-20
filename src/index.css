@@ -30,6 +30,27 @@
     min-height: 100vh;
   }
 
+  /* RTL Support */
+  [dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+
+  [dir="rtl"] .table th,
+  [dir="rtl"] .table td {
+    text-align: right;
+  }
+
+  [dir="rtl"] .table th[style*="text-align: center"],
+  [dir="rtl"] .table td[style*="text-align: center"] {
+    text-align: center;
+  }
+
+  [dir="rtl"] .table th[style*="text-align: left"],
+  [dir="rtl"] .table td[style*="text-align: left"] {
+    text-align: left;
+  }
+
   /* Responsive typography - mobile-first, compact */
   h1 {
     @apply text-lg sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-semibold text-gray-900;

@@ -56,9 +56,10 @@ const Layout = () => {
   const userDropdownRef = useRef(null);
   const languageDropdownRef = useRef(null);
   const { user, logout } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
+  const isRTL = language === 'ar';
 
   useEffect(() => {
     const handleResize = () => {
@@ -95,21 +96,21 @@ const Layout = () => {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: BookOpen, label: 'Books', path: '/books' },
-    { icon: FileText, label: 'Materials', path: '/materials' },
-    { icon: Package, label: 'Products', path: '/products' },
-    { icon: ShoppingCart, label: 'Orders', path: '/orders' },
+    { icon: LayoutDashboard, label: t('menu.dashboard'), path: '/' },
+    { icon: BookOpen, label: t('menu.books'), path: '/books' },
+    { icon: FileText, label: t('menu.materials'), path: '/materials' },
+    { icon: Package, label: t('menu.products'), path: '/products' },
+    { icon: ShoppingCart, label: t('menu.orders'), path: '/orders' },
     {
       icon: Users,
-      label: 'Users & Profiles',
+      label: t('menu.users'),
       key: 'users',
       children: [
-        { icon: Users, label: 'All Users', path: '/users' },
-        { icon: GraduationCap, label: 'Students', path: '/students' },
-        { icon: Stethoscope, label: 'Doctors', path: '/doctors' },
-        { icon: Truck, label: 'Delivery', path: '/delivery' },
-        { icon: Briefcase, label: 'Customers', path: '/customers' },
+        { icon: Users, label: t('menu.users'), path: '/users' },
+        { icon: GraduationCap, label: t('menu.students'), path: '/students' },
+        { icon: Stethoscope, label: t('menu.doctors'), path: '/doctors' },
+        { icon: Truck, label: t('menu.delivery'), path: '/delivery' },
+        { icon: Briefcase, label: t('menu.customers'), path: '/customers' },
       ],
     },
     {
@@ -117,51 +118,51 @@ const Layout = () => {
       label: 'RBAC',
       key: 'rbac',
       children: [
-        { icon: Shield, label: 'Roles', path: '/roles' },
-        { icon: Key, label: 'Permissions', path: '/permissions' },
-        { icon: UserCog, label: 'User Roles', path: '/user-roles' },
+        { icon: Shield, label: t('menu.roles'), path: '/roles' },
+        { icon: Key, label: t('menu.permissions'), path: '/permissions' },
+        { icon: UserCog, label: t('menu.userRoles'), path: '/user-roles' },
       ],
     },
-    { icon: Building2, label: 'Colleges', path: '/colleges' },
-    { icon: GraduationCap, label: 'Departments', path: '/departments' },
-    { icon: Tag, label: 'Categories', path: '/categories' },
+    { icon: Building2, label: t('menu.colleges'), path: '/colleges' },
+    { icon: GraduationCap, label: t('menu.departments'), path: '/departments' },
+    { icon: Tag, label: t('menu.categories'), path: '/categories' },
     {
       icon: DollarSign,
-      label: 'Pricing',
+      label: t('menu.bookPricing'),
       key: 'pricing',
       children: [
-        { icon: DollarSign, label: 'Book Pricing', path: '/book-pricing' },
-        { icon: Printer, label: 'Print Options', path: '/print-options' },
-        { icon: TrendingUp, label: 'Product Pricing', path: '/product-pricing' },
+        { icon: DollarSign, label: t('menu.bookPricing'), path: '/book-pricing' },
+        { icon: Printer, label: t('menu.printOptions'), path: '/print-options' },
+        { icon: TrendingUp, label: t('menu.productPricing'), path: '/product-pricing' },
       ],
     },
-    { icon: Star, label: 'Reviews', path: '/reviews' },
+    { icon: Star, label: t('menu.reviews'), path: '/reviews' },
     {
       icon: FileBarChart,
-      label: 'Financial & Reports',
+      label: t('menu.reports'),
       key: 'financial',
       children: [
-        { icon: DollarSign, label: 'Transactions', path: '/financial-transactions' },
-        { icon: FileBarChart, label: 'Reports', path: '/reports' },
-        { icon: Upload, label: 'Import Logs', path: '/import-logs' },
+        { icon: DollarSign, label: t('menu.transactions'), path: '/financial-transactions' },
+        { icon: FileBarChart, label: t('menu.reports'), path: '/reports' },
+        { icon: Upload, label: t('menu.importLogs'), path: '/import-logs' },
       ],
     },
     {
       icon: Truck,
-      label: 'Delivery Management',
+      label: t('menu.delivery'),
       key: 'delivery',
       children: [
-        { icon: ClipboardList, label: 'Assignments', path: '/delivery-assignments' },
-        { icon: Wallet, label: 'Wallets', path: '/delivery-wallets' },
-        { icon: MapPin, label: 'Locations', path: '/delivery-locations' },
+        { icon: ClipboardList, label: t('menu.assignments'), path: '/delivery-assignments' },
+        { icon: Wallet, label: t('menu.wallets'), path: '/delivery-wallets' },
+        { icon: MapPin, label: t('menu.locations'), path: '/delivery-locations' },
       ],
     },
-    { icon: ArrowRight, label: 'Onboarding', path: '/onboarding' },
-    { icon: Image, label: 'Sliders', path: '/sliders' },
-    { icon: FileText, label: 'Static Pages', path: '/static-pages' },
-    { icon: UserCheck, label: 'Approvals', path: '/approvals' },
-    { icon: BarChart3, label: 'Dashboard Metrics', path: '/dashboard-metrics' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: ArrowRight, label: t('menu.onboarding'), path: '/onboarding' },
+    { icon: Image, label: t('menu.sliders'), path: '/sliders' },
+    { icon: FileText, label: t('menu.staticPages'), path: '/static-pages' },
+    { icon: UserCheck, label: t('menu.approvals'), path: '/approvals' },
+    { icon: BarChart3, label: t('menu.dashboardMetrics'), path: '/dashboard-metrics' },
+    { icon: Settings, label: t('common.settings'), path: '/settings' },
   ];
 
   const handleLogout = () => {
@@ -187,17 +188,28 @@ const Layout = () => {
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Icon size={18} className={isActive ? 'text-gray-900' : 'text-gray-600'} />
               <span className="text-sm">{item.label}</span>
             </div>
-            <ChevronRight
-              size={16}
-              className={`text-gray-400 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
-            />
+            {isRTL ? (
+              <ChevronRight
+                size={16}
+                className={`text-gray-400 transition-transform duration-150 ${isExpanded ? '-rotate-90' : ''}`}
+              />
+            ) : (
+              <ChevronRight
+                size={16}
+                className={`text-gray-400 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
+              />
+            )}
           </button>
           {isExpanded && (
-            <div className="pl-4 space-y-0.5 border-l border-gray-200 ml-3">
+            <div className={`space-y-0.5 border-gray-200 ${
+              isRTL 
+                ? 'pr-4 border-r mr-3' 
+                : 'pl-4 border-l ml-3'
+            }`}>
               {item.children.map((child) => {
                 const ChildIcon = child.icon;
                 const isChildActive = location.pathname === child.path;
@@ -207,6 +219,8 @@ const Layout = () => {
                     to={child.path}
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors duration-150 ${
+                      isRTL ? 'flex-row-reverse' : ''
+                    } ${
                       isChildActive
                         ? 'bg-gray-100 text-gray-900 font-medium'
                         : 'text-gray-600 hover:bg-gray-50'
@@ -229,6 +243,8 @@ const Layout = () => {
         to={item.path}
         onClick={() => setSidebarOpen(false)}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors duration-150 ${
+          isRTL ? 'flex-row-reverse' : ''
+        } ${
           isActive
             ? 'bg-gray-900 text-white font-medium'
             : 'text-gray-700 hover:bg-gray-50'
@@ -252,11 +268,13 @@ const Layout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-blue-200 transition-transform duration-150 ${
-          isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'
+        className={`fixed top-0 z-50 w-64 h-screen bg-white transition-transform duration-150 ${
+          isRTL 
+            ? `right-0 border-l border-blue-200 ${isMobile ? (sidebarOpen ? 'translate-x-0' : 'translate-x-full') : 'translate-x-0'}`
+            : `left-0 border-r border-blue-200 ${isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}`
         }`}
         style={{
-          boxShadow: '2px 0 8px 0 rgba(0, 0, 0, 0.05)',
+          boxShadow: isRTL ? '-2px 0 8px 0 rgba(0, 0, 0, 0.05)' : '2px 0 8px 0 rgba(0, 0, 0, 0.05)',
         }}
       >
         <div className="flex flex-col h-full">
@@ -272,7 +290,9 @@ const Layout = () => {
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="absolute right-2 sm:right-3 lg:hidden p-1.5 text-gray-500 hover:text-gray-700 hover:bg-white/20 rounded-md transition-colors duration-150"
+              className={`absolute lg:hidden p-1.5 text-gray-500 hover:text-gray-700 hover:bg-white/20 rounded-md transition-colors duration-150 ${
+                isRTL ? 'left-2 sm:left-3' : 'right-2 sm:right-3'
+              }`}
             >
               <X size={18} className="sm:w-5 sm:h-5" />
             </button>
@@ -304,17 +324,19 @@ const Layout = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md text-sm font-medium transition-colors duration-150 hover:bg-blue-700"
+              className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md text-sm font-medium transition-colors duration-150 hover:bg-blue-700 ${
+                isRTL ? 'flex-row-reverse' : ''
+              }`}
             >
               <LogOut size={16} />
-              <span>Logout</span>
+              <span>{t('common.logout')}</span>
             </button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className={isRTL ? 'lg:pr-64' : 'lg:pl-64'}>
         {/* Top Bar */}
         <header 
           className="sticky top-0 z-30 bg-white border-b border-blue-200"
@@ -323,20 +345,24 @@ const Layout = () => {
           }}
         >
           <div className="flex items-center justify-between h-16 px-4 lg:px-6 xl:px-8">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-150"
-            >
-              <Menu size={20} />
-            </button>
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className={`lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-150 ${
+                  isRTL ? 'ml-auto' : ''
+                }`}
+              >
+                <Menu size={20} />
+              </button>
 
-            <div className="flex-1 flex items-center justify-end gap-1.5 sm:gap-2">
+            <div className={`flex-1 flex items-center gap-1.5 sm:gap-2 ${
+              isRTL ? 'justify-start' : 'justify-end'
+            }`}>
               {/* Search */}
               <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 bg-white focus-within:border-gray-900 focus-within:ring-1 focus-within:ring-gray-900 transition-all duration-150">
                 <Search size={16} className="text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder={t('common.search')}
                   className="bg-transparent outline-none text-sm w-48 lg:w-64 xl:w-80 text-gray-900 placeholder-gray-400"
                 />
               </div>
@@ -356,13 +382,17 @@ const Layout = () => {
                 </button>
 
                 {languageDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50">
+                  <div className={`absolute mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 ${
+                    isRTL ? 'left-0' : 'right-0'
+                  }`}>
                     <button
                       onClick={() => {
                         setLanguage('en');
                         setLanguageDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-left flex items-center justify-between text-sm transition-colors duration-150 ${
+                      className={`w-full px-4 py-2.5 flex items-center justify-between text-sm transition-colors duration-150 ${
+                        isRTL ? 'text-right flex-row-reverse' : 'text-left'
+                      } ${
                         language === 'en'
                           ? 'bg-gray-50 text-gray-900 font-medium'
                           : 'text-gray-700 hover:bg-gray-50'
@@ -376,7 +406,9 @@ const Layout = () => {
                         setLanguage('ar');
                         setLanguageDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-left flex items-center justify-between text-sm border-t border-gray-100 transition-colors duration-150 ${
+                      className={`w-full px-4 py-2.5 flex items-center justify-between text-sm border-t border-gray-100 transition-colors duration-150 ${
+                        isRTL ? 'text-right flex-row-reverse' : 'text-left'
+                      } ${
                         language === 'ar'
                           ? 'bg-gray-50 text-gray-900 font-medium'
                           : 'text-gray-700 hover:bg-gray-50'
@@ -415,7 +447,9 @@ const Layout = () => {
                 </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50">
+                  <div className={`absolute mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 ${
+                    isRTL ? 'left-0' : 'right-0'
+                  }`}>
                     <div className="p-4 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900">{user?.phone || 'Admin'}</p>
                       <p className="text-xs text-gray-500 capitalize mt-0.5">
@@ -426,7 +460,9 @@ const Layout = () => {
                       <Link
                         to="/settings"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150 ${
+                          isRTL ? 'flex-row-reverse' : ''
+                        }`}
                       >
                         <UserCircle size={16} />
                         <span>Profile</span>
@@ -434,20 +470,24 @@ const Layout = () => {
                       <Link
                         to="/settings"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150 ${
+                          isRTL ? 'flex-row-reverse' : ''
+                        }`}
                       >
                         <Settings size={16} />
-                        <span>Settings</span>
+                        <span>{t('common.settings')}</span>
                       </Link>
                       <button
                         onClick={() => {
                           handleLogout();
                           setUserDropdownOpen(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 border-t border-gray-100 mt-1"
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 border-t border-gray-100 mt-1 ${
+                          isRTL ? 'flex-row-reverse' : ''
+                        }`}
                       >
                         <LogOut size={16} />
-                        <span>Logout</span>
+                        <span>{t('common.logout')}</span>
                       </button>
                     </div>
                   </div>

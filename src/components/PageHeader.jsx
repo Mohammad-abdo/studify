@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Edit } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * Unified Page Header Component
@@ -17,6 +18,9 @@ const PageHeader = ({
   showBack = true 
 }) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRTL = language === 'ar';
+  const ArrowIcon = isRTL ? ArrowRight : ArrowLeft;
 
   const handleAction = () => {
     if (onAction) {
@@ -30,10 +34,14 @@ const PageHeader = ({
     <div className="mb-6">
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <nav className="mb-3 flex items-center gap-2 text-sm text-gray-600">
+        <nav className={`mb-3 flex items-center gap-2 text-sm text-gray-600 ${
+          isRTL ? 'flex-row-reverse' : ''
+        }`}>
           {breadcrumbs.map((crumb, index) => (
-            <div key={index} className="flex items-center gap-2">
-              {index > 0 && <span>/</span>}
+            <div key={index} className={`flex items-center gap-2 ${
+              isRTL ? 'flex-row-reverse' : ''
+            }`}>
+              {index > 0 && <span>{isRTL ? '\\' : '/'}</span>}
               {crumb.path ? (
                 <button
                   onClick={() => navigate(crumb.path)}
@@ -52,18 +60,22 @@ const PageHeader = ({
       )}
 
       {/* Header Content */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className={`flex items-center justify-between gap-4 ${
+        isRTL ? 'flex-row-reverse' : ''
+      }`}>
+        <div className={`flex items-center gap-4 ${
+          isRTL ? 'flex-row-reverse' : ''
+        }`}>
           {showBack && backPath && (
             <button
               onClick={() => navigate(backPath)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Go back"
             >
-              <ArrowLeft size={20} className="text-gray-600" />
+              <ArrowIcon size={20} className="text-gray-600" />
             </button>
           )}
-          <div>
+          <div className={isRTL ? 'text-right' : 'text-left'}>
             <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
             {subtitle && (
               <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
@@ -75,7 +87,9 @@ const PageHeader = ({
         {(actionLabel || actionPath) && (
           <button
             onClick={handleAction}
-            className="btn-primary flex items-center gap-2"
+            className={`btn-primary flex items-center gap-2 ${
+              isRTL ? 'flex-row-reverse' : ''
+            }`}
           >
             <ActionIcon size={18} />
             {actionLabel || 'Add New'}

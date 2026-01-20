@@ -7,9 +7,11 @@ import DataTable from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
 import EmptyState, { EmptyStates } from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
+import { useLanguage } from '../context/LanguageContext';
 
 const Books = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -174,13 +176,13 @@ const Books = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Books"
-        subtitle="Manage all books in the system"
+        title={t('pages.books.title')}
+        subtitle={t('pages.books.subtitle')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/' },
-          { label: 'Books' },
+          { label: t('menu.dashboard'), path: '/' },
+          { label: t('menu.books') },
         ]}
-        actionLabel="Add Book"
+        actionLabel={t('pages.books.addBook')}
         actionPath="/books/add"
       />
 
@@ -190,7 +192,7 @@ const Books = () => {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search books..."
+              placeholder={t('pages.books.search')}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -207,10 +209,10 @@ const Books = () => {
             }}
             className="input-field"
           >
-            <option value="">All Status</option>
-            <option value="APPROVED">Approved</option>
-            <option value="PENDING">Pending</option>
-            <option value="REJECTED">Rejected</option>
+            <option value="">{t('pages.books.allStatus')}</option>
+            <option value="APPROVED">{t('pages.books.approved')}</option>
+            <option value="PENDING">{t('pages.books.pending')}</option>
+            <option value="REJECTED">{t('pages.books.rejected')}</option>
           </select>
         </div>
 
@@ -219,7 +221,7 @@ const Books = () => {
           <div className="mt-4 flex flex-wrap gap-2">
             {searchTerm && (
               <span className="badge badge-info flex items-center gap-1">
-                Search: {searchTerm}
+                {t('common.search')}: {searchTerm}
                 <button
                   onClick={() => {
                     setSearchTerm('');
@@ -233,7 +235,7 @@ const Books = () => {
             )}
             {filterStatus && (
               <span className="badge badge-info flex items-center gap-1">
-                Status: {filterStatus}
+                {t('common.status')}: {t(`status.${filterStatus.toLowerCase()}`)}
                 <button
                   onClick={() => {
                     setFilterStatus('');
@@ -251,7 +253,7 @@ const Books = () => {
 
       {/* Data Table */}
       {loading ? (
-        <LoadingState message="Loading books..." />
+        <LoadingState message={t('common.loading')} />
       ) : books.length === 0 ? (
         searchTerm || filterStatus ? (
           <EmptyStates.Search searchTerm={searchTerm} />

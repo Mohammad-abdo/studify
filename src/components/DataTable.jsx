@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * Enhanced DataTable Component
@@ -25,6 +26,8 @@ const DataTable = ({
   // Custom empty state
   emptyState,
 }) => {
+  const { language } = useLanguage();
+  const isRTL = language === 'ar';
   const [currentPage, setCurrentPage] = useState(1);
 
   // Use server-side pagination if enabled, otherwise use client-side
@@ -114,7 +117,7 @@ const DataTable = ({
                 </th>
               ))}
               {(onView || onEdit || onDelete) && (
-                <th className="text-right">
+                <th className={isRTL ? 'text-left' : 'text-right'}>
                   <span className="hidden sm:inline">Actions</span>
                   <span className="sm:hidden">Act</span>
                 </th>
@@ -152,8 +155,10 @@ const DataTable = ({
                     </td>
                   ))}
                   {(onView || onEdit || onDelete) && (
-                    <td className="text-right">
-                      <div className="flex items-center justify-end gap-1 sm:gap-2">
+                    <td className={isRTL ? 'text-left' : 'text-right'}>
+                      <div className={`flex items-center gap-1 sm:gap-2 ${
+                        isRTL ? 'justify-start' : 'justify-end'
+                      }`}>
                         {onView && (
                           <button
                             onClick={() => onView(item)}

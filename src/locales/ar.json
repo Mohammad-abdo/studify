@@ -1,0 +1,186 @@
+{
+  "common": {
+    "dashboard": "لوحة التحكم",
+    "search": "بحث",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "view": "عرض",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "loading": "جاري التحميل...",
+    "noData": "لا توجد بيانات",
+    "actions": "الإجراءات",
+    "status": "الحالة",
+    "created": "تاريخ الإنشاء",
+    "updated": "تاريخ التحديث",
+    "logout": "تسجيل الخروج",
+    "settings": "الإعدادات"
+  },
+  "menu": {
+    "dashboard": "لوحة التحكم",
+    "books": "الكتب",
+    "materials": "المواد الدراسية",
+    "products": "المنتجات",
+    "orders": "الطلبات",
+    "users": "المستخدمون",
+    "students": "الطلاب",
+    "doctors": "الأطباء",
+    "delivery": "التوصيل",
+    "customers": "العملاء",
+    "roles": "الأدوار",
+    "permissions": "الصلاحيات",
+    "userRoles": "أدوار المستخدمين",
+    "colleges": "الكليات",
+    "departments": "الأقسام",
+    "categories": "الفئات",
+    "bookPricing": "أسعار الكتب",
+    "printOptions": "خيارات الطباعة",
+    "productPricing": "أسعار المنتجات",
+    "reviews": "التقييمات",
+    "transactions": "المعاملات المالية",
+    "reports": "التقارير",
+    "importLogs": "سجلات الاستيراد",
+    "assignments": "التكليفات",
+    "wallets": "المحافظ",
+    "locations": "المواقع",
+    "onboarding": "الشاشات التمهيدية",
+    "sliders": "الشرائح",
+    "staticPages": "الصفحات الثابتة",
+    "approvals": "الموافقات",
+    "dashboardMetrics": "مقاييس لوحة التحكم"
+  },
+  "pages": {
+    "books": {
+      "title": "الكتب",
+      "subtitle": "إدارة جميع الكتب في النظام",
+      "addBook": "إضافة كتاب",
+      "search": "بحث في الكتب...",
+      "allStatus": "جميع الحالات",
+      "approved": "موافق عليه",
+      "pending": "قيد الانتظار",
+      "rejected": "مرفوض"
+    },
+    "materials": {
+      "title": "المواد الدراسية",
+      "subtitle": "إدارة المواد الدراسية",
+      "addMaterial": "إضافة مادة",
+      "search": "بحث في المواد...",
+      "allStatus": "جميع الحالات"
+    },
+    "products": {
+      "title": "المنتجات",
+      "subtitle": "إدارة جميع المنتجات في النظام",
+      "addProduct": "إضافة منتج",
+      "search": "بحث في المنتجات..."
+    },
+    "orders": {
+      "title": "الطلبات",
+      "subtitle": "عرض وإدارة جميع الطلبات",
+      "allStatus": "جميع الحالات",
+      "allTypes": "جميع الأنواع",
+      "created": "تم الإنشاء",
+      "paid": "مدفوع",
+      "processing": "قيد المعالجة",
+      "shipped": "تم الشحن",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغي",
+      "product": "منتج",
+      "content": "محتوى",
+      "print": "طباعة"
+    },
+    "users": {
+      "title": "المستخدمون",
+      "subtitle": "إدارة جميع المستخدمين",
+      "allTypes": "جميع الأنواع",
+      "allStatus": "جميع الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "students": {
+      "title": "الطلاب",
+      "subtitle": "إدارة الطلاب"
+    },
+    "doctors": {
+      "title": "الأطباء",
+      "subtitle": "إدارة الأطباء"
+    },
+    "colleges": {
+      "title": "الكليات",
+      "subtitle": "إدارة جميع الكليات في النظام",
+      "addCollege": "إضافة كلية",
+      "search": "بحث في الكليات..."
+    },
+    "departments": {
+      "title": "الأقسام",
+      "subtitle": "إدارة جميع الأقسام في النظام",
+      "addDepartment": "إضافة قسم",
+      "search": "بحث في الأقسام...",
+      "allColleges": "جميع الكليات"
+    },
+    "categories": {
+      "title": "الفئات",
+      "subtitle": "إدارة فئات الكتب والمنتجات",
+      "addCategory": "إضافة فئة",
+      "bookCategories": "فئات الكتب",
+      "productCategories": "فئات المنتجات",
+      "search": "بحث في الفئات..."
+    },
+    "reviews": {
+      "title": "التقييمات",
+      "subtitle": "إدارة جميع التقييمات والمراجعات",
+      "all": "الكل",
+      "book": "كتاب",
+      "product": "منتج",
+      "search": "بحث في التقييمات..."
+    },
+    "onboarding": {
+      "title": "الشاشات التمهيدية",
+      "subtitle": "إدارة الشاشات التمهيدية",
+      "addItem": "إضافة عنصر تمهيدي",
+      "search": "بحث في العناصر..."
+    },
+    "printOptions": {
+      "title": "خيارات الطباعة",
+      "subtitle": "إدارة خيارات الطباعة"
+    }
+  },
+  "status": {
+    "approved": "موافق عليه",
+    "pending": "قيد الانتظار",
+    "rejected": "مرفوض",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "created": "تم الإنشاء",
+    "paid": "مدفوع",
+    "processing": "قيد المعالجة",
+    "shipped": "تم الشحن",
+    "delivered": "تم التسليم",
+    "cancelled": "ملغي"
+  },
+  "table": {
+    "name": "الاسم",
+    "title": "العنوان",
+    "description": "الوصف",
+    "category": "الفئة",
+    "doctor": "الطبيب",
+    "college": "الكلية",
+    "department": "القسم",
+    "status": "الحالة",
+    "created": "تاريخ الإنشاء",
+    "actions": "الإجراءات",
+    "user": "المستخدم",
+    "items": "العناصر",
+    "total": "الإجمالي",
+    "date": "التاريخ",
+    "type": "النوع",
+    "order": "الترتيب",
+    "image": "الصورة",
+    "images": "الصور",
+    "pricing": "التسعير",
+    "downloads": "التحميلات",
+    "rating": "التقييم",
+    "comment": "التعليق"
+  }
+}
+
