@@ -74,7 +74,15 @@
     @apply rounded-lg border border-blue-200;
     @apply p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8;
     background: #ffffff;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  /* Alias for older \"glass-card\" usage to keep UI consistent and minimal */
+  .glass-card {
+    @apply rounded-lg border border-blue-200;
+    @apply p-4 md:p-5 lg:p-6 xl:p-7 2xl:p-8;
+    background: #ffffff;
+    box-shadow: 0 2px 6px 0 rgba(15, 23, 42, 0.08);
   }
 
   .card-mirror {
