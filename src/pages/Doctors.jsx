@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Stethoscope, Plus, Edit, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Stethoscope, Plus, Edit, Trash2, CheckCircle, XCircle, Clock, Search, ShieldCheck } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const Doctors = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,101 +26,90 @@ const Doctors = () => {
       const response = await api.get('/doctors');
       setDoctors(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load doctors');
+      toast.error(isRTL ? 'خدمات الهوية: سجلات الأطباء غير متاحة' : 'Identity services: Doctor records unavailable');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this doctor?')) {
-      return;
-    }
-    try {
-      await api.delete(`/doctors/${id}`);
-      toast.success('Doctor deleted successfully');
-      fetchDoctors();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete doctor');
+  const handleDelete = async (doctor) => {
+    const result = await Swal.fire({
+      title: t('pages.doctors.purgePractitioner'),
+      text: t('pages.doctors.purgePractitionerDesc').replace('{name}', doctor.name),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e11d48',
+      confirmButtonText: t('pages.doctors.confirmPurge'),
+      reverseButtons: isRTL
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/doctors/${doctor.id}`);
+        toast.success(isRTL ? 'تم حذف الممارس من السجل' : 'Practitioner removed from registry');
+        fetchDoctors();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل عملية الحذف' : 'Purge operation failed');
+      }
     }
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusStyles = (status) => {
     switch (status) {
-      case 'APPROVED':
-        return <CheckCircle className="text-green-600" size={18} />;
-      case 'REJECTED':
-        return <XCircle className="text-red-600" size={18} />;
-      default:
-        return <Clock className="text-yellow-600" size={18} />;
+      case 'APPROVED': return { icon: CheckCircle, badge: 'badge-modern-success' };
+      case 'REJECTED': return { icon: XCircle, badge: 'badge-modern-error' };
+      default: return { icon: Clock, badge: 'badge-modern-warning' };
     }
-  };
-
-  const getStatusBadge = (status) => {
-    const classes = {
-      APPROVED: 'bg-green-100 text-green-700',
-      REJECTED: 'bg-red-100 text-red-700',
-      PENDING: 'bg-yellow-100 text-yellow-700',
-    };
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${classes[status] || classes.PENDING}`}>
-        {status}
-      </span>
-    );
   };
 
   const columns = [
     {
-      header: 'Doctor',
+      header: t('pages.doctors.academicStaff'),
       accessor: 'name',
       render: (doctor) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-black border-2 border-white shadow-sm">
             {doctor.name?.charAt(0).toUpperCase() || 'D'}
           </div>
-          <div>
-            <span className="font-medium text-gray-900 block">{doctor.name || 'N/A'}</span>
-            <span className="text-sm text-gray-500">{doctor.user?.phone || 'N/A'}</span>
+          <div className="flex flex-col">
+            <span className="font-black text-slate-900 tracking-tight">{doctor.name || t('pages.doctors.staffMember')}</span>
+            <span className="text-[10px] font-bold font-mono text-slate-400">{doctor.user?.phone || t('pages.doctors.terminalIdHidden')}</span>
           </div>
         </div>
       ),
     },
     {
-      header: 'Specialization',
+      header: t('pages.doctors.specialization'),
       accessor: 'specialization',
       render: (doctor) => (
-        <span className="text-gray-600">{doctor.specialization || 'N/A'}</span>
-      ),
-    },
-    {
-      header: 'Status',
-      accessor: 'approvalStatus',
-      render: (doctor) => (
-        <div className="flex items-center gap-2">
-          {getStatusIcon(doctor.approvalStatus)}
-          {getStatusBadge(doctor.approvalStatus)}
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-700">{doctor.specialization || t('pages.doctors.generalSpecialist')}</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">{t('pages.doctors.departmentLead')}</span>
         </div>
       ),
     },
     {
-      header: 'Actions',
+      header: t('pages.doctors.credentialStatus'),
+      accessor: 'approvalStatus',
+      align: 'center',
+      render: (doctor) => {
+        const { icon: Icon, badge } = getStatusStyles(doctor.approvalStatus);
+        return (
+          <div className="flex flex-col items-center gap-1.5">
+            <span className={`badge-modern ${badge}`}>{doctor.approvalStatus}</span>
+            <Icon size={14} className={doctor.approvalStatus === 'APPROVED' ? 'text-emerald-500' : 'text-slate-300'} />
+          </div>
+        );
+      },
+    },
+    {
+      header: t('pages.doctors.actions'),
       accessor: 'actions',
+      align: 'right',
       render: (doctor) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/doctors/edit/${doctor.id}`)}
-            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Edit Doctor"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(doctor.id)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Delete Doctor"
-          >
-            <Trash2 size={18} />
-          </button>
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/doctors/edit/${doctor.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(doctor)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
       ),
     },
@@ -131,47 +124,45 @@ const Doctors = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="space-y-6 2xl:space-y-8 page-transition">
+      <PageHeader
+        title={t('pages.doctors.title')}
+        subtitle={t('pages.doctors.subtitle')}
+        breadcrumbs={[{ label: t('menu.doctors') }]}
+        actionLabel={t('pages.doctors.addDoctor')}
+        actionPath="/doctors/add"
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
-            Doctors
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage doctor profiles and approvals</p>
+      <div className="card-premium p-4 2xl:p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="relative max-w-2xl">
+          <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+          <input
+            type="text"
+            placeholder={t('pages.doctors.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full bg-slate-50 border-none rounded-2xl py-3.5 2xl:py-4 font-bold text-sm 2xl:text-base focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+          />
         </div>
-        <button
-          onClick={() => navigate('/doctors/add')}
-          className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Doctor
-        </button>
-      </motion.div>
-
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredDoctors}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search doctors..."
-        />
       </div>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-emerald-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.doctors.syncingRecords')}</span>
+        </div>
+      ) : (
+        <div className="fade-in">
+          <DataTable
+            data={filteredDoctors}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default Doctors;
-

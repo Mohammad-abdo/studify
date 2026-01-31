@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { TrendingUp, Plus, Edit, Trash2, Package } from 'lucide-react';
+import { TrendingUp, Plus, Edit, Trash2, Package, Search, Filter, Layers, DollarSign } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const ProductPricing = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [pricings, setPricings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,69 +26,97 @@ const ProductPricing = () => {
       const response = await api.get('/product-pricing');
       setPricings(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load product pricing');
+      toast.error(t('pages.productPricing.syncError'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this pricing?')) {
-      return;
-    }
-    try {
-      await api.delete(`/product-pricing/${id}`);
-      toast.success('Product pricing deleted successfully');
-      fetchPricings();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete product pricing');
+  const handleDelete = async (pricing) => {
+    const result = await Swal.fire({
+      title: t('pages.productPricing.purgeTier'),
+      text: t('pages.productPricing.purgeTierDesc').replace('{name}', pricing.product?.name),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: t('pages.productPricing.abolishConfirm'),
+      reverseButtons: isRTL
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/product-pricing/${pricing.id}`);
+        toast.success(t('pages.productPricing.success'));
+        fetchPricings();
+      } catch (error) {
+        toast.error(t('pages.productPricing.error'));
+      }
     }
   };
 
   const columns = [
     {
-      header: 'Product',
+      header: t('pages.productPricing.inventoryAsset'),
       accessor: 'product',
       render: (pricing) => (
-        <div className="flex items-center gap-3">
-          <Package className="text-orange-600" size={20} />
-          <span className="font-medium text-gray-900">{pricing.product?.name || 'N/A'}</span>
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 border border-orange-100 shadow-sm">
+            <Package size={20} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-black text-slate-900 tracking-tight">{pricing.product?.name || t('pages.productPricing.systemAsset')}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.productPricing.inventoryNode')}</span>
+          </div>
         </div>
       ),
     },
     {
-      header: 'Min Quantity',
+      header: t('pages.productPricing.bulkThreshold'),
       accessor: 'minQuantity',
+      align: 'center',
       render: (pricing) => (
-        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-          {pricing.minQuantity || 0}
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <div className="px-3 py-1 bg-slate-50 text-slate-900 rounded-lg text-xs font-black border border-slate-100">
+            {pricing.minQuantity || 0} {isRTL ? 'وحدات' : 'units'}
+          </div>
+          <span className="text-[9px] font-black uppercase text-slate-300">{t('pages.productPricing.minQuantity')}</span>
+        </div>
       ),
     },
     {
-      header: 'Price',
+      header: t('pages.productPricing.unitValuation'),
       accessor: 'price',
       render: (pricing) => (
-        <span className="font-semibold text-gray-900">${pricing.price?.toFixed(2) || '0.00'}</span>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1">
+            <DollarSign size={14} className="text-emerald-500" strokeWidth={3} />
+            <span className="font-black text-slate-900 text-lg">
+              ${pricing.price?.toFixed(2) || '0.00'}
+            </span>
+          </div>
+          <span className="text-[9px] font-black uppercase text-slate-300">{t('pages.productPricing.setRate')}</span>
+        </div>
       ),
     },
     {
-      header: 'Actions',
-      accessor: 'actions',
+      header: t('pages.productPricing.accountingStatus'),
+      accessor: 'id',
+      align: 'center',
       render: (pricing) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/product-pricing/edit/${pricing.id}`)}
-            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(pricing.id)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Trash2 size={18} />
-          </button>
+        <div className="flex items-center justify-center gap-2">
+          <TrendingUp size={14} className="text-emerald-500" />
+          <span className="text-[10px] font-black text-emerald-600 uppercase">{t('pages.productPricing.activeRate')}</span>
+        </div>
+      )
+    },
+    {
+      header: t('pages.productPricing.operations'),
+      accessor: 'actions',
+      align: 'right',
+      render: (pricing) => (
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/product-pricing/edit/${pricing.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(pricing)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
       ),
     },
@@ -97,38 +129,45 @@ const ProductPricing = () => {
   });
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Product Pricing</h1>
-          <p className="text-gray-600 mt-1">Manage wholesale product pricing</p>
-        </div>
-        <button
-          onClick={() => navigate('/product-pricing/add')}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Pricing
-        </button>
-      </motion.div>
-
-      <DataTable
-        data={filteredPricings}
-        columns={columns}
-        loading={loading}
-        searchable
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        searchPlaceholder="Search product pricing..."
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.productPricing.title')}
+        subtitle={t('pages.productPricing.subtitle')}
+        breadcrumbs={[{ label: t('menu.sections.logistics') }, { label: t('menu.productPricing') }]}
+        actionLabel={t('pages.productPricing.registerTier')}
+        actionPath="/product-pricing/add"
       />
+
+      <div className="card-premium p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="relative max-w-2xl">
+          <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+          <input
+            type="text"
+            placeholder={t('pages.productPricing.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full bg-slate-50 border-none rounded-2xl py-4 font-bold text-sm focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+          />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-orange-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.productPricing.syncingDatabase')}</span>
+        </div>
+      ) : (
+        <div className="fade-in">
+          <DataTable
+            data={filteredPricings}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default ProductPricing;
-
-

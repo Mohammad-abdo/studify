@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Plus, Edit } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 /**
- * Unified Page Header Component
- * Provides consistent header structure across all pages
+ * Professional Page Header
+ * High-density design with improved breadcrumbs
  */
 const PageHeader = ({ 
   title, 
@@ -18,7 +18,7 @@ const PageHeader = ({
   showBack = true 
 }) => {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRTL = language === 'ar';
   const ArrowIcon = isRTL ? ArrowRight : ArrowLeft;
 
@@ -31,26 +31,28 @@ const PageHeader = ({
   };
 
   return (
-    <div className="mb-6">
-      {/* Breadcrumbs */}
+    <div className="mb-8 2xl:mb-10">
+      {/* Dynamic Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <nav className={`mb-3 flex items-center gap-2 text-sm text-gray-600 ${
-          isRTL ? 'flex-row-reverse' : ''
-        }`}>
-          {breadcrumbs.map((crumb, index) => (
-            <div key={index} className={`flex items-center gap-2 ${
-              isRTL ? 'flex-row-reverse' : ''
-            }`}>
-              {index > 0 && <span>{isRTL ? '\\' : '/'}</span>}
+        <nav className="flex items-center gap-2 mb-4">
+          <button 
+            onClick={() => navigate('/')}
+            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors"
+          >
+            {t('menu.dashboard') || 'Dashboard'}
+          </button>
+          {breadcrumbs.map((crumb, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <ChevronRight size={12} className={`text-slate-300 ${isRTL ? 'rotate-180' : ''}`} />
               {crumb.path ? (
                 <button
                   onClick={() => navigate(crumb.path)}
-                  className="hover:text-gray-900 transition-colors"
+                  className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors"
                 >
                   {crumb.label}
                 </button>
               ) : (
-                <span className={index === breadcrumbs.length - 1 ? 'text-gray-900 font-medium' : ''}>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">
                   {crumb.label}
                 </span>
               )}
@@ -59,40 +61,31 @@ const PageHeader = ({
         </nav>
       )}
 
-      {/* Header Content */}
-      <div className={`flex items-center justify-between gap-4 ${
-        isRTL ? 'flex-row-reverse' : ''
-      }`}>
-        <div className={`flex items-center gap-4 ${
-          isRTL ? 'flex-row-reverse' : ''
-        }`}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-start gap-4">
           {showBack && backPath && (
             <button
               onClick={() => navigate(backPath)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Go back"
+              className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:border-slate-300 hover:shadow-lg transition-all"
             >
-              <ArrowIcon size={20} className="text-gray-600" />
+              <ArrowIcon size={22} />
             </button>
           )}
-          <div className={isRTL ? 'text-right' : 'text-left'}>
-            <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
+          <div>
+            <h1 className="text-3xl md:text-4xl 2xl:text-4xl font-black text-slate-900 tracking-tight">{title}</h1>
             {subtitle && (
-              <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+              <p className="text-slate-500 font-medium mt-1 max-w-2xl 2xl:text-base leading-relaxed">{subtitle}</p>
             )}
           </div>
         </div>
 
-        {/* Action Button */}
         {(actionLabel || actionPath) && (
           <button
             onClick={handleAction}
-            className={`btn-primary flex items-center gap-2 ${
-              isRTL ? 'flex-row-reverse' : ''
-            }`}
+            className="btn-modern-primary py-4 px-8 flex items-center gap-2"
           >
-            <ActionIcon size={18} />
-            {actionLabel || 'Add New'}
+            <ActionIcon size={20} className="stroke-[3]" />
+            <span className="uppercase tracking-widest text-xs font-black">{actionLabel || (isRTL ? 'إنشاء جديد' : 'Create New')}</span>
           </button>
         )}
       </div>
@@ -101,4 +94,3 @@ const PageHeader = ({
 };
 
 export default PageHeader;
-

@@ -40,119 +40,102 @@ const AddStaticPage = () => {
 
     try {
       await api.post('/static-pages', formData);
-      toast.success('Static page created successfully');
+      toast.success(t('pages.addStaticPage.success'));
       navigate('/static-pages');
     } catch (error) {
-      console.error('Error creating static page:', error);
-      toast.error(error.response?.data?.message || 'Failed to create static page');
+      toast.error(isRTL ? 'فشل تسجيل المحتوى' : 'Registration failed: Manifest error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4"
-      >
-        <button
-          onClick={() => navigate('/static-pages')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Add Static Page</h1>
-          <p className="text-gray-600 mt-1">Create a new static content page</p>
-        </div>
-      </motion.div>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.addStaticPage.title')}
+        subtitle={t('pages.addStaticPage.subtitle')}
+        breadcrumbs={[{ label: t('menu.staticPages'), path: '/static-pages' }, { label: t('pages.addStaticPage.draftPage') }]}
+        backPath="/static-pages"
+      />
 
-      <form onSubmit={handleSubmit} className="card space-y-6">
-        <div className="grid grid-cols-1 gap-6">
-          {/* Slug */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Slug <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="slug"
-              value={formData.slug}
-              onChange={handleSlugChange}
-              required
-              className="input-field"
-              placeholder="about-app, privacy-policy, etc."
-              pattern="[a-z0-9-]+"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              URL-friendly identifier (lowercase letters, numbers, and hyphens only)
-            </p>
-          </div>
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row gap-10 items-start">
+        {/* Main Entry Form */}
+        <div className="flex-1 w-full space-y-10">
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><FileText size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.addStaticPage.technicalManifest')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.addStaticPage.primaryIdentification')}</p>
+              </div>
+            </div>
 
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="input-field"
-              placeholder="Enter page title"
-            />
-          </div>
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addStaticPage.pageTitle')}</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    placeholder={t('pages.addStaticPage.enterPageTitle')}
+                    className="input-modern font-bold"
+                  />
+                </div>
 
-          {/* Content */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Content <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              required
-              rows="15"
-              className="input-field resize-none font-mono text-sm"
-              placeholder="Enter page content (HTML supported)"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              You can use HTML formatting in the content
-            </p>
+                <div className="space-y-2">
+                  <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addStaticPage.slug')}</label>
+                  <input
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleSlugChange}
+                    required
+                    placeholder={t('pages.addStaticPage.slugPlaceholder')}
+                    pattern="[a-z0-9-]+"
+                    className="input-modern font-mono font-bold"
+                  />
+                  <p className="text-[10px] font-medium text-slate-400 italic">{t('pages.addStaticPage.slugHint')}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addStaticPage.content')}</label>
+                <textarea
+                  name="content"
+                  value={formData.content}
+                  onChange={handleChange}
+                  required
+                  rows="15"
+                  placeholder={t('pages.addStaticPage.enterContent')}
+                  className="input-modern font-mono text-sm resize-none leading-relaxed"
+                />
+                <p className="text-[10px] font-medium text-slate-400 italic">{t('pages.addStaticPage.contentHint')}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-4 pt-4 border-t">
-          <button
-            type="button"
-            onClick={() => navigate('/static-pages')}
-            className="btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                Create Page
-              </>
-            )}
-          </button>
+        {/* Configuration Sidebar */}
+        <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
+          <div className="flex flex-col gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-modern-primary py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl"
+            >
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Save size={20} /> {t('pages.addStaticPage.initializeRegistry')}</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/static-pages')}
+              className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              {t('pages.addStaticPage.abortMission')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

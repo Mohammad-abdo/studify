@@ -26,79 +26,72 @@ const AddPermission = () => {
 
     try {
       await api.post('/permissions', formData);
-      toast.success('Permission created successfully');
+      toast.success(t('pages.addPermission.success'));
       navigate('/permissions');
     } catch (error) {
-      console.error('Error creating permission:', error);
-      toast.error(error.response?.data?.message || 'Failed to create permission');
+      toast.error(isRTL ? 'فشل إنشاء الصلاحية' : 'Failed to create permission');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4"
-      >
-        <button
-          onClick={() => navigate('/permissions')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Add New Permission</h1>
-          <p className="text-gray-600 mt-1">Create a new permission key</p>
-        </div>
-      </motion.div>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.addPermission.title')}
+        subtitle={t('pages.addPermission.subtitle')}
+        breadcrumbs={[{ label: isRTL ? 'صلاحيات الوصول' : 'RBAC' }, { label: t('pages.addPermission.registerScope') }]}
+        backPath="/permissions"
+      />
 
-      <form onSubmit={handleSubmit} className="card space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Permission Key <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="key"
-            value={formData.key}
-            onChange={handleChange}
-            required
-            className="input-field font-mono"
-            placeholder="e.g., users.create, books.delete"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Use dot notation (e.g., module.action)
-          </p>
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row gap-10 items-start">
+        {/* Main Entry Form */}
+        <div className="flex-1 w-full space-y-10">
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><Lock size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.addPermission.technicalManifest')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.addPermission.primaryIdentification')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addPermission.permissionKey')}</label>
+                <input
+                  type="text"
+                  name="key"
+                  value={formData.key}
+                  onChange={handleChange}
+                  required
+                  placeholder={t('pages.addPermission.enterPermissionKey')}
+                  className="input-modern font-mono font-bold text-lg"
+                />
+                <p className="text-[10px] font-medium text-slate-400 italic">{t('pages.addPermission.keyHint')}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4 pt-4 border-t">
-          <button
-            type="button"
-            onClick={() => navigate('/permissions')}
-            className="btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                Create Permission
-              </>
-            )}
-          </button>
+        {/* Configuration Sidebar */}
+        <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
+          <div className="flex flex-col gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-modern-primary py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl"
+            >
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Save size={20} /> {t('pages.addPermission.initializeRegistry')}</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/permissions')}
+              className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              {t('pages.addPermission.abortMission')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

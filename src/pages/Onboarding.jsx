@@ -24,23 +24,31 @@ const Onboarding = () => {
       const response = await api.get('/onboarding');
       setItems(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load onboarding items');
+      toast.error(isRTL ? 'فشل تحميل عناصر الانضمام' : 'Failed to load onboarding items');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this onboarding item?')) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: t('pages.onboarding.purgeStep'),
+      text: t('pages.onboarding.purgeStepDesc'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: t('pages.onboarding.confirmPurge'),
+      reverseButtons: isRTL
+    });
 
-    try {
-      await api.delete(`/onboarding/${id}`);
-      toast.success('Onboarding item deleted successfully');
-      fetchItems();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete onboarding item');
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/onboarding/${id}`);
+        toast.success(isRTL ? 'تم حذف عنصر الانضمام بنجاح' : 'Onboarding item deleted successfully');
+        fetchItems();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل حذف عنصر الانضمام' : 'Failed to delete onboarding item');
+      }
     }
   };
 
@@ -51,102 +59,96 @@ const Onboarding = () => {
 
   const columns = [
     {
-      header: 'Order',
+      header: t('pages.onboarding.order'),
       accessor: 'order',
-      align: 'right',
+      align: 'center',
+      render: (item) => (
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100">
+            <span className="text-xs font-black text-slate-900">{item.order || 0}</span>
+          </div>
+          <span className="text-[9px] font-black uppercase text-slate-300 tracking-tighter">{t('pages.onboarding.step')}</span>
+        </div>
+      )
     },
     {
-      header: 'Title',
+      header: t('pages.onboarding.flowIdentity'),
       accessor: 'title',
+      render: (item) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-black text-slate-900 tracking-tight uppercase text-xs">{item.title || t('pages.onboarding.onboardingNode')}</span>
+          <p className="text-[10px] font-medium text-slate-400 max-w-xs truncate">{item.description}</p>
+        </div>
+      ),
     },
     {
-      header: 'Description',
-      accessor: 'description',
-      hideOnMobile: true,
-      render: (item) =>
-        item.description?.length > 80
-          ? item.description.slice(0, 80) + '...'
-          : item.description,
-    },
-    {
-      header: 'Image',
+      header: t('pages.onboarding.visualManifest'),
       accessor: 'imageUrl',
       hideOnMobile: true,
-      render: (item) =>
-        item.imageUrl ? (
-          <img
-            src={item.imageUrl}
-            alt={item.title}
-            className="w-10 h-10 rounded object-cover border border-gray-200"
-          />
-        ) : (
-          '—'
-        ),
+      render: (item) => (
+        <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 shadow-sm transition-all group-hover:scale-105">
+          {item.imageUrl ? (
+            <img
+              src={item.imageUrl}
+              alt={item.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-200 font-black text-[8px]">NO IMAGE</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      header: t('pages.onboarding.operations') || t('common.actions'),
+      accessor: 'actions',
+      align: 'right',
+      render: (item) => (
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/onboarding/edit/${item.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(item.id)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
+        </div>
+      ),
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 page-transition pb-20">
       <PageHeader
-        title="Onboarding"
-        subtitle="Manage onboarding screens"
-        breadcrumbs={[
-          { label: 'Dashboard', path: '/' },
-          { label: 'Onboarding' },
-        ]}
-        actionLabel="Add Onboarding Item"
+        title={t('pages.onboarding.title')}
+        subtitle={t('pages.onboarding.subtitle')}
+        breadcrumbs={[{ label: t('menu.sections.system') }, { label: t('menu.onboarding') }]}
+        actionLabel={t('pages.onboarding.addItem')}
         actionPath="/onboarding/add"
       />
 
-      {/* Search */}
-      <div className="card-elevated">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search onboarding items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field w-full"
-            />
-          </div>
+      <div className="card-premium p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="relative max-w-2xl">
+          <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+          <input
+            type="text"
+            placeholder={t('pages.onboarding.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full bg-slate-50 border-none rounded-2xl py-4 font-bold text-sm focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+          />
         </div>
-
-        {searchTerm && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="badge badge-info flex items-center gap-1">
-              Search: {searchTerm}
-              <button
-                onClick={() => setSearchTerm('')}
-                className="ml-1 hover:text-blue-800"
-              >
-                <X size={12} />
-              </button>
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Data Table */}
       {loading ? (
-        <LoadingState message="Loading onboarding items..." />
-      ) : filteredItems.length === 0 ? (
-        <EmptyState
-          icon={ArrowRight}
-          title="No onboarding items found"
-          description="Try adjusting your search or add a new onboarding item."
-          actionLabel="Add Onboarding Item"
-          onAction={() => navigate('/onboarding/add')}
-        />
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.onboarding.syncingFlows')}</span>
+        </div>
       ) : (
-        <DataTable
-          data={filteredItems}
-          columns={columns}
-          loading={false}
-          searchable={false}
-          onEdit={(item) => navigate(`/onboarding/edit/${item.id}`)}
-          onDelete={(item) => handleDelete(item.id)}
-        />
+        <div className="fade-in">
+          <DataTable
+            data={filteredItems}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
       )}
     </div>
   );

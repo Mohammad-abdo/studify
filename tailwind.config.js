@@ -12,6 +12,7 @@ export default {
       'lg': '1025px',  // Desktop/Laptop
       'xl': '1281px',  // Large desktop
       '2xl': '1537px', // Extra large desktop
+      '3xl': '1921px', // Ultra-wide / 4K
     },
     extend: {
       colors: {

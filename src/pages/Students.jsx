@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { GraduationCap, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { GraduationCap, Plus, Edit, Trash2, Eye, Search, BookOpen, Building2 } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const Students = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,78 +26,83 @@ const Students = () => {
       const response = await api.get('/students');
       setStudents(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load students');
+      toast.error(isRTL ? 'فشل استرجاع سجلات الطلاب' : 'Failed to retrieve student records');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this student?')) {
-      return;
-    }
-    try {
-      await api.delete(`/students/${id}`);
-      toast.success('Student deleted successfully');
-      fetchStudents();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete student');
+  const handleDelete = async (student) => {
+    const result = await Swal.fire({
+      title: t('pages.students.revokeAccess'),
+      text: t('pages.students.revokeAccessDesc').replace('{name}', student.name),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: t('pages.students.confirmPurge'),
+      reverseButtons: isRTL
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/students/${student.id}`);
+        toast.success(isRTL ? 'تم حذف ملف الطالب بنجاح' : 'Student profile removed');
+        fetchStudents();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل عملية الحذف' : 'Purge operation failed');
+      }
     }
   };
 
   const columns = [
     {
-      header: 'Student',
+      header: t('pages.students.academicIdentity'),
       accessor: 'name',
       render: (student) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 font-black border-2 border-white shadow-sm">
             {student.name?.charAt(0).toUpperCase() || 'S'}
           </div>
-          <div>
-            <span className="font-medium text-gray-900 block">{student.name || 'N/A'}</span>
-            <span className="text-sm text-gray-500">{student.user?.phone || 'N/A'}</span>
+          <div className="flex flex-col">
+            <span className="font-black text-slate-900 tracking-tight">{student.name || t('pages.students.anonymousStudent')}</span>
+            <span className="text-[10px] font-bold font-mono text-slate-400">{student.user?.phone || t('pages.students.noContact')}</span>
           </div>
         </div>
       ),
     },
     {
-      header: 'College',
+      header: t('pages.students.enrollment'),
       accessor: 'college',
       render: (student) => (
-        <span className="text-gray-600">{student.college?.name || 'N/A'}</span>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-slate-700">
+            <Building2 size={14} className="text-slate-400" />
+            <span className="text-sm font-bold">{student.college?.name || t('pages.students.generalAdmission')}</span>
+          </div>
+          <span className={`text-[10px] font-medium text-slate-400 ${isRTL ? 'mr-5' : 'ml-5'}`}>{student.department?.name || t('pages.students.undecidedMajor')}</span>
+        </div>
       ),
     },
     {
-      header: 'Department',
-      accessor: 'department',
+      header: t('pages.students.systemRegistry'),
+      accessor: 'createdAt',
+      hideOnMobile: true,
       render: (student) => (
-        <span className="text-gray-600">{student.department?.name || 'N/A'}</span>
-      ),
+        <div className="flex flex-col">
+          <span className="text-xs font-bold text-slate-500">{new Date(student.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span className="text-[10px] font-medium text-slate-300 uppercase tracking-tighter">{t('pages.students.registrationDate')}</span>
+        </div>
+      )
     },
     {
-      header: 'Actions',
+      header: t('pages.students.operations'),
       accessor: 'actions',
+      align: 'right',
       render: (student) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/students/${student.id}`)}
-            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Eye size={18} />
-          </button>
-          <button
-            onClick={() => navigate(`/students/edit/${student.id}`)}
-            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(student.id)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Trash2 size={18} />
-          </button>
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/students/${student.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Eye size={18} /></button>
+          <button onClick={() => navigate(`/students/edit/${student.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(student)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
       ),
     },
@@ -107,47 +116,45 @@ const Students = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="space-y-6 2xl:space-y-8 page-transition">
+      <PageHeader
+        title={t('pages.students.title')}
+        subtitle={t('pages.students.subtitle')}
+        breadcrumbs={[{ label: t('menu.students') }]}
+        actionLabel={t('pages.students.addStudent')}
+        actionPath="/students/add"
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-            Students
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage student profiles</p>
+      <div className="card-premium p-4 2xl:p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="relative max-w-2xl">
+          <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+          <input
+            type="text"
+            placeholder={t('pages.students.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full bg-slate-50 border-none rounded-2xl py-3.5 2xl:py-4 font-bold text-sm 2xl:text-base focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+          />
         </div>
-        <button
-          onClick={() => navigate('/students/add')}
-          className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Student
-        </button>
-      </motion.div>
-
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredStudents}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search students..."
-        />
       </div>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.students.syncingRecords')}</span>
+        </div>
+      ) : (
+        <div className="fade-in">
+          <DataTable
+            data={filteredStudents}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default Students;
-

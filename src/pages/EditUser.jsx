@@ -31,7 +31,7 @@ const EditUser = () => {
         isActive: userData.isActive !== undefined ? userData.isActive : true,
       });
     } catch (error) {
-      toast.error('Failed to load user');
+      toast.error(isRTL ? 'فشل تحميل المستخدم' : 'Failed to load user');
       navigate('/users');
     } finally {
       setFetching(false);
@@ -44,10 +44,10 @@ const EditUser = () => {
 
     try {
       await api.put(`/admin/users/${id}`, formData);
-      toast.success('User updated successfully');
+      toast.success(t('pages.editUser.success'));
       navigate(`/users/${id}`);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update user');
+      toast.error(isRTL ? 'فشل تحديث المستخدم' : 'Failed to update user');
     } finally {
       setLoading(false);
     }
@@ -55,114 +55,101 @@ const EditUser = () => {
 
   if (fetching) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="py-24 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.editUser.loading')}</span>
       </div>
     );
   }
 
-  if (!user) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">User not found</p>
-      </div>
-    );
-  }
+  if (!user) return null;
 
   return (
-    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <button
-            onClick={() => navigate(`/users/${id}`)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900">Edit User</h1>
-            <p className="text-xs sm:text-sm text-gray-600">Update user information</p>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.editUser.title')}
+        subtitle={t('pages.editUser.subtitle')}
+        breadcrumbs={[{ label: t('menu.users'), path: '/users' }, { label: t('pages.editUser.updateUser') }]}
+        backPath={`/users/${id}`}
+      />
+
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row gap-10 items-start">
+        {/* Main Entry Form */}
+        <div className="flex-1 w-full space-y-10">
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200"><Fingerprint size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.editUser.terminalProfile')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.editUser.primaryIdentification')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.editUser.userType')}</label>
+                  <input type="text" value={user.type} disabled className="input-modern opacity-60 cursor-not-allowed font-bold" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.editUser.phone')}</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="input-modern font-mono font-bold"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.editUser.email')}</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="input-modern font-bold"
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="card-elevated">
-        <div className="space-y-4 sm:space-y-5">
-          {/* User Type (Read-only) */}
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-              User Type
-            </label>
-            <input
-              type="text"
-              value={user.type}
-              disabled
-              className="input-field bg-gray-50 cursor-not-allowed"
-            />
+        {/* Configuration Sidebar */}
+        <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
+          <div className="card-premium p-10 bg-slate-900 text-white border-none shadow-2xl shadow-slate-300">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-10">{t('pages.editUser.status')}</h3>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{t('common.status')}</label>
+                <select
+                  value={formData.isActive ? 'true' : 'false'}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                >
+                  <option value="true" className="text-slate-900">{t('pages.editUser.active')}</option>
+                  <option value="false" className="text-slate-900">{t('pages.editUser.inactive')}</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          {/* Phone */}
-          <div>
-            <label htmlFor="phone" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="input-field"
-              required
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="input-field"
-            />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-              Status
-            </label>
-            <select
-              value={formData.isActive ? 'true' : 'false'}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-              className="input-field"
-            >
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-blue-200">
-            <button
-              type="button"
-              onClick={() => navigate(`/users/${id}`)}
-              className="btn-secondary w-full sm:w-auto"
-            >
-              Cancel
-            </button>
+          <div className="flex flex-col gap-3">
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2"
+              className="w-full btn-modern-primary py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl"
             >
-              <Save size={16} />
-              <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Save size={20} /> {t('pages.editUser.deployUpdates')}</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/users/${id}`)}
+              className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              {t('pages.editUser.abortMission')}
             </button>
           </div>
         </div>

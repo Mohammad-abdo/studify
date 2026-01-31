@@ -41,103 +41,87 @@ const AddDepartment = () => {
 
     try {
       await api.post('/departments', formData);
-      toast.success('Department created successfully');
+      toast.success(t('pages.addDepartment.success'));
       navigate('/departments');
     } catch (error) {
-      console.error('Error creating department:', error);
-      toast.error(error.response?.data?.message || 'Failed to create department');
+      toast.error(isRTL ? 'فشل إنشاء القسم' : 'Failed to create department');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-violet-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-fuchsia-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.addDepartment.title')}
+        subtitle={t('pages.addDepartment.subtitle')}
+        breadcrumbs={[{ label: t('menu.departments'), path: '/departments' }, { label: t('pages.addDepartment.charterDepartment') }]}
+        backPath="/departments"
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center gap-4 border border-white/40 shadow-2xl"
-      >
-        <button
-          onClick={() => navigate('/departments')}
-          className="p-3 glass rounded-xl hover:bg-white/80 transition-all hover:scale-105 group"
-        >
-          <ArrowLeft size={20} className="text-gray-700 group-hover:text-violet-600 transition-colors" />
-        </button>
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-            Add New Department
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Create a new department for your platform</p>
-        </div>
-      </motion.div>
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row gap-10 items-start">
+        {/* Main Entry Form */}
+        <div className="flex-1 w-full space-y-10">
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-violet-50 text-violet-600 rounded-2xl"><GraduationCap size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.addDepartment.technicalManifest')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.addDepartment.primaryIdentification')}</p>
+              </div>
+            </div>
 
-      <form onSubmit={handleSubmit} className="relative glass-card p-8 space-y-8 border border-white/40 shadow-2xl">
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
-            Department Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full px-5 py-3 glass rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all bg-white/50 backdrop-blur-sm font-medium text-gray-900 placeholder-gray-400"
-            placeholder="Enter department name"
-          />
-        </div>
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addDepartment.departmentName')}</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder={t('pages.addDepartment.enterDepartmentName')}
+                  className="input-modern font-bold text-lg"
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
-            College <span className="text-red-500">*</span>
-          </label>
-          <select
-            name="collegeId"
-            value={formData.collegeId}
-            onChange={handleChange}
-            required
-            className="w-full px-5 py-3 glass rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all bg-white/50 backdrop-blur-sm font-medium text-gray-900"
-          >
-            <option value="">Select college</option>
-            {colleges.map((college) => (
-              <option key={college.id} value={college.id}>
-                {college.name}
-              </option>
-            ))}
-          </select>
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addDepartment.parentUnit')}</label>
+                <select
+                  name="collegeId"
+                  value={formData.collegeId}
+                  onChange={handleChange}
+                  required
+                  className="input-modern font-bold"
+                >
+                  <option value="">{t('pages.addDepartment.selectCollege')}</option>
+                  {colleges.map((college) => (
+                    <option key={college.id} value={college.id}>{college.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4 pt-6 border-t border-white/30">
-          <button
-            type="button"
-            onClick={() => navigate('/departments')}
-            className="px-6 py-3 glass rounded-xl font-semibold text-gray-700 hover:bg-white/80 transition-all hover:scale-105 border border-white/30"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <Save size={20} />
-                Create Department
-              </>
-            )}
-          </button>
+        {/* Configuration Sidebar */}
+        <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
+          <div className="flex flex-col gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-modern-primary py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl"
+            >
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Save size={20} /> {t('pages.addDepartment.initializeRegistry')}</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/departments')}
+              className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              {t('pages.addDepartment.abortMission')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

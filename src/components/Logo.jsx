@@ -3,17 +3,20 @@ import { motion } from 'framer-motion';
 const Logo = ({ className = '', size = 'default', variant = 'default' }) => {
   const sizes = {
     small: 'text-sm',
+    medium: 'text-lg',
     default: 'text-2xl',
     large: 'text-3xl',
   };
 
   const lightbulbSizes = {
     small: { width: 16, height: 18, offset: -4 },
+    medium: { width: 20, height: 24, offset: -5 },
     default: { width: 24, height: 28, offset: -6 },
     large: { width: 32, height: 36, offset: -8 },
   };
 
-  const lbSize = lightbulbSizes[size];
+  const lbSize = lightbulbSizes[size] || lightbulbSizes.default;
+  const textSize = sizes[size] || sizes.default;
 
   // If variant is 'icon', show just the lightbulb
   if (variant === 'icon') {
@@ -60,10 +63,11 @@ const Logo = ({ className = '', size = 'default', variant = 'default' }) => {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className={`flex items-center gap-0.5 ${className}`}
+      dir="ltr"
     >
       {/* STUDIF Text */}
       <span
-        className={`font-black text-white ${sizes[size]} relative`}
+        className={`font-black text-white ${textSize} relative`}
         style={{
           fontFamily: '"Arial Black", "Arial Bold", Arial, sans-serif',
           textShadow: '2px 2px 0px #0f766e, -1px -1px 0px #0f766e, 1px -1px 0px #0f766e, -1px 1px 0px #0f766e',
@@ -77,7 +81,7 @@ const Logo = ({ className = '', size = 'default', variant = 'default' }) => {
       {/* 'Y' with lightbulb above */}
       <div className="relative inline-flex items-start">
         <span
-          className={`font-black text-white ${sizes[size]} relative`}
+          className={`font-black text-white ${textSize} relative`}
           style={{
             fontFamily: '"Arial Black", "Arial Bold", Arial, sans-serif',
             textShadow: '2px 2px 0px #0f766e, -1px -1px 0px #0f766e, 1px -1px 0px #0f766e, -1px 1px 0px #0f766e',

@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Briefcase, Plus, Edit, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, Edit, Trash2, Search, Filter, UserCircle, Phone, Mail } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const Customers = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,74 +26,92 @@ const Customers = () => {
       const response = await api.get('/customers');
       setCustomers(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load customers');
+      toast.error(isRTL ? 'فشل مزامنة سجلات العملاء' : 'Identity: Customer records synchronization failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this customer?')) {
-      return;
-    }
-    try {
-      await api.delete(`/customers/${id}`);
-      toast.success('Customer deleted successfully');
-      fetchCustomers();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete customer');
+  const handleDelete = async (customer) => {
+    const result = await Swal.fire({
+      title: t('pages.customers.purgeProfile'),
+      text: t('pages.customers.purgeProfileDesc').replace('{name}', customer.entityName),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: isRTL ? 'تأكيد الحذف' : 'Confirm Purge',
+      reverseButtons: isRTL
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/customers/${customer.id}`);
+        toast.success(isRTL ? 'تم حذف ملف التاجر من السجل' : 'Merchant profile purged from registry');
+        fetchCustomers();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل عملية الحذف: السجل مقفل' : 'Purge operation failed: Registry locked');
+      }
     }
   };
 
   const columns = [
     {
-      header: 'Customer',
+      header: t('pages.customers.merchantEntity'),
       accessor: 'entityName',
       render: (customer) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold">
-            {customer.entityName?.charAt(0).toUpperCase() || 'C'}
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black border-2 border-white shadow-sm">
+            {customer.entityName?.charAt(0).toUpperCase() || 'M'}
           </div>
-          <div>
-            <span className="font-medium text-gray-900 block">{customer.entityName || 'N/A'}</span>
-            <span className="text-sm text-gray-500">{customer.user?.phone || 'N/A'}</span>
+          <div className="flex flex-col">
+            <span className="font-black text-slate-900 tracking-tight">{customer.entityName || t('pages.customers.unnamedMerchant')}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.customers.merchantRegistry')}</span>
           </div>
         </div>
       ),
     },
     {
-      header: 'Contact Person',
+      header: t('pages.customers.authorizedContact'),
       accessor: 'contactPerson',
       render: (customer) => (
-        <span className="text-gray-600">{customer.contactPerson || 'N/A'}</span>
+        <div className="flex items-center gap-3">
+          <UserCircle size={16} className="text-slate-400" />
+          <span className="text-sm font-bold text-slate-700">{customer.contactPerson || t('pages.customers.leadAdministrator')}</span>
+        </div>
       ),
     },
     {
-      header: 'Phone',
+      header: t('pages.customers.terminalInfo'),
       accessor: 'phone',
       render: (customer) => (
-        <span className="text-gray-600">{customer.phone || customer.user?.phone || 'N/A'}</span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-slate-600">
+            <Phone size={12} />
+            <span className="text-xs font-bold font-mono">{customer.phone || customer.user?.phone || t('pages.customers.offline')}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-400">
+            <Mail size={12} />
+            <span className="text-[10px] font-medium">{customer.user?.email || t('pages.customers.noRegistryEmail')}</span>
+          </div>
+        </div>
       ),
     },
     {
-      header: 'Actions',
-      accessor: 'actions',
+      header: t('pages.customers.registryStatus'),
+      accessor: 'id',
+      align: 'center',
       render: (customer) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/customers/edit/${customer.id}`)}
-            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Edit Customer"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(customer.id)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Delete Customer"
-          >
-            <Trash2 size={18} />
-          </button>
+        <span className="badge-modern badge-modern-info">{t('pages.customers.verifiedMerchant')}</span>
+      )
+    },
+    {
+      header: t('pages.customers.operations'),
+      accessor: 'actions',
+      align: 'right',
+      render: (customer) => (
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/customers/edit/${customer.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(customer)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
       ),
     },
@@ -104,47 +126,53 @@ const Customers = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="space-y-6 2xl:space-y-8 page-transition pb-20">
+      <PageHeader
+        title={t('pages.customers.title')}
+        subtitle={t('pages.customers.subtitle')}
+        breadcrumbs={[{ label: t('menu.sections.userManagement') }, { label: isRTL ? 'التجار' : 'Merchants' }]}
+        actionLabel={t('pages.customers.addMerchant')}
+        actionPath="/customers/add"
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 bg-clip-text text-transparent">
-            Customers
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage wholesale customers</p>
+      <div className="card-premium p-4 2xl:p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="flex flex-col lg:flex-row gap-4 2xl:gap-6">
+          <div className="flex-1 relative">
+            <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+            <input
+              type="text"
+              placeholder={t('pages.customers.search')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`w-full bg-slate-50 border-none rounded-2xl py-3.5 2xl:py-4 font-bold text-sm 2xl:text-base focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+            />
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button className="p-3.5 2xl:p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-slate-900 transition-all">
+              <Filter size={20} />
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/customers/add')}
-          className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Customer
-        </button>
-      </motion.div>
-
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredCustomers}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search customers..."
-        />
       </div>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.customers.syncingDatabase')}</span>
+        </div>
+      ) : (
+        <div className="fade-in">
+          <DataTable
+            data={filteredCustomers}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default Customers;
-

@@ -1,36 +1,44 @@
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft } from 'lucide-react';
+import { Home, ArrowLeft, Search } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * 404 Not Found Page
  */
 const NotFound = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center px-4">
-        <div className="mb-6">
-          <h1 className="text-9xl font-bold text-gray-200">404</h1>
+    <div className={`min-h-screen flex items-center justify-center bg-slate-50 ${isRTL ? 'font-arabic' : ''}`}>
+      <div className="text-center px-4 max-w-md page-transition">
+        <div className="mb-8 flex justify-center">
+          <div className="p-6 bg-blue-50 rounded-3xl shadow-xl shadow-blue-500/5">
+            <Search size={64} className="text-blue-600" />
+          </div>
         </div>
-        <h2 className="text-3xl font-semibold text-gray-900 mb-3">Page Not Found</h2>
-        <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          The page you're looking for doesn't exist or has been moved.
+        <div className="mb-4">
+          <h1 className="text-9xl font-black text-slate-200 tracking-tighter">404</h1>
+        </div>
+        <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">{t('pages.notFound.title')}</h2>
+        <p className="text-slate-500 font-medium mb-10 leading-relaxed">
+          {t('pages.notFound.subtitle')}
         </p>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="btn-secondary flex items-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-3"
           >
-            <ArrowLeft size={18} />
-            Go Back
+            <ArrowLeft size={18} className={isRTL ? 'rotate-180' : ''} />
+            {t('pages.notFound.goBack')}
           </button>
           <button
             onClick={() => navigate('/')}
-            className="btn-primary flex items-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-3"
           >
             <Home size={18} />
-            Go to Dashboard
+            {t('pages.notFound.goDashboard')}
           </button>
         </div>
       </div>

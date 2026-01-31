@@ -1,25 +1,31 @@
+import { useLanguage } from '../context/LanguageContext';
+
 /**
- * Loading State Component
- * Provides consistent loading UI across all pages
+ * Professional Loading State
  */
-const LoadingState = ({ message = 'Loading...', fullScreen = false }) => {
+const LoadingState = ({ message, fullScreen = false }) => {
+  const { t } = useLanguage();
+  const displayMessage = message || t('common.loading');
+  
   const content = (
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className="w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mb-4"></div>
-      <p className="text-sm text-gray-600">{message}</p>
+    <div className="flex flex-col items-center justify-center p-12 text-center">
+      <div className="relative w-16 h-16 mb-6">
+        <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{displayMessage}</p>
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-white/90 backdrop-blur-xl z-50">
         {content}
       </div>
     );
   }
 
-  return <div className="card-elevated">{content}</div>;
+  return <div className="card-premium">{content}</div>;
 };
 
 export default LoadingState;
-

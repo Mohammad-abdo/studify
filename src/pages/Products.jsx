@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Package, X, Search, Filter, ShoppingBag, ArrowRight } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
-import EmptyState, { EmptyStates } from '../components/EmptyState';
-import LoadingState from '../components/LoadingState';
+import { EmptyStates } from '../components/EmptyState';
+import { useLanguage } from '../context/LanguageContext';
 
 const Products = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +36,6 @@ const Products = () => {
       const response = await api.get(`/products?${params}`);
       const data = response.data.data || response.data;
       
-      // Parse imageUrls if it's a string
       const productsWithParsedImages = Array.isArray(data) ? data.map(product => {
         if (product.imageUrls && typeof product.imageUrls === 'string') {
           try {
@@ -48,7 +50,7 @@ const Products = () => {
       setProducts(productsWithParsedImages);
       setTotal(response.data.pagination?.total || productsWithParsedImages.length || 0);
     } catch (error) {
-      toast.error('Failed to load products');
+      toast.error(isRTL ? 'فشل تحميل المنتجات' : 'Failed to load products');
       console.error(error);
     } finally {
       setLoading(false);
@@ -56,50 +58,60 @@ const Products = () => {
   };
 
   const handleDelete = async (product) => {
-    if (!window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: isRTL ? 'إزالة المنتج؟' : 'Remove Product?',
+      text: isRTL ? `هل أنت متأكد أنك تريد حذف "${product.name}"؟` : `Are you sure you want to delete "${product.name}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: isRTL ? 'نعم، قم بالإزالة' : 'Yes, remove it',
+      reverseButtons: isRTL
+    });
 
-    try {
-      await api.delete(`/products/${product.id}`);
-      toast.success('Product deleted successfully');
-      fetchProducts();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete product');
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/products/${product.id}`);
+        toast.success(isRTL ? 'تم حذف المنتج بنجاح' : 'Product deleted successfully');
+        fetchProducts();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل حذف المنتج' : 'Failed to delete product');
+      }
     }
   };
 
   const columns = [
     {
-      header: 'Images',
+      header: t('pages.products.visual'),
       accessor: 'imageUrls',
-      width: '100px',
-      align: 'center',
+      width: '120px',
       hideOnMobile: true,
       render: (product) => {
         const images = Array.isArray(product.imageUrls) ? product.imageUrls : [];
+        const firstImage = images[0];
         return (
-          <div className="flex justify-center gap-1">
+          <div className="flex items-center -space-x-3 hover:space-x-1 transition-all duration-300">
             {images.length > 0 ? (
-              images.slice(0, 2).map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img.startsWith('http') ? img : `${api.defaults.baseURL.replace('/api', '')}${img}`}
-                  alt={`${product.name} ${idx + 1}`}
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded border border-gray-200"
-                  onError={(e) => {
-                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=f97316&color=fff&size=48`;
-                  }}
-                />
+              images.slice(0, 3).map((img, idx) => (
+                <div key={idx} className="w-12 h-12 rounded-xl border-2 border-white shadow-sm overflow-hidden bg-white">
+                  <img
+                    src={img.startsWith('http') ? img : `${api.defaults.baseURL.replace('/api', '')}${img}`}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=f97316&color=fff&size=48`;
+                    }}
+                  />
+                </div>
               ))
             ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-md flex items-center justify-center">
-                <Package className="text-gray-400" size={16} />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-300 border-2 border-white shadow-sm">
+                <Package size={20} />
               </div>
             )}
-            {images.length > 2 && (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-md flex items-center justify-center text-xs font-medium text-gray-600">
-                +{images.length - 2}
+            {images.length > 3 && (
+              <div className="w-8 h-8 rounded-full bg-slate-900 text-[10px] font-black text-white flex items-center justify-center border-2 border-white shadow-sm z-10">
+                +{images.length - 3}
               </div>
             )}
           </div>
@@ -107,116 +119,105 @@ const Products = () => {
       },
     },
     {
-      header: 'Name',
+      header: t('pages.products.productDetails'),
       accessor: 'name',
       render: (product) => (
-        <div className="min-w-0">
-          <div className="font-medium text-sm sm:text-base text-gray-900 truncate">{product.name}</div>
-          <div className="text-xs sm:text-sm text-gray-500 truncate">{product.category?.name}</div>
+        <div className="flex flex-col gap-1">
+          <span className="font-black text-slate-900 tracking-tight">{product.name}</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">{product.category?.name || t('pages.products.generalMerchant')}</span>
         </div>
       ),
     },
     {
-      header: 'Description',
-      accessor: 'description',
-      hideOnMobile: true,
-      render: (product) => (
-        <div className="max-w-xs">
-          <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{product.description}</p>
-        </div>
-      ),
-    },
-    {
-      header: 'Pricing',
+      header: t('pages.products.marketValue'),
       accessor: 'pricing',
-      align: 'right',
       render: (product) => (
-        <div className="text-xs sm:text-sm">
+        <div className="flex flex-col">
           {product.pricing && product.pricing.length > 0 ? (
-            <div>
-              <div className="font-medium text-gray-900">${product.pricing[0].price?.toFixed(2) || '0.00'}</div>
-              {product.pricing.length > 1 && (
-                <div className="text-gray-500 text-xs">{product.pricing.length} tiers</div>
-              )}
-            </div>
+            <>
+              <span className="text-sm font-black text-slate-900">${product.pricing[0].price?.toFixed(2)}</span>
+              <span className="text-[10px] font-medium text-slate-400">{product.pricing.length > 1 ? `${product.pricing.length} ${t('pages.products.pricingTiers')}` : t('pages.products.standardPrice')}</span>
+            </>
           ) : (
-            <span className="text-gray-400">No pricing</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">{t('pages.products.noPricingSet')}</span>
           )}
         </div>
       ),
     },
     {
-      header: 'Created',
+      header: t('pages.products.systemId'),
+      accessor: 'id',
+      hideOnMobile: true,
+      render: (product) => (
+        <span className="text-[10px] font-mono text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+          {product.id.slice(0, 12)}...
+        </span>
+      ),
+    },
+    {
+      header: t('pages.products.catalogDate'),
       accessor: 'createdAt',
       hideOnMobile: true,
       render: (product) => (
-        <div className="text-xs sm:text-sm text-gray-600">
-          {new Date(product.createdAt).toLocaleDateString()}
-        </div>
+        <span className="text-xs font-bold text-slate-500">
+          {new Date(product.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+        </span>
       ),
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 2xl:space-y-8 page-transition">
       <PageHeader
-        title="Products"
-        subtitle="Manage all products in the system"
+        title={t('pages.products.title')}
+        subtitle={t('pages.products.subtitle')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/' },
-          { label: 'Products' },
+          { label: t('menu.products') },
         ]}
-        actionLabel="Add Product"
+        actionLabel={t('pages.products.addProduct')}
         actionPath="/products/add"
       />
 
-      {/* Filters */}
-      <div className="card-elevated">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
+      {/* High-End Filter Bar */}
+      <div className="card-premium p-4 2xl:p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="flex flex-col lg:flex-row gap-4 2xl:gap-6">
+          <div className="flex-1 relative">
+            <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder={t('pages.products.search')}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setPage(1);
               }}
-              className="input-field w-full"
+              className={`w-full bg-slate-50 border-none rounded-2xl py-3.5 2xl:py-4 font-bold text-sm 2xl:text-base focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
             />
           </div>
-        </div>
-
-        {/* Active Filters */}
-        {searchTerm && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="badge badge-info flex items-center gap-1">
-              Search: {searchTerm}
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setPage(1);
-                }}
-                className="ml-1 hover:text-blue-800"
-              >
-                <X size={12} />
-              </button>
-            </span>
+          
+          <div className="flex items-center gap-3">
+            <button className="p-3.5 2xl:p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-slate-900 transition-all">
+              <Filter size={20} />
+            </button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Data Table */}
       {loading ? (
-        <LoadingState message="Loading products..." />
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{isRTL ? 'جاري مزامنة المخزون' : 'Inventory Sync in Progress'}</span>
+        </div>
       ) : products.length === 0 ? (
-        searchTerm ? (
-          <EmptyStates.Search searchTerm={searchTerm} />
-        ) : (
-          <EmptyStates.Products />
-        )
+        <div className="fade-in">
+          {searchTerm ? (
+            <EmptyStates.Search searchTerm={searchTerm} />
+          ) : (
+            <EmptyStates.Products />
+          )}
+        </div>
       ) : (
-        <>
+        <div className="fade-in">
           <DataTable
             data={products}
             columns={columns}
@@ -231,7 +232,7 @@ const Products = () => {
             onEdit={(product) => navigate(`/products/edit/${product.id}`)}
             onDelete={handleDelete}
           />
-        </>
+        </div>
       )}
     </div>
   );

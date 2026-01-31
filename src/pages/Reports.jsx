@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FileBarChart, Plus, Edit, Trash2, Download } from 'lucide-react';
+import { FileBarChart, Plus, Edit, Trash2, Download, Search, Filter, Calendar, ExternalLink } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const Reports = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,22 +26,31 @@ const Reports = () => {
       const response = await api.get('/reports');
       setReports(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load reports');
+      toast.error(isRTL ? 'تحليلات: فشل مزامنة التقارير' : 'Analytics: Report synchronization failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this report?')) {
-      return;
-    }
-    try {
-      await api.delete(`/reports/${id}`);
-      toast.success('Report deleted successfully');
-      fetchReports();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete report');
+  const handleDelete = async (report) => {
+    const result = await Swal.fire({
+      title: t('pages.reports.abolishReport'),
+      text: t('pages.reports.abolishReportDesc').replace('{name}', report.name),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: t('pages.reports.abolishReportConfirm') || (isRTL ? 'إلغاء التقرير' : 'Abolish Report'),
+      reverseButtons: isRTL
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/reports/${report.id}`);
+        toast.success(isRTL ? 'تم إلغاء التقرير التحليلي' : 'Analytic report abolished');
+        fetchReports();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل الإلغاء: قفل التحليلات' : 'Abolition failed: Analytics lock');
+      }
     }
   };
 
@@ -49,54 +62,52 @@ const Reports = () => {
 
   const columns = [
     {
-      header: 'Name',
+      header: t('pages.reports.intelligenceNode'),
       accessor: 'name',
       render: (report) => (
-        <div className="flex items-center gap-3">
-          <FileBarChart className="text-blue-600" size={20} />
-          <span className="font-medium text-gray-900">{report.name || 'N/A'}</span>
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm">
+            <FileBarChart size={20} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-black text-slate-900 tracking-tight uppercase text-xs">{report.name || t('pages.reports.draftIntelligence')}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.reports.analyticMatrix')}</span>
+          </div>
         </div>
       ),
     },
     {
-      header: 'File',
+      header: t('pages.reports.exportManifest'),
       accessor: 'fileUrl',
       render: (report) => (
         <button
           onClick={() => handleDownload(report.fileUrl)}
-          className="flex items-center gap-2 text-primary-600 hover:text-primary-700"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-blue-600 transition-all text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200"
         >
-          <Download size={16} />
-          <span className="text-sm">Download</span>
+          <Download size={14} strokeWidth={3} />
+          {t('pages.reports.exportData')}
         </button>
       ),
     },
     {
-      header: 'Date',
+      header: t('pages.reports.generationDate'),
       accessor: 'createdAt',
+      hideOnMobile: true,
       render: (report) => (
-        <span className="text-gray-600">
-          {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'N/A'}
-        </span>
+        <div className="flex items-center gap-2 text-slate-400 font-bold">
+          <Calendar size={12} />
+          <span className="text-xs">{new Date(report.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : undefined)}</span>
+        </div>
       ),
     },
     {
-      header: 'Actions',
+      header: t('pages.reports.operations'),
       accessor: 'actions',
+      align: 'right',
       render: (report) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/reports/edit/${report.id}`)}
-            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(report.id)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Trash2 size={18} />
-          </button>
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/reports/edit/${report.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(report)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
       ),
     },
@@ -107,48 +118,57 @@ const Reports = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.reports.title')}
+        subtitle={t('pages.reports.subtitle')}
+        breadcrumbs={[{ label: t('menu.sections.main') }, { label: t('menu.reports') }]}
+        actionLabel={t('pages.reports.generateReport')}
+        actionPath="/reports/add"
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Reports
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage system reports</p>
+      <div className="card-premium p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 relative">
+            <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+            <input
+              type="text"
+              placeholder={t('pages.reports.search')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`w-full bg-slate-50 border-none rounded-2xl py-4 font-bold text-sm focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+            />
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/reports/add')}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Report
-        </button>
-      </motion.div>
-
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredReports}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search reports..."
-        />
       </div>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.reports.syncingIntelligence')}</span>
+        </div>
+      ) : filteredReports.length === 0 ? (
+        <div className="fade-in">
+          <EmptyState
+            icon={FileBarChart}
+            title={t('pages.reports.intelligenceVoid')}
+            description={t('pages.reports.intelligenceVoidDesc')}
+            actionLabel={t('pages.reports.generateFirstReport')}
+            onAction={() => navigate('/reports/add')}
+          />
+        </div>
+      ) : (
+        <div className="fade-in">
+          <DataTable
+            data={filteredReports}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default Reports;
-
-

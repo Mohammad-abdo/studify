@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Key, Plus, Edit, Trash2 } from 'lucide-react';
+import { Key, Plus, Edit, Trash2, Search, ShieldAlert, Lock } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const Permissions = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,107 +26,124 @@ const Permissions = () => {
       const response = await api.get('/permissions');
       setPermissions(response.data.data || response.data || []);
     } catch (error) {
-      toast.error('Failed to load permissions');
+      toast.error(isRTL ? 'نطاقات الأمان: فشل مزامنة نطاق الصلاحيات' : 'Security: Permission scope sync failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this permission?')) {
-      return;
-    }
-    try {
-      await api.delete(`/permissions/${id}`);
-      toast.success('Permission deleted successfully');
-      fetchPermissions();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete permission');
+  const handleDelete = async (permission) => {
+    const result = await Swal.fire({
+      title: t('pages.permissions.restrictScope'),
+      text: t('pages.permissions.restrictScopeDesc').replace('{key}', permission.key),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: t('pages.permissions.confirmRestriction'),
+      reverseButtons: isRTL
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/permissions/${permission.id}`);
+        toast.success(isRTL ? 'تم تقييد نطاق الصلاحيات' : 'Permission scope restricted');
+        fetchPermissions();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل العملية: تم رفض الوصول' : 'Operation failed: Access denied');
+      }
     }
   };
-
-  const columns = [
-    {
-      header: 'Key',
-      accessor: 'key',
-      render: (permission) => (
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-yellow-100 rounded-lg">
-            <Key className="text-yellow-600" size={20} />
-          </div>
-          <span className="font-medium text-gray-900 font-mono text-sm">{permission.key}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Actions',
-      accessor: 'actions',
-      render: (permission) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/permissions/edit/${permission.id}`)}
-            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(permission.id)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
-      ),
-    },
-  ];
 
   const filteredPermissions = permissions.filter((permission) =>
     permission.key?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center justify-between border border-white/40 shadow-2xl"
-      >
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 bg-clip-text text-transparent">
-            Permissions
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Manage system permissions</p>
+  const columns = [
+    {
+      header: t('pages.permissions.scopeKey'),
+      accessor: 'key',
+      render: (permission) => (
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
+            <Lock size={18} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-black text-slate-900 tracking-tight font-mono text-sm uppercase">{permission.key}</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter italic">{t('pages.permissions.systemPermissionNode')}</span>
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/permissions/add')}
-          className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-amber-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Permission
-        </button>
-      </motion.div>
+      ),
+    },
+    {
+      header: t('pages.permissions.securityLevel'),
+      accessor: 'id',
+      align: 'center',
+      render: (permission) => (
+        <div className="flex items-center justify-center gap-1.5">
+          <ShieldAlert size={14} className="text-amber-500" />
+          <span className="text-[10px] font-black uppercase text-amber-600">{t('pages.permissions.restrictedNode')}</span>
+        </div>
+      )
+    },
+    {
+      header: t('pages.permissions.registryId'),
+      accessor: 'id',
+      hideOnMobile: true,
+      render: (permission) => <span className="text-[10px] font-mono text-slate-300">{t('pages.userDetail.uuid')}: {permission.id.slice(0, 12)}...</span>
+    },
+    {
+      header: t('pages.permissions.operations'),
+      accessor: 'actions',
+      align: 'right',
+      render: (permission) => (
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/permissions/edit/${permission.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => handleDelete(permission)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
+        </div>
+      ),
+    },
+  ];
 
-      <div className="relative glass-card border border-white/40 shadow-2xl overflow-hidden">
-        <DataTable
-          data={filteredPermissions}
-          columns={columns}
-          loading={loading}
-          searchable
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search permissions..."
-        />
+  return (
+    <div className="space-y-6 2xl:space-y-8 page-transition">
+      <PageHeader
+        title={t('pages.permissions.title')}
+        subtitle={t('pages.permissions.subtitle')}
+        breadcrumbs={[{ label: isRTL ? 'صلاحيات الوصول' : 'RBAC' }, { label: t('menu.permissions') }]}
+        actionLabel={t('pages.permissions.registerScope')}
+        actionPath="/permissions/add"
+      />
+
+      <div className="card-premium p-4 2xl:p-6 bg-white border-none shadow-xl shadow-slate-200/50">
+        <div className="relative max-w-2xl">
+          <Search size={20} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+          <input
+            type="text"
+            placeholder={t('pages.permissions.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full bg-slate-50 border-none rounded-2xl py-3.5 2xl:py-4 font-bold text-sm 2xl:text-base focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+          />
+        </div>
       </div>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.permissions.syncingNodes')}</span>
+        </div>
+      ) : (
+        <div className="fade-in">
+          <DataTable
+            data={filteredPermissions}
+            columns={columns}
+            loading={false}
+            searchable={false}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default Permissions;
-
-

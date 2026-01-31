@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Edit, Trash2, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-/**
- * Enhanced DataTable Component
- * Supports both client-side and server-side pagination
- */
 const DataTable = ({
   data = [],
   columns = [],
@@ -14,176 +10,120 @@ const DataTable = ({
   onEdit,
   onDelete,
   searchable = true,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = '',
   searchValue = '',
   onSearchChange,
-  // Server-side pagination props
   serverSide = false,
   total = 0,
   page = 1,
   limit = 10,
   onPageChange,
-  // Custom empty state
   emptyState,
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRTL = language === 'ar';
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Use server-side pagination if enabled, otherwise use client-side
   const isServerSide = serverSide && onPageChange;
   const itemsPerPage = isServerSide ? limit : 10;
 
   useEffect(() => {
-    if (isServerSide) {
-      setCurrentPage(page);
-    }
+    if (isServerSide) setCurrentPage(page);
   }, [page, isServerSide]);
 
   const getValue = (item, key) => {
-    if (typeof key === 'function') {
-      return key(item);
-    }
-    const keys = key.split('.');
-    let value = item;
-    for (const k of keys) {
-      value = value?.[k];
-    }
-    return value;
+    if (typeof key === 'function') return key(item);
+    return key.split('.').reduce((obj, i) => obj?.[i], item);
   };
 
-  // Filter columns for mobile (hide some columns on small screens)
-  const getVisibleColumns = () => {
-    return columns.filter(col => col.hideOnMobile !== true);
-  };
-
-  // Calculate pagination for client-side
-  const totalPages = isServerSide 
-    ? Math.ceil(total / limit)
-    : Math.ceil(data.length / itemsPerPage);
-  
-  const startIndex = isServerSide
-    ? (page - 1) * limit
-    : (currentPage - 1) * itemsPerPage;
-  
-  const endIndex = isServerSide
-    ? Math.min(page * limit, total)
-    : startIndex + itemsPerPage;
-  
-  const currentData = isServerSide ? data : data.slice(startIndex, endIndex);
-  const displayTotal = isServerSide ? total : data.length;
-  const displayStart = isServerSide ? startIndex + 1 : startIndex + 1;
-  const displayEnd = isServerSide ? endIndex : Math.min(endIndex, data.length);
-
-  const handlePageChange = (newPage) => {
-    if (isServerSide) {
-      onPageChange?.(newPage);
-    } else {
-      setCurrentPage(newPage);
-    }
-  };
+  const totalPages = isServerSide ? Math.ceil(total / limit) : Math.ceil(data.length / itemsPerPage);
+  const currentData = isServerSide ? data : data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="card-elevated overflow-hidden">
-      {/* Search Bar */}
-      {searchable && (
-        <div className="px-4 md:px-5 lg:px-6 xl:px-7 py-3 md:py-3.5 lg:py-4 border-b border-blue-200">
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="input-field w-full"
-            />
+    <div className="card-premium overflow-hidden bg-white border-none shadow-xl shadow-slate-200/50">
+      {/* Header with Search and Filters */}
+      {(searchable || onView) && (
+        <div className="p-6 md:p-8 2xl:p-8 bg-white border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {searchable && (
+            <div className="relative flex-1 max-w-md 2xl:max-w-xl">
+              <Search size={18} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+              <input
+                type="text"
+                placeholder={searchPlaceholder || t('common.quickSearch')}
+                value={searchValue}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                className={`w-full bg-slate-50 border-none rounded-2xl py-4 2xl:py-4 text-sm 2xl:text-base font-medium focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
+              />
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button className="p-4 2xl:p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-slate-900 transition-all">
+              <SlidersHorizontal size={20} className="2xl:w-6 2xl:h-6" />
+            </button>
           </div>
         </div>
       )}
 
-      {/* Table - Responsive wrapper */}
-      <div className="table-wrapper overflow-x-auto">
-        <table className="table min-w-full">
-          <thead className="sticky top-0 z-10">
+      {/* Modern Table Body */}
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="table-premium">
+          <thead>
             <tr>
-              {getVisibleColumns().map((column, index) => (
-                <th
-                  key={index}
-                  className={`${
-                    column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
-                  } ${column.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
-                  style={{ width: column.width }}
-                >
-                  {column.header}
+              {columns.filter(c => !c.hideOnMobile).map((col, i) => (
+                <th key={i} className={`2xl:px-8 2xl:py-5 ${col.align === 'right' ? 'text-end' : col.align === 'center' ? 'text-center' : 'text-start'}`}>
+                  {col.header}
                 </th>
               ))}
               {(onView || onEdit || onDelete) && (
-                <th className={isRTL ? 'text-left' : 'text-right'}>
-                  <span className="hidden sm:inline">Actions</span>
-                  <span className="sm:hidden">Act</span>
+                <th className="2xl:px-8 2xl:py-5 text-end">
+                  {t('common.actions')}
                 </th>
               )}
             </tr>
           </thead>
           <tbody>
             {loading ? (
+              [...Array(5)].map((_, i) => (
+                <tr key={i} className="animate-pulse">
+                  <td colSpan={100} className="py-8 2xl:py-8"><div className="h-4 bg-slate-50 rounded-full w-full"></div></td>
+                </tr>
+              ))
+            ) : currentData.length === 0 ? (
               <tr>
-                <td colSpan={getVisibleColumns().length + (onView || onEdit || onDelete ? 1 : 0)} className="px-4 py-8 sm:py-12 text-center">
-                  <div className="flex justify-center">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 border-3 sm:border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+                <td colSpan={100} className="py-24 2xl:py-24 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="p-6 2xl:p-8 bg-slate-50 rounded-full text-slate-300"><Search size={48} className="2xl:w-16 2xl:h-16" /></div>
+                    <div>
+                      <p className="text-lg 2xl:text-2xl font-black text-slate-900">{t('common.noResults')}</p>
+                      <p className="text-slate-400 text-sm 2xl:text-base font-medium">{t('common.noResultsDesc')}</p>
+                    </div>
                   </div>
                 </td>
               </tr>
-            ) : currentData.length === 0 ? (
-              <tr>
-                <td colSpan={getVisibleColumns().length + (onView || onEdit || onDelete ? 1 : 0)} className="px-4 py-8 sm:py-12 text-center">
-                  {emptyState || (
-                    <div className="text-gray-500 text-sm">No data available</div>
-                  )}
-                </td>
-              </tr>
             ) : (
-              currentData.map((item, rowIndex) => (
-                <tr key={item.id || rowIndex} className="hover:bg-gray-50 transition-colors duration-100">
-                  {getVisibleColumns().map((column, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={`${
-                        column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
-                      } ${column.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
-                    >
-                      {column.render ? column.render(item) : getValue(item, column.accessor)}
+              currentData.map((item, idx) => (
+                <tr key={item.id || idx}>
+                  {columns.filter(c => !c.hideOnMobile).map((col, i) => (
+                    <td key={i} className={`2xl:px-8 2xl:py-6 ${col.align === 'right' ? 'text-end' : col.align === 'center' ? 'text-center' : 'text-start'}`}>
+                      {col.render ? col.render(item) : <span className="text-slate-600 font-semibold 2xl:text-lg">{getValue(item, col.accessor)}</span>}
                     </td>
                   ))}
                   {(onView || onEdit || onDelete) && (
-                    <td className={isRTL ? 'text-left' : 'text-right'}>
-                      <div className={`flex items-center gap-1 sm:gap-2 ${
-                        isRTL ? 'justify-start' : 'justify-end'
-                      }`}>
+                    <td className="2xl:px-8 2xl:py-6 text-end">
+                      <div className="flex items-center justify-end gap-1">
                         {onView && (
-                          <button
-                            onClick={() => onView(item)}
-                            className="p-1.5 sm:p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-150"
-                            title="View"
-                          >
-                            <Eye size={14} className="sm:w-4 sm:h-4" />
+                          <button onClick={() => onView(item)} className="p-3 2xl:p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                            <Eye size={18} className="2xl:w-6 2xl:h-6" />
                           </button>
                         )}
                         {onEdit && (
-                          <button
-                            onClick={() => onEdit(item)}
-                            className="p-1.5 sm:p-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors duration-150"
-                            title="Edit"
-                          >
-                            <Edit size={14} className="sm:w-4 sm:h-4" />
+                          <button onClick={() => onEdit(item)} className="p-3 2xl:p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                            <Edit size={18} className="2xl:w-6 2xl:h-6" />
                           </button>
                         )}
                         {onDelete && (
-                          <button
-                            onClick={() => onDelete(item)}
-                            className="p-1.5 sm:p-2 rounded-md text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
-                            title="Delete"
-                          >
-                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                          <button onClick={() => onDelete(item)} className="p-3 2xl:p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+                            <Trash2 size={18} className="2xl:w-6 2xl:h-6" />
                           </button>
                         )}
                       </div>
@@ -196,31 +136,41 @@ const DataTable = ({
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Refined Pagination */}
       {totalPages > 1 && (
-        <div className="px-4 md:px-5 lg:px-6 xl:px-7 py-3 md:py-3.5 lg:py-4 border-t border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-sm md:text-base font-medium text-gray-700">
-            Showing <span className="font-semibold">{displayStart}</span> to{' '}
-            <span className="font-semibold">{displayEnd}</span> of{' '}
-            <span className="font-semibold">{displayTotal}</span> results
+        <div className="p-8 2xl:p-10 bg-slate-50/30 border-t border-slate-50 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-[10px] 2xl:text-xs font-black uppercase tracking-widest text-slate-400">
+            {t('common.page')} <span className="text-slate-900 font-bold">{isServerSide ? page : currentPage}</span> {t('common.of')} {totalPages} — {total || data.length} {t('common.records')}
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handlePageChange(isServerSide ? page - 1 : currentPage - 1)}
+              onClick={() => onPageChange?.(page - 1)}
               disabled={isServerSide ? page === 1 : currentPage === 1}
-              className="btn-secondary p-2 min-h-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-modern-secondary h-12 w-12 2xl:h-14 2xl:w-14 p-0 flex items-center justify-center disabled:opacity-20"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={20} className={`2xl:w-8 2xl:h-8 ${isRTL ? 'rotate-180' : ''}`} />
             </button>
-            <span className="px-3 py-2 rounded-md border border-blue-200 bg-white text-sm font-medium text-gray-900">
-              Page {isServerSide ? page : currentPage} of {totalPages}
-            </span>
+            <div className="flex items-center gap-1">
+              {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                const p = i + 1;
+                const isCurrent = (isServerSide ? page : currentPage) === p;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => onPageChange?.(p) || setCurrentPage(p)}
+                    className={`h-12 w-12 2xl:h-14 2xl:w-14 rounded-xl text-xs 2xl:text-sm font-black transition-all ${isCurrent ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
             <button
-              onClick={() => handlePageChange(isServerSide ? page + 1 : currentPage + 1)}
+              onClick={() => onPageChange?.(page + 1)}
               disabled={isServerSide ? page >= totalPages : currentPage >= totalPages}
-              className="btn-secondary p-2 min-h-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-modern-secondary h-12 w-12 2xl:h-14 2xl:w-14 p-0 flex items-center justify-center disabled:opacity-20"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={20} className={`2xl:w-8 2xl:h-8 ${isRTL ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>

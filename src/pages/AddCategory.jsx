@@ -28,84 +28,81 @@ const AddCategory = () => {
 
     try {
       await api.post(`/categories/${categoryType}`, formData);
-      toast.success(`${categoryType === 'books' ? 'Book' : 'Product'} category created successfully`);
+      toast.success(t('pages.addCategory.success').replace('{type}', categoryType === 'books' ? t('pages.addCategory.book') : t('pages.addCategory.product')));
       navigate('/categories');
     } catch (error) {
-      console.error('Error creating category:', error);
-      toast.error(error.response?.data?.message || 'Failed to create category');
+      toast.error(isRTL ? 'فشل إنشاء الفئة' : 'Failed to create category');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.addCategory.title')}
+        subtitle={t('pages.addCategory.subtitle')}
+        breadcrumbs={[{ label: t('menu.categories'), path: '/categories' }, { label: t('pages.addCategory.defineCategory') }]}
+        backPath="/categories"
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative glass-card p-6 flex items-center gap-4 border border-white/40 shadow-2xl"
-      >
-        <button
-          onClick={() => navigate('/categories')}
-          className="p-3 glass rounded-xl hover:bg-white/80 transition-all hover:scale-105 group"
-        >
-          <ArrowLeft size={20} className="text-gray-700 group-hover:text-teal-600 transition-colors" />
-        </button>
-        <div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Add New {categoryType === 'books' ? 'Book' : 'Product'} Category
-          </h1>
-          <p className="text-gray-700 mt-1 font-semibold">Create a new category for your platform</p>
-        </div>
-      </motion.div>
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row gap-10 items-start">
+        {/* Main Entry Form */}
+        <div className="flex-1 w-full space-y-10">
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-teal-50 text-teal-600 rounded-2xl"><Tag size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.addCategory.technicalManifest')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.addCategory.primaryIdentification')}</p>
+              </div>
+            </div>
 
-      <form onSubmit={handleSubmit} className="relative glass-card p-8 space-y-8 border border-white/40 shadow-2xl">
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
-            Category Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full px-5 py-3 glass rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all bg-white/50 backdrop-blur-sm font-medium text-gray-900 placeholder-gray-400"
-            placeholder="Enter category name"
-          />
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addCategory.categoryName')}</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder={t('pages.addCategory.enterCategoryName')}
+                  className="input-modern font-bold text-lg"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4 pt-6 border-t border-white/30">
-          <button
-            type="button"
-            onClick={() => navigate('/categories')}
-            className="px-6 py-3 glass rounded-xl font-semibold text-gray-700 hover:bg-white/80 transition-all hover:scale-105 border border-white/30"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <Save size={20} />
-                Create Category
-              </>
-            )}
-          </button>
+        {/* Configuration Sidebar */}
+        <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
+          <div className="card-premium p-10 bg-slate-900 text-white border-none shadow-2xl shadow-slate-300">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-10">{isRTL ? 'معلمات التصنيف' : 'Classification Params'}</h3>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{isRTL ? 'نوع الأصل' : 'Asset Type'}</span>
+                <span className="badge-modern badge-modern-info uppercase tracking-widest">{categoryType}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-modern-primary py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl"
+            >
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Save size={20} /> {t('pages.addCategory.initializeRegistry')}</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/categories')}
+              className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              {t('pages.addCategory.abortMission')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

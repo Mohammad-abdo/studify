@@ -26,7 +26,7 @@ const EditCollege = () => {
         name: college.name || '',
       });
     } catch (error) {
-      toast.error('Failed to load college');
+      toast.error(isRTL ? 'فشل تحميل الكلية' : 'Failed to load college');
       navigate('/colleges');
     } finally {
       setFetching(false);
@@ -35,10 +35,7 @@ const EditCollege = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -47,11 +44,10 @@ const EditCollege = () => {
 
     try {
       await api.put(`/colleges/${id}`, formData);
-      toast.success('College updated successfully');
+      toast.success(t('pages.editCollege.success'));
       navigate('/colleges');
     } catch (error) {
-      console.error('Error updating college:', error);
-      toast.error(error.response?.data?.message || 'Failed to update college');
+      toast.error(isRTL ? 'فشل تحديث الكلية' : 'Failed to update college');
     } finally {
       setLoading(false);
     }
@@ -59,72 +55,69 @@ const EditCollege = () => {
 
   if (fetching) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="py-24 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.editCollege.loading')}</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4"
-      >
-        <button
-          onClick={() => navigate('/colleges')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit College</h1>
-          <p className="text-gray-600 mt-1">Update college information</p>
-        </div>
-      </motion.div>
+    <div className="space-y-10 page-transition pb-20">
+      <PageHeader
+        title={t('pages.editCollege.title')}
+        subtitle={t('pages.editCollege.subtitle')}
+        breadcrumbs={[{ label: t('menu.colleges'), path: '/colleges' }, { label: t('pages.editCollege.updateCollege') }]}
+        backPath="/colleges"
+      />
 
-      <form onSubmit={handleSubmit} className="card space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            College Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="input-field"
-            placeholder="Enter college name"
-          />
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row gap-10 items-start">
+        {/* Main Entry Form */}
+        <div className="flex-1 w-full space-y-10">
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><Building2 size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.addCollege.technicalManifest')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.addCollege.primaryIdentification')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('pages.addCollege.collegeName')}</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder={t('pages.addCollege.enterCollegeName')}
+                  className="input-modern font-bold text-lg"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4 pt-4 border-t">
-          <button
-            type="button"
-            onClick={() => navigate('/colleges')}
-            className="btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Updating...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                Update College
-              </>
-            )}
-          </button>
+        {/* Configuration Sidebar */}
+        <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
+          <div className="flex flex-col gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-modern-primary py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl"
+            >
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Save size={20} /> {t('pages.editCollege.updateCollege')}</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/colleges')}
+              className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+            >
+              {t('pages.editCollege.abortMission')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

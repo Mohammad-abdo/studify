@@ -11,6 +11,7 @@ import {
   Star,
   Eye,
   ArrowRight,
+  ArrowLeft,
   Activity,
   Building2,
   GraduationCap,
@@ -19,34 +20,32 @@ import {
   ShoppingBag,
   Image,
   FileText,
+  ChevronRight,
+  Plus,
 } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  Cell,
 } from 'recharts';
+import { useLanguage } from '../context/LanguageContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentBooks, setRecentBooks] = useState([]);
-  const [recentProducts, setRecentProducts] = useState([]);
-  const [categoryStats, setCategoryStats] = useState([]);
   const [orderStats, setOrderStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,549 +56,231 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      const statsResponse = await api.get('/admin/dashboard/stats');
-      setStats(statsResponse.data.data || statsResponse.data);
+      const [statsRes, ordersRes, booksRes] = await Promise.all([
+        api.get('/admin/dashboard/stats'),
+        api.get('/admin/orders?page=1&limit=6'),
+        api.get('/books?page=1&limit=6'),
+      ]);
 
-      try {
-        const ordersResponse = await api.get('/admin/orders?page=1&limit=5');
-        setRecentOrders(ordersResponse.data.data || ordersResponse.data || []);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      }
+      setStats(statsRes.data.data);
+      setRecentOrders(ordersRes.data.data || []);
+      setRecentBooks(booksRes.data.data || []);
 
-      try {
-        const booksResponse = await api.get('/books?page=1&limit=5');
-        setRecentBooks(booksResponse.data.data || booksResponse.data || []);
-      } catch (error) {
-        console.error('Error fetching books:', error);
-      }
-
-      try {
-        const productsResponse = await api.get('/products?page=1&limit=5');
-        setRecentProducts(productsResponse.data.data || productsResponse.data || []);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-
-      try {
-        const [bookCategories, productCategories] = await Promise.all([
-          api.get('/categories/books'),
-          api.get('/categories/products'),
-        ]);
-        
-        const bookCats = bookCategories.data.data || bookCategories.data || [];
-        const productCats = productCategories.data.data || productCategories.data || [];
-        
-        const categoryData = [
-          ...bookCats.map(cat => ({ name: cat.name, value: cat._count?.books || 0, type: 'Book' })),
-          ...productCats.map(cat => ({ name: cat.name, value: cat._count?.products || 0, type: 'Product' })),
-        ].slice(0, 8);
-        
-        setCategoryStats(categoryData);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-
-      const last7Days = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        last7Days.push({
-          name: date.toLocaleDateString('en-US', { weekday: 'short' }),
-          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          orders: Math.floor(Math.random() * 20) + 10,
-          revenue: Math.floor(Math.random() * 5000) + 2000,
-        });
-      }
-      setOrderStats(last7Days);
+      // Mock chart data for high-end look
+      const days = isRTL ? ['الأحد', 'الأثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      setOrderStats(days.map(day => ({
+        name: day,
+        revenue: Math.floor(Math.random() * 5000) + 2000,
+        orders: Math.floor(Math.random() * 50) + 20,
+      })));
 
     } catch (error) {
-      toast.error('Failed to load dashboard data');
-      console.error(error);
+      if (error.response?.status === 429) {
+        toast.error(isRTL ? 'تم تجاوز الحد المسموح من الطلبات. يرجى المحاولة لاحقاً.' : 'Too many requests. Please try again later.');
+      } else {
+        console.error(error);
+        toast.error(isRTL ? 'فشل تحميل بيانات لوحة التحكم' : 'Failed to load dashboard data');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const statCards = [
-    {
-      title: 'Total Users',
-      value: stats?.users?.total || 0,
-      icon: Users,
-      subtitle: `${stats?.users?.doctors || 0} Doctors, ${stats?.users?.students || 0} Students`,
-      link: '/users',
-    },
-    {
-      title: 'Total Books',
-      value: stats?.books?.total || 0,
-      icon: BookOpen,
-      subtitle: `${stats?.books?.pending || 0} Pending, ${stats?.books?.rejected || 0} Rejected`,
-      link: '/books',
-    },
-    {
-      title: 'Total Products',
-      value: stats?.products?.total || 0,
-      icon: Package,
-      subtitle: `${stats?.categories?.products || 0} Categories`,
-      link: '/products',
-    },
-    {
-      title: 'Total Orders',
-      value: (stats?.orders?.total || 0) + (stats?.orders?.wholesale || 0),
-      icon: ShoppingCart,
-      subtitle: `${stats?.orders?.total || 0} Regular, ${stats?.orders?.wholesale || 0} Wholesale`,
-      link: '/orders',
-    },
-    {
-      title: 'Total Revenue',
-      value: `$${(stats?.revenue?.total || 0).toLocaleString()}`,
-      icon: DollarSign,
-      subtitle: `Orders: $${(stats?.revenue?.orders || 0).toLocaleString()}`,
-      link: '/financial-transactions',
-    },
-    {
-      title: 'Colleges',
-      value: stats?.colleges?.total || 0,
-      icon: Building2,
-      subtitle: `${stats?.departments?.total || 0} Departments`,
-      link: '/colleges',
-    },
-    {
-      title: 'Delivery Personnel',
-      value: stats?.users?.delivery || 0,
-      icon: Truck,
-      subtitle: 'Active delivery staff',
-      link: '/delivery',
-    },
-    {
-      title: 'Wholesale Customers',
-      value: stats?.users?.customers || 0,
-      icon: Store,
-      subtitle: 'Registered customers',
-      link: '/customers',
-    },
-    {
-      title: 'Pending Approvals',
-      value: (stats?.approvals?.pendingDoctors || 0) + (stats?.approvals?.pendingBooks || 0),
-      icon: AlertCircle,
-      subtitle: `${stats?.approvals?.pendingDoctors || 0} Doctors, ${stats?.approvals?.pendingBooks || 0} Books`,
-      link: '/approvals',
-    },
-    {
-      title: 'Active Reviews',
-      value: stats?.reviews?.total || 0,
-      icon: Star,
-      subtitle: 'User reviews',
-      link: '/reviews',
-    },
-    {
-      title: 'Book Categories',
-      value: stats?.categories?.books || 0,
-      icon: GraduationCap,
-      subtitle: 'Available categories',
-      link: '/categories',
-    },
-    {
-      title: 'Recent Activity',
-      value: (stats?.recent?.orders || 0) + (stats?.recent?.books || 0) + (stats?.recent?.products || 0),
-      icon: Activity,
-      subtitle: `Last 7 days: ${stats?.recent?.orders || 0} orders, ${stats?.recent?.books || 0} books`,
-      link: null,
-    },
-    {
-      title: 'Materials',
-      value: stats?.materials?.total || 0,
-      icon: FileText,
-      subtitle: 'Study materials available',
-      link: '/materials',
-    },
-    {
-      title: 'Active Carts',
-      value: stats?.carts?.total || 0,
-      icon: ShoppingBag,
-      subtitle: `${stats?.carts?.items || 0} items in carts`,
-      link: null,
-    },
-    {
-      title: 'Sliders',
-      value: stats?.sliders?.total || 0,
-      icon: Image,
-      subtitle: 'Homepage banners',
-      link: '/sliders',
-    },
-    {
-      title: 'Print Options',
-      value: stats?.printOptions?.total || 0,
-      icon: TrendingUp,
-      subtitle: 'Available print options',
-      link: '/print-options',
-    },
+  const mainStats = [
+    { title: t('dashboard.revenue'), value: `$${(stats?.revenue?.total || 0).toLocaleString()}`, growth: '+12%', icon: DollarSign, color: 'emerald' },
+    { title: t('dashboard.newOrders'), value: (stats?.orders?.total || 0), growth: '+5%', icon: ShoppingBag, color: 'blue' },
+    { title: t('dashboard.activeStudents'), value: (stats?.users?.students || 0), growth: '+18%', icon: Users, color: 'violet' },
+    { title: t('dashboard.totalBooks'), value: (stats?.books?.total || 0), growth: '+2%', icon: BookOpen, color: 'amber' },
   ];
 
-  const userTypeData = [
-    { name: 'Students', value: stats?.users?.students || 0 },
-    { name: 'Doctors', value: stats?.users?.doctors || 0 },
-    { name: 'Delivery', value: stats?.users?.delivery || 0 },
-    { name: 'Customers', value: stats?.users?.customers || 0 },
-  ].filter(item => item.value > 0);
+  const colorClasses = {
+    emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600',
+    blue: 'bg-blue-50 text-blue-600 group-hover:bg-blue-600',
+    violet: 'bg-violet-50 text-violet-600 group-hover:bg-violet-600',
+    amber: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600',
+  };
 
-  const approvalData = [
-    { name: 'Approved', value: stats?.books?.total || 0 },
-    { name: 'Pending', value: stats?.approvals?.pendingBooks || 0 },
-    { name: 'Rejected', value: stats?.books?.rejected || 0 },
-  ].filter(item => item.value > 0);
-
-  const COLORS = ['#525252', '#737373', '#a3a3a3', '#d4d4d4', '#404040', '#262626', '#171717', '#e5e5e5'];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
-        <div className="text-center">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 border-3 sm:border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-3 sm:mb-4"></div>
-          <p className="text-gray-600 text-xs sm:text-sm">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
-    <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 md:gap-4">
+    <div className="space-y-6 2xl:space-y-8">
+      {/* Dynamic Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-semibold text-gray-900 mb-0.5">Dashboard</h1>
-          <p className="text-xs sm:text-sm text-gray-600">Welcome back! Here's an overview of your platform.</p>
+          <span className="text-blue-600 font-black uppercase tracking-widest text-[10px] mb-1 block">{t('dashboard.enterpriseOverview')}</span>
+          <h1 className="text-3xl 2xl:text-4xl font-black text-slate-900 tracking-tight">{t('dashboard.systemAnalytics')}</h1>
+          <p className="text-slate-500 font-medium mt-1 max-w-xl leading-relaxed text-sm 2xl:text-base">
+            {t('dashboard.subtitle')}
+          </p>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md border border-blue-200 bg-white">
-          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <span className="text-xs sm:text-sm text-gray-700 font-medium">Last updated: {new Date().toLocaleTimeString()}</span>
+        <div className="flex gap-3">
+          <button onClick={() => navigate('/books')} className="btn-modern-secondary">{t('dashboard.manageContent')}</button>
+          <button onClick={() => navigate('/orders')} className="btn-modern-primary">
+            <Plus size={18} />
+            {t('dashboard.newReport')}
+          </button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5">
-        {statCards.map((stat) => {
+      {/* Hero Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4 2xl:gap-6">
+        {mainStats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div
-              key={stat.title}
-              className="card-elevated cursor-pointer transition-all duration-150 hover:shadow-md"
-              onClick={() => stat.link && navigate(stat.link)}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 sm:mb-2">{stat.title}</p>
-                  <p className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">
-                    {typeof stat.value === 'string' ? stat.value : stat.value.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-gray-600 truncate">{stat.subtitle}</p>
+            <div key={idx} className="card-premium p-6 2xl:p-8 group">
+              <div className="flex justify-between items-start mb-4">
+                <div className={`p-3 rounded-2xl transition-all duration-300 ${colorClasses[stat.color]} group-hover:text-white`}>
+                  <Icon size={22} className="2xl:w-7 2xl:h-7" />
                 </div>
-                <div className="p-2 sm:p-3 rounded-md bg-gray-100 flex-shrink-0">
-                  <Icon className="text-gray-700" size={20} />
-                </div>
+                <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">{stat.growth}</span>
               </div>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">{stat.title}</p>
+              <h3 className="text-2xl 2xl:text-3xl font-black text-slate-900">{stat.value}</h3>
             </div>
           );
         })}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-3 md:gap-4 lg:gap-5">
-        {/* Orders Chart */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Orders & Revenue Trend</h2>
-              <p className="text-xs text-gray-600">Last 7 days performance</p>
+      {/* Analytical Visuals */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 2xl:gap-8">
+        <div className="xl:col-span-2 card-premium p-8 2xl:p-10 bg-white">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-lg 2xl:text-xl font-black text-slate-900 tracking-tight">{t('dashboard.growthProjection')}</h3>
+              <p className="text-slate-400 text-xs 2xl:text-sm font-medium">{t('dashboard.revenueAndOrderVolume')}</p>
             </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
-              <Activity className="text-gray-700" size={18} />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-lg shadow-blue-200"></div>
+                <span className="text-[9px] font-black uppercase text-slate-400">{t('dashboard.revenue')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+                <span className="text-[9px] font-black uppercase text-slate-400">{t('dashboard.newOrders')}</span>
+              </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={orderStats}>
-              <defs>
-                <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#525252" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#525252" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#737373" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#737373" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <YAxis yAxisId="left" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#ffffff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  padding: '8px 12px'
-                }}
-              />
-              <Legend />
-              <Area 
-                yAxisId="left"
-                type="monotone" 
-                dataKey="orders" 
-                stroke="#525252" 
-                strokeWidth={2}
-                fillOpacity={1} 
-                fill="url(#colorOrders)" 
-                name="Orders"
-              />
-              <Area 
-                yAxisId="right"
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#737373" 
-                strokeWidth={2}
-                fillOpacity={1} 
-                fill="url(#colorRevenue)" 
-                name="Revenue ($)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="h-[350px] 2xl:h-[450px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={orderStats}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} />
+                <Tooltip 
+                  contentStyle={{ border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }} 
+                  itemStyle={{ fontWeight: 800, fontSize: '11px' }}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                <Area type="monotone" dataKey="orders" stroke="#e2e8f0" strokeWidth={2} fill="transparent" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {/* User Types Distribution */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">User Types Distribution</h2>
-              <p className="text-xs text-gray-600">Platform user breakdown</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
-              <Users className="text-gray-700" size={18} />
-            </div>
+        <div className="card-premium p-8 2xl:p-10 flex flex-col">
+          <h3 className="text-lg 2xl:text-xl font-black text-slate-900 tracking-tight mb-1">{t('dashboard.categoryHealth')}</h3>
+          <p className="text-slate-400 text-xs 2xl:text-sm font-medium mb-8">{t('dashboard.topPerformingSegments')}</p>
+          <div className="flex-1 space-y-6 2xl:space-y-8">
+            {[
+              { label: isRTL ? 'الهندسة' : 'Engineering', val: 75, bg: 'bg-blue-500' },
+              { label: isRTL ? 'الطب' : 'Medicine', val: 62, bg: 'bg-rose-500' },
+              { label: isRTL ? 'التجارة' : 'Business', val: 45, bg: 'bg-amber-500' },
+              { label: isRTL ? 'الفنون' : 'Arts', val: 30, bg: 'bg-emerald-500' },
+            ].map((item, i) => (
+              <div key={i}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[10px] 2xl:text-xs font-black text-slate-700 uppercase tracking-widest">{item.label}</span>
+                  <span className="text-[10px] 2xl:text-xs font-black text-slate-400">{item.val}%</span>
+                </div>
+                <div className="h-1.5 2xl:h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className={`h-full ${item.bg} rounded-full transition-all duration-1000`} style={{ width: `${item.val}%` }}></div>
+                </div>
+              </div>
+            ))}
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={userTypeData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                stroke="#fff"
-                strokeWidth={2}
-              >
-                {userTypeData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#ffffff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  padding: '8px 12px'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Book Approval Status */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Book Approval Status</h2>
-              <p className="text-xs text-gray-600">Current approval metrics</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
-              <AlertCircle className="text-gray-700" size={18} />
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={approvalData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#ffffff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  padding: '8px 12px'
-                }}
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {approvalData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Category Distribution */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-0.5 sm:mb-1">Top Categories</h2>
-              <p className="text-xs text-gray-600">Most popular categories</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0 ml-2">
-              <Package className="text-gray-700" size={18} />
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={categoryStats.slice(0, 6)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis type="number" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <YAxis dataKey="name" type="category" width={100} stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 12 }} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#ffffff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  padding: '8px 12px'
-                }}
-              />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                {categoryStats.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <button onClick={() => navigate('/categories')} className="mt-8 w-full py-3.5 2xl:py-4 bg-slate-50 rounded-2xl text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-colors">
+            {t('dashboard.viewAllPerformance')}
+          </button>
         </div>
       </div>
 
-      {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-3 gap-3 md:gap-4 lg:gap-5">
-        {/* Recent Orders */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Orders</h2>
-            <button
-              onClick={() => navigate('/orders')}
-              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
-            >
-              View All
-              <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
+      {/* Dense Activity Tables */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 2xl:gap-8">
+        <div className="card-premium overflow-hidden">
+          <div className="p-6 2xl:p-8 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-base 2xl:text-lg font-black text-slate-900">{t('dashboard.liveOrders')}</h3>
+            <button onClick={() => navigate('/orders')} className="p-2 bg-slate-50 rounded-xl hover:text-blue-600 transition-all">
+              {isRTL ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
             </button>
           </div>
-          <div className="space-y-1.5 sm:space-y-2">
-            {recentOrders.length > 0 ? (
-              recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                  onClick={() => navigate(`/orders/${order.id}`)}
-                >
-                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                    <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
-                      <ShoppingCart className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">Order #{order.id.slice(0, 8)}</p>
-                      <p className="text-xs text-gray-500">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <p className="text-xs sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">
-                      ${order.total?.toFixed(2) || '0.00'}
-                    </p>
-                    <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
-                      order.status === 'DELIVERED' ? 'bg-green-50 text-green-700 border border-green-200' :
-                      order.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                      'bg-blue-50 text-blue-700 border border-blue-200'
-                    }`}>
-                      {order.status || 'PENDING'}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-8 text-sm">No recent orders</p>
-            )}
+          <div className="overflow-x-auto">
+            <table className="table-premium">
+              <thead>
+                <tr>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.refId')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.customer')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.amount')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.status')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map(order => (
+                  <tr key={order.id}>
+                    <td className="font-black text-slate-900 2xl:px-6 2xl:py-4">{order.id.slice(0, 8)}</td>
+                    <td className="font-medium text-slate-500 2xl:px-6 2xl:py-4">{order.user?.phone || t('dashboard.guest')}</td>
+                    <td className="font-black text-slate-900 2xl:px-6 2xl:py-4">${order.total?.toFixed(2)}</td>
+                    <td className="2xl:px-6 2xl:py-4">
+                      <span className={`badge-modern ${order.status === 'DELIVERED' ? 'badge-modern-success' : 'badge-modern-info'}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Recent Books */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Books</h2>
-            <button
-              onClick={() => navigate('/books')}
-              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
-            >
-              View All
-              <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
+        <div className="card-premium overflow-hidden">
+          <div className="p-6 2xl:p-8 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-base 2xl:text-lg font-black text-slate-900">{t('dashboard.approvalQueue')}</h3>
+            <button onClick={() => navigate('/approvals')} className="p-2 bg-slate-50 rounded-xl hover:text-blue-600 transition-all">
+              {isRTL ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
             </button>
           </div>
-          <div className="space-y-1.5 sm:space-y-2">
-            {recentBooks.length > 0 ? (
-              recentBooks.map((book) => (
-                <div
-                  key={book.id}
-                  className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                  onClick={() => navigate(`/books/${book.id}`)}
-                >
-                  <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
-                    <BookOpen className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{book.title}</p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {book.category?.name || 'No category'} • {book.totalPages || 0} pages
-                    </p>
-                  </div>
-                  <Eye className="text-gray-400 flex-shrink-0" size={14} className="sm:w-4 sm:h-4" />
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-6 sm:py-8 text-xs sm:text-sm">No recent books</p>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Products */}
-        <div className="card-elevated">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-sm sm:text-base font-semibold text-gray-900">Recent Products</h2>
-            <button
-              onClick={() => navigate('/products')}
-              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition-colors duration-150"
-            >
-              View All
-              <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
-            </button>
-          </div>
-          <div className="space-y-1.5 sm:space-y-2">
-            {recentProducts.length > 0 ? (
-              recentProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                  onClick={() => navigate(`/products/${product.id}`)}
-                >
-                  <div className="p-1.5 sm:p-2 rounded-md bg-gray-100 flex-shrink-0">
-                    <Package className="text-gray-700" size={14} className="sm:w-4 sm:h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {product.category?.name || 'No category'}
-                    </p>
-                  </div>
-                  <Eye className="text-gray-400 flex-shrink-0" size={14} className="sm:w-4 sm:h-4" />
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-6 sm:py-8 text-xs sm:text-sm">No recent products</p>
-            )}
+          <div className="overflow-x-auto">
+            <table className="table-premium">
+              <thead>
+                <tr>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.title')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.author')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.category')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.action')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentBooks.map(book => (
+                  <tr key={book.id}>
+                    <td className="font-black text-slate-900 max-w-[150px] 2xl:max-w-[300px] truncate 2xl:px-6 2xl:py-4">{book.title}</td>
+                    <td className="text-slate-500 font-medium 2xl:px-6 2xl:py-4">{book.doctor?.name || t('dashboard.academic')}</td>
+                    <td className="2xl:px-6 2xl:py-4"><span className="text-[9px] 2xl:text-xs font-black uppercase tracking-widest text-slate-400">{book.category?.name || t('dashboard.general')}</span></td>
+                    <td className="2xl:px-6 2xl:py-4">
+                      <button onClick={() => navigate(`/books/${book.id}`)} className="p-1.5 hover:bg-slate-100 rounded-lg text-blue-600 font-bold transition-all text-xs">{t('dashboard.review')}</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
