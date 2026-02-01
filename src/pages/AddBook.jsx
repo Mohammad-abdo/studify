@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, BookOpen, Layers, Info, Globe, Image as ImageIcon, FileText } from 'lucide-react';
+import { ArrowLeft, Save, BookOpen, Layers, Info, Globe, Image as ImageIcon, FileText, Upload } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
@@ -11,7 +11,9 @@ const AddBook = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
+  const pdfInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [pdfUploading, setPdfUploading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [colleges, setColleges] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -69,6 +71,37 @@ const AddBook = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      toast.error(isRTL ? 'يرجى اختيار ملف PDF فقط' : 'Please select a PDF file only');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(isRTL ? 'الحد الأقصى 5 ميجابايت' : 'Maximum size is 5MB');
+      return;
+    }
+    setPdfUploading(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      const response = await api.post('/upload/single', formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = response.data?.data?.url || response.data?.url;
+      if (url) {
+        setFormData(prev => ({ ...prev, fileUrl: url }));
+        toast.success(t('pages.addBook.pdfUploaded'));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || (isRTL ? 'فشل رفع الملف' : 'Upload failed'));
+    } finally {
+      setPdfUploading(false);
+      if (pdfInputRef.current) pdfInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -238,7 +271,31 @@ const AddBook = () => {
               <div className="h-px bg-white/10"></div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{t('pages.addBook.digitalSource')}</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{t('pages.addBook.uploadPdf')}</label>
+                <p className="text-[10px] text-slate-500 mb-2">{t('pages.addBook.uploadPdfHint')}</p>
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handlePdfUpload}
+                  disabled={pdfUploading}
+                  className="hidden"
+                  id="book-pdf-upload"
+                />
+                <label
+                  htmlFor="book-pdf-upload"
+                  className={`flex items-center justify-center gap-2 w-full py-3 px-4 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white cursor-pointer hover:bg-white/10 transition-all border-dashed ${pdfUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {pdfUploading ? (
+                    <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {isRTL ? 'جاري الرفع...' : 'Uploading...'}</span>
+                  ) : (
+                    <><Upload size={16} /> {formData.fileUrl ? t('pages.addBook.pdfUploaded') : (isRTL ? 'اختر ملف PDF' : 'Choose PDF file')}</>
+                  )}
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{t('pages.addBook.orPasteUrl')}</label>
                 <div className="relative">
                   <FileText size={14} className={`absolute top-1/2 -translate-y-1/2 text-slate-500 ${isRTL ? 'right-4' : 'left-4'}`} />
                   <input

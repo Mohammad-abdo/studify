@@ -26,7 +26,7 @@ const PrintOptions = () => {
       const response = await api.get('/print-options');
       setOptions(response.data.data || response.data || []);
     } catch (error) {
-      toast.error(isRTL ? 'نظام: فشل مزامنة بيان الطباعة' : 'System: Print manifest synchronization failed');
+      toast.error(t('pages.printOptions.syncError'));
     } finally {
       setLoading(false);
     }
@@ -39,17 +39,17 @@ const PrintOptions = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#f43f5e',
-      confirmButtonText: isRTL ? 'تأكيد الحذف' : 'Purge Configuration',
+      confirmButtonText: t('pages.printOptions.confirmPurge'),
       reverseButtons: isRTL
     });
 
     if (result.isConfirmed) {
       try {
         await api.delete(`/print-options/${option.id}`);
-        toast.success(isRTL ? 'تم حذف تكوين الطباعة' : 'Print configuration purged');
+        toast.success(t('pages.printOptions.purgeSuccess'));
         fetchOptions();
       } catch (error) {
-        toast.error(isRTL ? 'فشل عملية الحذف: قفل السجل' : 'Purge operation failed: Registry lock');
+        toast.error(t('pages.printOptions.purgeError'));
       }
     }
   };

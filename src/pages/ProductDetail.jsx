@@ -28,7 +28,7 @@ const ProductDetail = () => {
       }
       setProduct(productData);
     } catch (error) {
-      toast.error('Inventory: Asset retrieval failed');
+      toast.error(t('pages.productDetail.retrieveFailed'));
       navigate('/products');
     } finally {
       setLoading(false);
@@ -39,7 +39,7 @@ const ProductDetail = () => {
     return (
       <div className="py-24 flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Retrieving Inventory Asset</span>
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.productDetail.retrievingAsset')}</span>
       </div>
     );
   }
@@ -52,10 +52,10 @@ const ProductDetail = () => {
     <div className="space-y-10 page-transition pb-20">
       <PageHeader
         title={product.name}
-        subtitle="Operational technical manifest and market classification of physical inventory"
-        breadcrumbs={[{ label: 'Products', path: '/products' }, { label: 'Asset Detail' }]}
+        subtitle={t('pages.productDetail.subtitle')}
+        breadcrumbs={[{ label: t('menu.products'), path: '/products' }, { label: t('pages.productDetail.title') }]}
         backPath="/products"
-        actionLabel="Modify Asset"
+        actionLabel={t('pages.productDetail.modifyAsset')}
         actionPath={`/products/edit/${product.id}`}
       />
 
@@ -82,7 +82,7 @@ const ProductDetail = () => {
               <div className="flex-1 space-y-8">
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Inventory Node</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">{t('pages.productDetail.inventoryNode')}</span>
                     <div className="h-px flex-1 bg-slate-50"></div>
                   </div>
                   <h2 className="text-3xl font-black text-slate-900 tracking-tight">{product.name}</h2>
@@ -91,18 +91,18 @@ const ProductDetail = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-8 p-8 bg-slate-50 rounded-3xl border border-slate-100">
                   <div className="space-y-1">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Node Identity</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{t('pages.productDetail.nodeIdentity')}</span>
                     <p className="font-mono text-xs font-bold text-slate-900 uppercase">#{product.id.slice(0, 8)}</p>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Classification</span>
-                    <p className="text-sm font-black text-slate-900 truncate">{product.category?.name || 'Uncategorized'}</p>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{t('pages.productDetail.classification')}</span>
+                    <p className="text-sm font-black text-slate-900 truncate">{product.category?.name || t('pages.productDetail.uncategorized')}</p>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Operational state</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{t('pages.productDetail.operationalState')}</span>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                      <span className="text-[10px] font-black uppercase text-slate-900">In Catalog</span>
+                      <span className="text-[10px] font-black uppercase text-slate-900">{t('pages.productDetail.inCatalog')}</span>
                     </div>
                   </div>
                 </div>
@@ -113,7 +113,7 @@ const ProductDetail = () => {
           {/* Visual Assets Matrix */}
           {images.length > 1 && (
             <div className="card-premium p-10 bg-white">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-8">Visual Evidence Matrix</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-8">{t('pages.productDetail.visualEvidenceMatrix')}</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {images.slice(1).map((img, i) => (
                   <div key={i} className="aspect-square rounded-2xl bg-slate-50 overflow-hidden border-2 border-white shadow-sm hover:border-indigo-500 transition-all cursor-pointer">
@@ -132,8 +132,8 @@ const ProductDetail = () => {
           <div className="card-premium overflow-hidden bg-white">
             <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
               <div>
-                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Wholesale Tiers</h3>
-                <p className="text-xs font-medium text-slate-400">Logical volume thresholds and market valuation</p>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">{t('pages.productDetail.wholesaleTiers')}</h3>
+                <p className="text-xs font-medium text-slate-400">{t('pages.productDetail.volumeThresholds')}</p>
               </div>
               <ShoppingBag size={24} className="text-slate-200" />
             </div>
@@ -141,12 +141,12 @@ const ProductDetail = () => {
               {product.pricing?.map((p, i) => (
                 <div key={i} className="p-8 space-y-4 hover:bg-slate-50/50 transition-all">
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Min Threshold</span>
-                    <span className="text-xs font-black text-slate-900">{p.minQuantity} Unit(s)</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{t('pages.productDetail.minThreshold')}</span>
+                    <span className="text-xs font-black text-slate-900">{p.minQuantity} {t('pages.productDetail.units')}</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-3xl font-black text-slate-900 tracking-tighter">${p.price?.toFixed(2)}</span>
-                    <span className="text-[10px] font-black uppercase text-indigo-500">Unit Rate</span>
+                    <span className="text-[10px] font-black uppercase text-indigo-500">{t('pages.productDetail.unitRate')}</span>
                   </div>
                 </div>
               ))}
@@ -157,19 +157,19 @@ const ProductDetail = () => {
         {/* System Sidebar */}
         <div className="w-full xl:w-96 space-y-8 shrink-0 lg:sticky lg:top-28">
           <div className="card-premium p-10 bg-slate-900 text-white border-none shadow-2xl shadow-slate-300">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-10">Registry Meta</h3>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-10">{t('pages.productDetail.registryMeta')}</h3>
             <div className="space-y-8">
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Entry Date</span>
-                  <span className="text-xs font-black text-white">{new Date(product.createdAt).toLocaleDateString()}</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('pages.productDetail.entryDate')}</span>
+                  <span className="text-xs font-black text-white">{new Date(product.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : undefined)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pricing Nodes</span>
-                  <span className="text-xs font-black text-white">{product.pricing?.length || 0} Tiers</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('pages.productDetail.pricingNodes')}</span>
+                  <span className="text-xs font-black text-white">{product.pricing?.length || 0} {t('pages.productDetail.tiers')}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Reviews</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('pages.productDetail.totalReviews')}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{product.reviews?.length || 0}</span>
                     <Star size={12} className="text-amber-400 fill-current" />
@@ -182,9 +182,9 @@ const ProductDetail = () => {
               <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
                 <div className="flex items-center gap-3 text-emerald-400 mb-2">
                   <ShieldCheck size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Asset Secured</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t('pages.productDetail.assetSecured')}</span>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium leading-relaxed uppercase tracking-wider">This asset is actively monitored in the global inventory registry.</p>
+                <p className="text-[10px] text-slate-400 font-medium leading-relaxed uppercase tracking-wider">{t('pages.productDetail.assetSecuredDesc')}</p>
               </div>
             </div>
           </div>

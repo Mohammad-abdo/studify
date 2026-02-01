@@ -32,7 +32,7 @@ const PendingApprovals = () => {
   const handleApprove = async (item) => {
     const result = await Swal.fire({
       title: t('pages.approvals.grantApproval'),
-      text: t('pages.approvals.grantApprovalDesc').replace('{name}', item.user?.name || item.title),
+      text: t('pages.approvals.grantApprovalDesc').replace('{name}', type === 'DOCTOR' ? (item.name || item.user?.phone) : item.title),
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#10b981',
@@ -139,7 +139,7 @@ const PendingApprovals = () => {
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">{t('pages.approvals.pendingReview')}</span>
-                      <h3 className="text-base 2xl:text-lg font-black text-slate-900 tracking-tight">{type === 'DOCTOR' ? (item.user?.name || item.name) : item.title}</h3>
+                      <h3 className="text-base 2xl:text-lg font-black text-slate-900 tracking-tight">{type === 'DOCTOR' ? item.name : item.title}</h3>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
                       {type === 'DOCTOR' ? <UserCheck size={20} /> : <BookOpen size={20} />}
@@ -165,7 +165,7 @@ const PendingApprovals = () => {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.approvals.contributor')}</span>
-                        <span className="text-sm font-bold text-slate-700">{item.doctor?.user?.name || t('pages.approvals.academicStaff')}</span>
+                        <span className="text-sm font-bold text-slate-700">{item.doctor?.name || t('pages.approvals.academicStaff')}</span>
                       </div>
                       <p className="text-xs 2xl:text-sm text-slate-500 font-medium line-clamp-2 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">{item.description}</p>
                     </div>

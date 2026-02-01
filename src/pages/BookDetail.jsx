@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Edit, BookOpen, User, Building, Tag, FileText, Calendar, CheckCircle, Clock, XCircle, Layout, Layers, ShieldCheck, Star } from 'lucide-react';
+import { ArrowLeft, Edit, BookOpen, User, Building, Tag, FileText, Calendar, CheckCircle, Clock, XCircle, Layout, Layers, ShieldCheck, Star, DollarSign } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';

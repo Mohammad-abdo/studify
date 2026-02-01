@@ -56,14 +56,22 @@
   body {
     @apply text-slate-800 antialiased;
     background-color: #f8fafc;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Source Sans 3', 'SN Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
   }
 
-  /* RTL Support */
+  /* RTL Support - Arabic font: Alexandria */
   [dir="rtl"] {
     direction: rtl;
-    font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Alexandria', sans-serif;
+  }
+
+  .font-arabic {
+    font-family: 'Alexandria', sans-serif;
+  }
+
+  .font-english {
+    font-family: 'Source Sans 3', 'SN Pro', sans-serif;
   }
 }
 

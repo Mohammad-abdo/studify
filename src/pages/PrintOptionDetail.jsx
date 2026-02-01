@@ -15,8 +15,12 @@ const PrintOptionDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (id === 'add' || id === 'edit') {
+      navigate('/print-options', { replace: true });
+      return;
+    }
     fetchPrintOption();
-  }, [id]);
+  }, [id, navigate]);
 
   const fetchPrintOption = async () => {
     try {

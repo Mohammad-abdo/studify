@@ -18,6 +18,9 @@ const PrintCenterForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
+    address: '',
+    latitude: '',
+    longitude: '',
     phone: '',
     email: '',
     password: '',
@@ -38,10 +41,13 @@ const PrintCenterForm = () => {
       setFormData({
         name: data.name,
         location: data.location || '',
+        address: data.address || '',
+        latitude: data.latitude ?? '',
+        longitude: data.longitude ?? '',
         phone: data.user.phone,
         email: data.user.email || '',
         isActive: data.isActive,
-        password: '', // Don't show password
+        password: '',
       });
     } catch (error) {
       toast.error(isRTL ? 'خطأ في استرجاع بيانات المطبعة' : 'Error fetching center data');
@@ -59,23 +65,24 @@ const PrintCenterForm = () => {
       if (isEdit) {
         await api.put(`/print-centers/${id}`, {
           name: formData.name,
-          location: formData.location,
+          location: formData.location || null,
+          address: formData.address || null,
+          latitude: formData.latitude ? Number(formData.latitude) : null,
+          longitude: formData.longitude ? Number(formData.longitude) : null,
           isActive: formData.isActive,
         });
         toast.success(isRTL ? 'تم تحديث البيانات بنجاح' : 'Center updated successfully');
       } else {
-        // For new center, we need to create a user first
-        // Usually handled by a dedicated endpoint, but we'll use auth/register
-        await api.post('/auth/register', {
+        await api.post('/print-centers', {
           phone: formData.phone,
           password: formData.password,
-          email: formData.email,
+          email: formData.email || null,
           name: formData.name,
-          type: 'PRINT_CENTER',
+          location: formData.location || null,
+          address: formData.address || null,
+          latitude: formData.latitude ? Number(formData.latitude) : null,
+          longitude: formData.longitude ? Number(formData.longitude) : null,
         });
-        
-        // After user creation, we might need to update the location if the register doesn't support it
-        // But our updated authService already creates the PrintCenter profile
         toast.success(isRTL ? 'تم تسجيل المطبعة بنجاح' : 'Print center registered successfully');
       }
       navigate('/print-centers');
@@ -188,17 +195,53 @@ const PrintCenterForm = () => {
 
             {/* Location */}
             <div className="space-y-2 md:col-span-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pr-4">{isRTL ? 'الموقع الجغرافي' : 'Geographic Node'}</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pr-4">{isRTL ? 'الموقع (وصف)' : 'Location (description)'}</label>
               <div className="relative group">
                 <MapPin size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-teal-600 transition-colors" />
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder={isRTL ? 'أدخل الموقع التفصيلي للمطبعة...' : 'Enter physical location details...'}
+                  placeholder={isRTL ? 'مثال: مبنى أ، الطابق الأرضي' : 'e.g. Building A, Ground Floor'}
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-teal-600/20 focus:bg-white rounded-2xl py-4 pr-14 pl-6 font-bold text-slate-900 placeholder:text-slate-300 transition-all outline-none text-sm"
                 />
               </div>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pr-4">{isRTL ? 'العنوان الكامل' : 'Full address'}</label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder={isRTL ? 'العنوان للخريطة والتوصيل' : 'Address for map and delivery'}
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-teal-600/20 focus:bg-white rounded-2xl py-4 px-6 font-bold text-slate-900 placeholder:text-slate-300 transition-all outline-none text-sm"
+              />
+            </div>
+
+            {/* Latitude / Longitude (for proximity assignment) */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pr-4">{isRTL ? 'خط العرض' : 'Latitude'}</label>
+              <input
+                type="number"
+                step="any"
+                value={formData.latitude}
+                onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                placeholder="30.0444"
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-teal-600/20 focus:bg-white rounded-2xl py-4 px-6 font-bold text-slate-900 placeholder:text-slate-300 transition-all outline-none text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pr-4">{isRTL ? 'خط الطول' : 'Longitude'}</label>
+              <input
+                type="number"
+                step="any"
+                value={formData.longitude}
+                onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                placeholder="31.2357"
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-teal-600/20 focus:bg-white rounded-2xl py-4 px-6 font-bold text-slate-900 placeholder:text-slate-300 transition-all outline-none text-sm"
+              />
             </div>
 
             {/* Is Active */}

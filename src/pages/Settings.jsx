@@ -1,28 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Settings as SettingsIcon, 
   Save, 
   User, 
-  Lock, 
   DollarSign, 
   Printer,
-  BookOpen,
-  FileText,
-  Package,
-  Plus,
-  Edit,
-  Trash2,
-  ExternalLink,
   ShieldAlert,
   Fingerprint,
-  Mail
+  Mail,
+  Percent,
+  Truck,
+  Building2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../config/api';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
-import DataTable from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -39,53 +31,59 @@ const Settings = () => {
     repeatPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  
-  // Pricing data
-  const [bookPricings, setBookPricings] = useState([]);
-  const [materialPricings, setMaterialPricings] = useState([]);
-  const [productPricings, setProductPricings] = useState([]);
-  const [printOptions, setPrintOptions] = useState([]);
-  const [pricingLoading, setPricingLoading] = useState(false);
-  const [printOptionsLoading, setPrintOptionsLoading] = useState(false);
+
+  // Financial settings (tax, commissions, shipping)
+  const [financialSettings, setFinancialSettings] = useState({
+    taxRate: 0,
+    commissionRate: 0,
+    shippingValue: 0,
+    deliveryCommissionRate: 0,
+    printCenterCommissionRate: 0,
+  });
+  const [financialLoading, setFinancialLoading] = useState(false);
+  const [financialSaving, setFinancialSaving] = useState(false);
 
   useEffect(() => {
-    if (activeTab === 'pricing') {
-      fetchPricingData();
-    } else if (activeTab === 'print-options') {
-      fetchPrintOptions();
+    if (user?.email !== undefined) {
+      setFormData(prev => ({ ...prev, email: user?.email || '' }));
+    }
+  }, [user?.email]);
+
+  useEffect(() => {
+    if (activeTab === 'financial') {
+      fetchFinancialSettings();
     }
   }, [activeTab]);
 
-  const fetchPricingData = async () => {
+  const fetchFinancialSettings = async () => {
     try {
-      setPricingLoading(true);
-      const [bookRes, materialRes, productRes] = await Promise.all([
-        api.get('/book-pricing?limit=100'),
-        api.get('/materials?limit=100').then(res => {
-          const materials = res.data.data || res.data || [];
-          return materials.flatMap(m => (m.pricing || []).map(p => ({ ...p, material: m })));
-        }).catch(() => []),
-        api.get('/product-pricing?limit=100'),
-      ]);
-      setBookPricings(bookRes.data.data || bookRes.data || []);
-      setMaterialPricings(materialRes || []);
-      setProductPricings(productRes.data.data || productRes.data || []);
+      setFinancialLoading(true);
+      const response = await api.get('/settings/financial');
+      const data = response.data.data || response.data;
+      setFinancialSettings({
+        taxRate: data.taxRate ?? 0,
+        commissionRate: data.commissionRate ?? 0,
+        shippingValue: data.shippingValue ?? 0,
+        deliveryCommissionRate: data.deliveryCommissionRate ?? 0,
+        printCenterCommissionRate: data.printCenterCommissionRate ?? 0,
+      });
     } catch (error) {
-      toast.error(isRTL ? 'نظام مالي: فشل مزامنة التسعير' : 'Financial system: Pricing synchronization failed');
+      toast.error(t('pages.settings.financialLoadError'));
     } finally {
-      setPricingLoading(false);
+      setFinancialLoading(false);
     }
   };
 
-  const fetchPrintOptions = async () => {
+  const handleFinancialSubmit = async (e) => {
+    e.preventDefault();
+    setFinancialSaving(true);
     try {
-      setPrintOptionsLoading(true);
-      const response = await api.get('/print-options?limit=100');
-      setPrintOptions(response.data.data || response.data || []);
+      await api.put('/settings/financial', financialSettings);
+      toast.success(t('pages.settings.financialSaved'));
     } catch (error) {
-      toast.error(isRTL ? 'نظام المخرجات: خيارات الطباعة غير متاحة' : 'Manifest system: Print options unavailable');
+      toast.error(isRTL ? 'فشل تحديث الإعدادات المالية' : 'Failed to update financial settings');
     } finally {
-      setPrintOptionsLoading(false);
+      setFinancialSaving(false);
     }
   };
 
@@ -117,61 +115,9 @@ const Settings = () => {
     }
   };
 
-  const handleDeletePricing = async (type, id) => {
-    const result = await Swal.fire({
-      title: t('pages.settings.purgeTier'),
-      text: t('pages.settings.purgeTierDesc'),
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#f43f5e',
-      confirmButtonText: t('pages.settings.abolishTier'),
-      reverseButtons: isRTL
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const endpoint = type === 'book' ? '/book-pricing' : '/product-pricing';
-        await api.delete(`${endpoint}/${id}`);
-        toast.success(isRTL ? 'تم إلغاء فئة السعر' : 'Price tier abolished');
-        fetchPricingData();
-      } catch (error) {
-        toast.error(isRTL ? 'فشل العملية: قيود مالية' : 'Operation failed: Financial restriction');
-      }
-    }
-  };
-
-  const bookPricingColumns = [
-    {
-      header: t('pages.settings.resource'),
-      accessor: 'book.title',
-      render: (p) => <span className="font-bold text-slate-900 truncate block max-w-[200px]">{p.book?.title}</span>
-    },
-    {
-      header: t('pages.settings.access'),
-      accessor: 'accessType',
-      render: (p) => <span className="badge-modern badge-modern-info">{p.accessType}</span>
-    },
-    {
-      header: t('pages.settings.value'),
-      accessor: 'price',
-      render: (p) => <span className="font-black text-slate-900">${p.price?.toFixed(2)}</span>
-    },
-    {
-      header: t('pages.settings.control'),
-      accessor: 'id',
-      align: 'right',
-      render: (p) => (
-        <div className="flex justify-end gap-1">
-          <button onClick={() => navigate(`/book-pricing/edit/${p.id}`)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Edit size={16} /></button>
-          <button onClick={() => handleDeletePricing('book', p.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"><Trash2 size={16} /></button>
-        </div>
-      )
-    }
-  ];
-
   const tabs = [
     { id: 'profile', label: t('pages.settings.identityAndSecurity'), icon: Fingerprint },
-    { id: 'pricing', label: t('pages.settings.financialMatrix'), icon: DollarSign },
+    { id: 'financial', label: t('pages.settings.financialControl'), icon: DollarSign },
     { id: 'print-options', label: t('pages.settings.outputManifests'), icon: Printer },
   ];
 
@@ -287,18 +233,121 @@ const Settings = () => {
             </div>
           )}
 
-          {activeTab === 'pricing' && (
+          {activeTab === 'financial' && (
             <div className="space-y-6">
-              <div className="card-premium overflow-hidden bg-white">
-                <div className="p-6 2xl:p-8 border-b border-slate-50 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><BookOpen size={20} /></div>
-                    <h3 className="text-base 2xl:text-lg font-black text-slate-900 uppercase tracking-tight">{t('pages.settings.academicAssetPricing')}</h3>
+              <div className="card-premium p-6 2xl:p-8 bg-white">
+                <div className="flex items-center gap-4 mb-8 border-b border-slate-50 pb-6">
+                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><DollarSign size={22} /></div>
+                  <div>
+                    <h3 className="text-lg 2xl:text-xl font-black text-slate-900">{t('pages.settings.financialControl')}</h3>
+                    <p className="text-xs 2xl:text-sm font-medium text-slate-400">{t('pages.settings.financialControlDesc')}</p>
                   </div>
-                  <button onClick={() => navigate('/book-pricing/add')} className="btn-modern-primary py-2 px-4 rounded-xl text-xs"><Plus size={16} /> {t('pages.settings.newTier')}</button>
                 </div>
-                <DataTable data={bookPricings} columns={bookPricingColumns} loading={pricingLoading} searchable />
+
+                {financialLoading ? (
+                  <div className="py-16 flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-slate-100 border-t-emerald-600 rounded-full animate-spin" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('common.loading')}</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleFinancialSubmit} className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 2xl:gap-8">
+                      <div className="space-y-2">
+                        <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Percent size={14} /> {t('pages.settings.taxRate')}
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.5}
+                          value={financialSettings.taxRate}
+                          onChange={(e) => setFinancialSettings({ ...financialSettings, taxRate: parseFloat(e.target.value) || 0 })}
+                          className="input-modern font-bold"
+                        />
+                        <p className="text-[10px] font-medium text-slate-400">{t('pages.settings.taxRateHint')}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Percent size={14} /> {t('pages.settings.commissionRate')}
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.5}
+                          value={financialSettings.commissionRate}
+                          onChange={(e) => setFinancialSettings({ ...financialSettings, commissionRate: parseFloat(e.target.value) || 0 })}
+                          className="input-modern font-bold"
+                        />
+                        <p className="text-[10px] font-medium text-slate-400">{t('pages.settings.commissionRateHint')}</p>
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Truck size={14} /> {t('pages.settings.shippingValue')}
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.01}
+                          value={financialSettings.shippingValue}
+                          onChange={(e) => setFinancialSettings({ ...financialSettings, shippingValue: parseFloat(e.target.value) || 0 })}
+                          className="input-modern font-bold max-w-xs"
+                        />
+                        <p className="text-[10px] font-medium text-slate-400">{t('pages.settings.shippingValueHint')}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Truck size={14} /> {t('pages.settings.deliveryCommissionRate')}
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.5}
+                          value={financialSettings.deliveryCommissionRate}
+                          onChange={(e) => setFinancialSettings({ ...financialSettings, deliveryCommissionRate: parseFloat(e.target.value) || 0 })}
+                          className="input-modern font-bold"
+                        />
+                        <p className="text-[10px] font-medium text-slate-400">{t('pages.settings.deliveryCommissionHint')}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className={`text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Building2 size={14} /> {t('pages.settings.printCenterCommissionRate')}
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.5}
+                          value={financialSettings.printCenterCommissionRate}
+                          onChange={(e) => setFinancialSettings({ ...financialSettings, printCenterCommissionRate: parseFloat(e.target.value) || 0 })}
+                          className="input-modern font-bold"
+                        />
+                        <p className="text-[10px] font-medium text-slate-400">{t('pages.settings.printCenterCommissionHint')}</p>
+                      </div>
+                    </div>
+                    <button type="submit" disabled={financialSaving} className="w-full md:w-auto btn-modern-primary py-4 2xl:py-5 px-8 rounded-2xl mt-4">
+                      {financialSaving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save size={18} /> {t('pages.settings.saveFinancial')}</>}
+                    </button>
+                  </form>
+                )}
               </div>
+            </div>
+          )}
+
+          {activeTab === 'print-options' && (
+            <div className="card-premium p-6 2xl:p-8 bg-white">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl"><Printer size={22} /></div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">{t('pages.settings.outputManifests')}</h3>
+                  <p className="text-xs font-medium text-slate-400">{isRTL ? 'إدارة خيارات الطباعة من قسم خيارات الطباعة' : 'Manage print options from Print Options section'}</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => navigate('/print-options')} className="btn-modern-secondary py-3 px-5 rounded-xl text-sm">
+                {isRTL ? 'فتح خيارات الطباعة' : 'Open Print Options'}
+              </button>
             </div>
           )}
         </div>

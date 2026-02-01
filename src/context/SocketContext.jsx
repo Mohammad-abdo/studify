@@ -11,16 +11,24 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     // Only connect if user is logged in
     if (user) {
-      const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // Use same host as API (strip /api from VITE_API_URL); default backend port is 6008
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:6008/api';
+      const socketUrl = apiUrl.replace(/\/api\/?$/, '') || 'http://localhost:6008';
       const newSocket = io(socketUrl, {
         withCredentials: true,
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
       });
 
       setSocket(newSocket);
 
       newSocket.on('connect', () => {
         console.log('🔌 Socket connected:', newSocket.id);
+      });
+      newSocket.on('connect_error', () => {
+        // Silent: backend may not have socket or may be on different port
       });
 
       return () => {

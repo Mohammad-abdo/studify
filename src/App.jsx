@@ -45,6 +45,7 @@ import AddUserRole from './pages/AddUserRole';
 // Profiles
 import Students from './pages/Students';
 import Doctors from './pages/Doctors';
+import DoctorDetail from './pages/DoctorDetail';
 import Customers from './pages/Customers';
 import Delivery from './pages/Delivery';
 import PrintCenters from './pages/PrintCenters';
@@ -73,6 +74,7 @@ import MaterialDetail from './pages/MaterialDetail';
 import OrderDetail from './pages/OrderDetail';
 import OrderTracking from './pages/OrderTracking';
 import PrintOptionDetail from './pages/PrintOptionDetail';
+import AddPrintOption from './pages/AddPrintOption';
 // General Pages
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
@@ -180,6 +182,7 @@ function App() {
               {/* Profiles */}
               <Route path="students" element={<Students />} />
               <Route path="doctors" element={<Doctors />} />
+              <Route path="doctors/:id" element={<DoctorDetail />} />
               <Route path="customers" element={<Customers />} />
               <Route path="delivery" element={<Delivery />} />
               <Route path="print-centers" element={<PrintCenters />} />
@@ -193,6 +196,8 @@ function App() {
               {/* Pricing */}
               <Route path="book-pricing" element={<BookPricing />} />
               <Route path="print-options" element={<PrintOptions />} />
+              <Route path="print-options/add" element={<AddPrintOption />} />
+              <Route path="print-options/edit/:id" element={<PrintOptionDetail />} />
               <Route path="print-options/:id" element={<PrintOptionDetail />} />
               <Route path="product-pricing" element={<ProductPricing />} />
               {/* Financial & Reports */}

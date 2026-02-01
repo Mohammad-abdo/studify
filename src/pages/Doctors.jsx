@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, Plus, Edit, Trash2, CheckCircle, XCircle, Clock, Search, ShieldCheck } from 'lucide-react';
+import { Stethoscope, Plus, Edit, Trash2, CheckCircle, XCircle, Clock, Search, ShieldCheck, Eye } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -108,6 +108,7 @@ const Doctors = () => {
       align: 'right',
       render: (doctor) => (
         <div className="flex items-center justify-end gap-1">
+          <button onClick={() => navigate(`/doctors/${doctor.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title={language === 'ar' ? 'عرض الملف' : 'View profile'}><Eye size={18} /></button>
           <button onClick={() => navigate(`/doctors/edit/${doctor.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
           <button onClick={() => handleDelete(doctor)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
