@@ -5,7 +5,8 @@
 import axios from 'axios';
 
 // const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:6008/api';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:6008/api';
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:6008/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://back-studify.developteam.site/api';
 
 // Store for rate limit retry attempts
 const rateLimitRetries = new Map();
