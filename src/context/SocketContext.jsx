@@ -11,9 +11,9 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     // Only connect if user is logged in
     if (user) {
-      // Use same host as API (strip /api from VITE_API_URL); default backend port is 6008
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:6008/api';
-      const socketUrl = apiUrl.replace(/\/api\/?$/, '') || 'http://localhost:6008';
+      // Use same host as API (strip /api). Default production so deployed app does not hit localhost.
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://back-studify.developteam.site/api';
+      const socketUrl = apiUrl.replace(/\/api\/?$/, '') || 'https://back-studify.developteam.site';
       const newSocket = io(socketUrl, {
         withCredentials: true,
         transports: ['polling', 'websocket'],
