@@ -1,10 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, Plus, Edit, Trash2, Truck, Search, Filter, ShoppingBag, Clock } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Truck,
+  Search,
+  Filter,
+  ShoppingBag,
+  Clock,
+  Package,
+  LayoutGrid,
+} from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import DataTable from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -24,7 +34,8 @@ const DeliveryAssignments = () => {
     try {
       setLoading(true);
       const response = await api.get('/delivery-assignments');
-      setAssignments(response.data.data || response.data || []);
+      const data = response.data?.data ?? response.data ?? [];
+      setAssignments(Array.isArray(data) ? data : []);
     } catch (error) {
       toast.error(isRTL ? 'لوجستيات: فشل مزامنة مصفوفة التكليفات' : 'Logistics: Assignment matrix sync failed');
     } finally {
@@ -40,7 +51,7 @@ const DeliveryAssignments = () => {
       showCancelButton: true,
       confirmButtonColor: '#f43f5e',
       confirmButtonText: t('pages.deliveryAssignments.confirmVoid'),
-      reverseButtons: isRTL
+      reverseButtons: isRTL,
     });
 
     if (result.isConfirmed) {
@@ -54,75 +65,20 @@ const DeliveryAssignments = () => {
     }
   };
 
-  const columns = [
-    {
-      header: t('pages.deliveryAssignments.deploymentNode'),
-      accessor: 'delivery',
-      render: (assignment) => (
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm">
-            <Truck size={20} />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-black text-slate-900 tracking-tight">{assignment.delivery?.name || t('pages.deliveryAssignments.assignedAgent')}</span>
-            <span className="text-[10px] font-bold text-slate-400 font-mono">NODE: {assignment.deliveryId?.slice(0, 8)}</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      header: t('pages.deliveryAssignments.targetManifest'),
-      accessor: 'orderId',
-      render: (assignment) => (
-        <div className="flex items-center gap-2">
-          <ShoppingBag size={14} className="text-slate-400" />
-          <span className="font-mono text-xs font-bold text-slate-600 uppercase tracking-tighter">#ORD-{assignment.orderId?.slice(0, 8)}</span>
-        </div>
-      ),
-    },
-    {
-      header: t('pages.deliveryAssignments.missionStatus'),
-      accessor: 'status',
-      align: 'center',
-      render: (assignment) => (
-        <div className="flex flex-col items-center gap-1">
-          <span className={`badge-modern ${assignment.status === 'DELIVERED' ? 'badge-modern-success' : 'badge-modern-info'}`}>
-            {assignment.status}
-          </span>
-          <span className="text-[9px] font-black uppercase text-slate-300">{t('pages.deliveryAssignments.liveTelemetry')}</span>
-        </div>
-      ),
-    },
-    {
-      header: t('pages.deliveryAssignments.dispatchTime'),
-      accessor: 'createdAt',
-      hideOnMobile: true,
-      render: (assignment) => (
-        <div className="flex items-center gap-2 text-slate-400 font-bold">
-          <Clock size={12} />
-          <span className="text-xs">{new Date(assignment.createdAt).toLocaleTimeString(isRTL ? 'ar-EG' : undefined, { hour: '2-digit', minute: '2-digit' })}</span>
-        </div>
-      )
-    },
-    {
-      header: t('pages.deliveryAssignments.operations'),
-      accessor: 'actions',
-      align: 'right',
-      render: (assignment) => (
-        <div className="flex items-center justify-end gap-1">
-          <button onClick={() => navigate(`/delivery-assignments/edit/${assignment.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
-          <button onClick={() => handleDelete(assignment)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
-        </div>
-      ),
-    },
-  ];
-
   const filteredAssignments = assignments.filter((assignment) => {
     const deliveryName = assignment.delivery?.name?.toLowerCase() || '';
     const orderId = assignment.orderId?.toLowerCase() || '';
     const search = searchTerm.toLowerCase();
     return deliveryName.includes(search) || orderId.includes(search);
   });
+
+  const formatTime = (dateStr) => {
+    const d = dateStr ? new Date(dateStr) : null;
+    if (!d || isNaN(d.getTime())) return '—';
+    return d.toLocaleTimeString(isRTL ? 'ar-EG' : undefined, { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getAssignmentTime = (a) => a.assignedAt || a.createdAt;
 
   return (
     <div className="space-y-10 page-transition pb-20">
@@ -146,9 +102,8 @@ const DeliveryAssignments = () => {
               className={`w-full bg-slate-50 border-none rounded-2xl py-4 font-bold text-sm focus:ring-4 focus:ring-blue-500/10 transition-all ${isRTL ? 'pr-12' : 'pl-12'}`}
             />
           </div>
-          
           <div className="flex items-center gap-3">
-            <button className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-slate-900 transition-all">
+            <button className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-slate-900 transition-all" title={t('pages.deliveryAssignments.missionStatus')}>
               <Filter size={20} />
             </button>
           </div>
@@ -157,17 +112,105 @@ const DeliveryAssignments = () => {
 
       {loading ? (
         <div className="py-24 flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.deliveryAssignments.syncingDeployment')}</span>
+          <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            {t('pages.deliveryAssignments.syncingDeployment')}
+          </span>
+        </div>
+      ) : filteredAssignments.length === 0 ? (
+        <div className="card-premium p-12 bg-white border-none shadow-xl shadow-slate-200/50 rounded-3xl text-center">
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+            <LayoutGrid size={40} />
+          </div>
+          <h3 className="font-black text-slate-800 text-lg mb-2">{t('pages.deliveryAssignments.noAssignments')}</h3>
+          <p className="text-slate-500 text-sm mb-6">{t('pages.deliveryAssignments.noAssignmentsHint')}</p>
+          <button
+            onClick={() => navigate('/delivery-assignments/add')}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={18} />
+            {t('pages.deliveryAssignments.deployAgent')}
+          </button>
         </div>
       ) : (
-        <div className="fade-in">
-          <DataTable
-            data={filteredAssignments}
-            columns={columns}
-            loading={false}
-            searchable={false}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 fade-in">
+          {filteredAssignments.map((assignment) => (
+            <div
+              key={assignment.id}
+              className="group relative bg-white border border-slate-200/80 rounded-2xl p-5 shadow-lg shadow-slate-200/30 hover:shadow-xl hover:border-blue-200/60 transition-all duration-200"
+            >
+              {/* Card header: delivery node icon + name */}
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
+                    <Truck size={24} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      {t('pages.deliveryAssignments.deploymentNode')}
+                    </p>
+                    <p className="font-black text-slate-900 truncate">
+                      {assignment.delivery?.name || t('pages.deliveryAssignments.assignedAgent')}
+                    </p>
+                    <p className="text-[10px] font-mono text-slate-400">ID: {assignment.deliveryId?.slice(0, 8)}</p>
+                  </div>
+                </div>
+                <span
+                  className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
+                    assignment.status === 'DELIVERED'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : assignment.status === 'PICKED_UP'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}
+                >
+                  {assignment.status}
+                </span>
+              </div>
+
+              {/* Order / target manifest */}
+              <div className="flex items-center gap-2 mb-3 py-2 px-3 rounded-xl bg-slate-50">
+                <ShoppingBag size={16} className="text-slate-500 flex-shrink-0" />
+                <span className="font-mono text-xs font-bold text-slate-700 uppercase">
+                  #{assignment.orderId?.slice(0, 8)}
+                </span>
+                <span className="text-[10px] text-slate-400">{t('pages.deliveryAssignments.targetManifest')}</span>
+              </div>
+
+              {/* Dispatch time */}
+              <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
+                <Clock size={14} className="flex-shrink-0" />
+                <span className="font-bold">{formatTime(getAssignmentTime(assignment))}</span>
+                <span className="text-[10px] text-slate-400">{t('pages.deliveryAssignments.dispatchTime')}</span>
+              </div>
+
+              {/* Actions */}
+              <div className={`flex items-center gap-2 pt-3 border-t border-slate-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <button
+                  onClick={() => assignment.orderId && navigate(`/orders/${assignment.orderId}`)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors"
+                  title={t('pages.deliveryAssignments.viewOrder')}
+                >
+                  <Package size={16} />
+                  {t('pages.deliveryAssignments.viewOrder')}
+                </button>
+                <button
+                  onClick={() => navigate(`/delivery-assignments/edit/${assignment.id}`)}
+                  className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
+                  title={t('pages.deliveryAssignments.operations')}
+                >
+                  <Edit size={18} />
+                </button>
+                <button
+                  onClick={() => handleDelete(assignment)}
+                  className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                  title={t('pages.deliveryAssignments.confirmVoid')}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

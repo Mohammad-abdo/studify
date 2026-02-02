@@ -8,6 +8,7 @@
     "accessGranted": "Access Granted. Welcome back.",
     "verificationFailed": "Identity verification failed",
     "authError": "A critical authentication error occurred.",
+    "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
     "copyright": "© 2026 Studify Enterprise System"
   },
   "common": {
@@ -183,6 +184,8 @@
       "refId": "Order Reference",
       "channel": "Channel",
       "terminalId": "Terminal ID (User)",
+      "customerName": "Customer Name",
+      "deliveryAddress": "Delivery Address",
       "manifest": "Manifest",
       "grossTotal": "Gross Total",
       "fulfillment": "Fulfillment",
@@ -577,7 +580,11 @@
       "syncingDeployment": "Syncing Deployment Data",
       "voidAssignment": "Void Assignment?",
       "voidAssignmentDesc": "This will detach the agent from the order. The order will return to the unassigned queue.",
-      "confirmVoid": "Void Assignment"
+      "confirmVoid": "Void Assignment",
+      "noAssignments": "No assignments yet",
+      "noAssignmentsHint": "Deploy an agent to start assigning orders.",
+      "order": "Order",
+      "viewOrder": "View order"
     },
     "deliveryLocations": {
       "title": "Geo-Logistic Registry",
@@ -932,6 +939,26 @@
       "pageUnitValue": "Price per page",
       "ratePerPage": "Per page"
     },
+    "printCenters": {
+      "detailTitle": "Print Center Details",
+      "detailSubtitle": "Full profile and all print assignments for this center",
+      "contact": "Contact",
+      "location": "Location",
+      "address": "Address",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "totalAssignments": "Total Assignments",
+      "assignmentsByStatus": "By Status",
+      "printAssignments": "Print Assignments",
+      "orderRef": "Order",
+      "assignmentStatus": "Status",
+      "assignedAt": "Assigned",
+      "customer": "Customer",
+      "viewOrder": "View Order",
+      "noAssignments": "No print assignments yet",
+      "noAssignmentsHint": "Orders assigned to this center will appear here."
+    },
     "printOptionDetail": {
       "title": "Print Configuration Manifest",
       "subtitle": "Detailed technical parameters and output protocols for physical production",
@@ -1173,7 +1200,10 @@
       "allocation": "Allocation",
       "valuation": "Valuation",
       "geographicTarget": "Geographic Target",
+      "deliveryAddress": "Delivery Address",
+      "noAddress": "No address provided",
       "endpointDeployment": "Endpoint for physical asset deployment",
+      "orderPlacedBy": "User who placed the order",
       "financialSettlement": "Financial Settlement",
       "assetSubtotal": "Asset Subtotal",
       "systemSurcharge": "System Surcharge (Tax)",
@@ -1185,7 +1215,17 @@
       "reviewOperator": "Review Operator Profile",
       "loading": "Decoding Transaction Manifest...",
       "syncError": "Transaction: Ledger entry retrieval failed",
-      "liveTrack": "Live Track Order"
+      "liveTrack": "Live Track Order",
+      "deliveryAssignment": "Delivery Assignment",
+      "deliveryAssignmentDesc": "Delivery person assigned to this order",
+      "printAssignment": "Print Assignment",
+      "printAssignmentDesc": "Print center assigned to this order",
+      "noDeliveryAssignment": "No delivery assigned yet",
+      "noPrintAssignment": "No print center assigned yet",
+      "deliveryAgent": "Delivery Agent",
+      "printCenter": "Print Center",
+      "assignmentStatus": "Status",
+      "assignedAt": "Assigned At"
     },
     "orderTracking": {
       "title": "Live Telemetry",

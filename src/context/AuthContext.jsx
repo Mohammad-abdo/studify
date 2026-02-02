@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../config/api';
 
 const AuthContext = createContext();
@@ -15,14 +15,19 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const checkAuthStarted = useRef(false);
+  const loginInProgress = useRef(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      checkAuth();
-    } else {
+    if (!token) {
       setLoading(false);
+      return;
     }
+    // Avoid duplicate profile calls (e.g. React Strict Mode double-mount)
+    if (checkAuthStarted.current) return;
+    checkAuthStarted.current = true;
+    checkAuth();
   }, []);
 
   const checkAuth = async () => {
@@ -40,6 +45,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (phone, password) => {
+    if (loginInProgress.current) {
+      return { success: false, error: 'Please wait...' };
+    }
+    loginInProgress.current = true;
     try {
       const response = await api.post('/auth/login', { phone, password });
       const { token, user } = response.data.data;
@@ -48,10 +57,20 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
+      const status = error.response?.status;
+      const message = error.response?.data?.error?.message;
+      if (status === 429) {
+        return {
+          success: false,
+          error: 'TOO_MANY_REQUESTS',
+        };
+      }
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Login failed',
+        error: message || 'Login failed',
       };
+    } finally {
+      loginInProgress.current = false;
     }
   };
 

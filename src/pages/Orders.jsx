@@ -34,10 +34,10 @@ const Orders = () => {
       if (filterStatus) params.append('status', filterStatus);
       if (filterType) params.append('orderType', filterType);
 
-      const response = await api.get(`/orders?${params}`);
+      const response = await api.get(`/admin/orders?${params}`);
       const data = response.data.data || response.data;
       setOrders(Array.isArray(data) ? data : []);
-      setTotal(response.data.pagination?.total || data.length || 0);
+      setTotal(response.data.pagination?.total || (Array.isArray(data) ? data.length : 0) || 0);
     } catch (error) {
       toast.error(isRTL ? 'فشل تحميل الطلبات' : 'Failed to load orders');
       console.error(error);
@@ -100,13 +100,26 @@ const Orders = () => {
       },
     },
     {
-      header: t('pages.orders.terminalId'),
-      accessor: 'user.phone',
+      header: t('pages.orders.customerName'),
+      accessor: 'customerName',
       hideOnMobile: true,
       render: (item) => (
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-slate-700">{item.user?.phone || t('pages.orders.guest')}</span>
-          <span className="text-[10px] font-medium text-slate-400">{item.user?.email || t('pages.orders.noElectronicMail')}</span>
+          <span className="text-sm font-bold text-slate-700">{item.customerName || item.user?.phone || t('pages.orders.guest')}</span>
+          <span className="text-[10px] font-medium text-slate-400">{item.user?.phone}</span>
+          {item.user?.email && <span className="text-[10px] font-medium text-slate-400">{item.user.email}</span>}
+        </div>
+      ),
+    },
+    {
+      header: t('pages.orders.deliveryAddress'),
+      accessor: 'deliveryAddress',
+      hideOnMobile: true,
+      render: (item) => (
+        <div className="flex flex-col max-w-[180px]">
+          <span className="text-xs font-medium text-slate-700 truncate" title={item.deliveryAddress || item.address || '—'}>
+            {item.deliveryAddress || item.address || '—'}
+          </span>
         </div>
       ),
     },

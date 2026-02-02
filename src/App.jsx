@@ -50,6 +50,7 @@ import Customers from './pages/Customers';
 import Delivery from './pages/Delivery';
 import PrintCenters from './pages/PrintCenters';
 import PrintCenterForm from './pages/PrintCenterForm';
+import PrintCenterDetail from './pages/PrintCenterDetail';
 // Pricing
 import BookPricing from './pages/BookPricing';
 import PrintOptions from './pages/PrintOptions';
@@ -188,6 +189,7 @@ function App() {
               <Route path="print-centers" element={<PrintCenters />} />
               <Route path="print-centers/add" element={<PrintCenterForm />} />
               <Route path="print-centers/edit/:id" element={<PrintCenterForm />} />
+              <Route path="print-centers/:id" element={<PrintCenterDetail />} />
               {/* Materials */}
               <Route path="materials" element={<Materials />} />
               <Route path="materials/add" element={<AddMaterial />} />

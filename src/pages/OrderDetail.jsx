@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Edit, ShoppingCart, Package, FileText, Printer, User, Calendar, DollarSign, ArrowLeft, ShieldCheck, Clock, MapPin, CreditCard, Navigation } from 'lucide-react';
+import { Edit, ShoppingCart, Package, FileText, Printer, User, Calendar, DollarSign, ArrowLeft, ShieldCheck, Clock, MapPin, CreditCard, Navigation, Truck } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';
@@ -165,21 +165,115 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Logistics Target */}
-          {order.shippingAddress && (
-            <div className="card-premium p-10 bg-white">
-              <div className="flex items-center gap-4 mb-8 border-b border-slate-50 pb-6">
-                <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><MapPin size={24} /></div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.orderDetail.geographicTarget')}</h3>
-                  <p className="text-sm font-medium text-slate-400">{t('pages.orderDetail.endpointDeployment')}</p>
-                </div>
-              </div>
-              <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
-                <p className="text-lg font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">{order.shippingAddress}</p>
+          {/* Delivery Address / Logistics Target */}
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-8 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl"><MapPin size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.orderDetail.deliveryAddress')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.orderDetail.endpointDeployment')}</p>
               </div>
             </div>
-          )}
+            <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
+              <p className="text-lg font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
+                {order.address || order.shippingAddress || t('pages.orderDetail.noAddress')}
+              </p>
+            </div>
+          </div>
+
+          {/* Delivery Assignment */}
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-8 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><Truck size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.orderDetail.deliveryAssignment')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.orderDetail.deliveryAssignmentDesc')}</p>
+              </div>
+            </div>
+            {order.assignment ? (
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.orderDetail.deliveryAgent')}</p>
+                    <p className="font-bold text-slate-900">{order.assignment.delivery?.name || order.assignment.delivery?.user?.phone || '—'}</p>
+                    <p className="text-xs text-slate-500">{order.assignment.delivery?.user?.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.orderDetail.assignmentStatus')}</p>
+                    <span className={`badge-modern ${order.assignment.status === 'DELIVERED' ? 'badge-modern-success' : 'badge-modern-info'}`}>
+                      {order.assignment.status}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.orderDetail.assignedAt')}</p>
+                    <p className="text-sm font-bold text-slate-700">
+                      {order.assignment.assignedAt
+                        ? new Date(order.assignment.assignedAt).toLocaleString(isRTL ? 'ar-EG' : undefined, { dateStyle: 'short', timeStyle: 'short' })
+                        : '—'}
+                    </p>
+                  </div>
+                </div>
+                {order.assignment.delivery?.id && (
+                  <button
+                    onClick={() => navigate(`/delivery-assignments`)}
+                    className="text-sm font-bold text-blue-600 hover:underline"
+                  >
+                    {isRTL ? 'عرض التكليفات' : 'View assignments'}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                <p className="text-slate-500 font-medium">{t('pages.orderDetail.noDeliveryAssignment')}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Print Assignment */}
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-8 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-violet-50 text-violet-600 rounded-2xl"><Printer size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.orderDetail.printAssignment')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.orderDetail.printAssignmentDesc')}</p>
+              </div>
+            </div>
+            {order.printAssignment ? (
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.orderDetail.printCenter')}</p>
+                    <p className="font-bold text-slate-900">{order.printAssignment.printCenter?.name || order.printAssignment.printCenter?.user?.phone || '—'}</p>
+                    <p className="text-xs text-slate-500">{order.printAssignment.printCenter?.user?.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.orderDetail.assignmentStatus')}</p>
+                    <span className="badge-modern badge-modern-info">{order.printAssignment.status}</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.orderDetail.assignedAt')}</p>
+                    <p className="text-sm font-bold text-slate-700">
+                      {order.printAssignment.assignedAt
+                        ? new Date(order.printAssignment.assignedAt).toLocaleString(isRTL ? 'ar-EG' : undefined, { dateStyle: 'short', timeStyle: 'short' })
+                        : '—'}
+                    </p>
+                  </div>
+                </div>
+                {order.printAssignment.printCenter?.id && (
+                  <button
+                    onClick={() => navigate(`/print-centers/${order.printAssignment.printCenter.id}`)}
+                    className="text-sm font-bold text-violet-600 hover:underline"
+                  >
+                    {isRTL ? 'عرض المطبعة' : 'View print center'}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                <p className="text-slate-500 font-medium">{t('pages.orderDetail.noPrintAssignment')}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Financial Sidebar */}
@@ -213,15 +307,18 @@ const OrderDetail = () => {
           </div>
 
           <div className="card-premium p-8 bg-white border-2 border-slate-50">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-8">{t('pages.orderDetail.operatorNode')}</h4>
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-8">{t('pages.orderDetail.orderPlacedBy')}</h4>
             <div className="flex items-center gap-4 mb-8">
               <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-100"><User size={24} /></div>
               <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                <span className="text-lg font-black text-slate-900 tracking-tight">{order.user?.phone || t('pages.orderDetail.guestNode')}</span>
+                <span className="text-lg font-black text-slate-900 tracking-tight">{order.customerName || order.user?.phone || t('pages.orderDetail.guestNode')}</span>
+                <span className="text-[10px] font-black uppercase text-slate-400 truncate max-w-[180px]">{order.user?.phone}</span>
                 <span className="text-[10px] font-black uppercase text-slate-400 truncate max-w-[180px]">{order.user?.email || t('pages.orderDetail.offlineRegistry')}</span>
               </div>
             </div>
-            <button onClick={() => navigate(`/users/${order.user?.id}`)} className="w-full py-4 bg-slate-50 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">{t('pages.orderDetail.reviewOperator')}</button>
+            {order.user?.id && (
+              <button onClick={() => navigate(`/users/${order.user.id}`)} className="w-full py-4 bg-slate-50 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">{t('pages.orderDetail.reviewOperator')}</button>
+            )}
           </div>
         </div>
       </div>

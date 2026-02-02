@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -10,6 +10,7 @@ const Login = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const submitLock = useRef(false);
   const { login } = useAuth();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
@@ -17,6 +18,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitLock.current || loading) return;
+    submitLock.current = true;
     setLoading(true);
 
     try {
@@ -25,12 +28,14 @@ const Login = () => {
         toast.success(t('login.accessGranted'));
         navigate('/');
       } else {
-        toast.error(result.error || t('login.verificationFailed'));
+        const msg = result.error === 'TOO_MANY_REQUESTS' ? t('login.tooManyRequests') : (result.error || t('login.verificationFailed'));
+        toast.error(msg);
       }
     } catch (error) {
       toast.error(t('login.authError'));
     } finally {
       setLoading(false);
+      submitLock.current = false;
     }
   };
 

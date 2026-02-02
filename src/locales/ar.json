@@ -8,6 +8,7 @@
     "accessGranted": "تم منح الوصول. مرحباً بعودتك.",
     "verificationFailed": "فشل التحقق من الهوية",
     "authError": "حدث خطأ فادح في المصادقة.",
+    "tooManyRequests": "محاولات كثيرة. انتظر دقيقة وحاول مرة أخرى.",
     "copyright": "© 2026 نظام مؤسسة Studify"
   },
   "common": {
@@ -183,6 +184,8 @@
       "refId": "مرجع الطلب",
       "channel": "القناة",
       "terminalId": "معرف الجهاز (المستخدم)",
+      "customerName": "اسم العميل",
+      "deliveryAddress": "عنوان التوصيل",
       "manifest": "البيان",
       "grossTotal": "الإجمالي الكلي",
       "fulfillment": "التنفيذ",
@@ -577,7 +580,11 @@
       "syncingDeployment": "جاري مزامنة بيانات الانتشار",
       "voidAssignment": "إلغاء التعيين؟",
       "voidAssignmentDesc": "سيؤدي هذا إلى فصل المندوب عن الطلب. سيعود الطلب إلى قائمة انتظار غير المعينين.",
-      "confirmVoid": "إلغاء التعيين"
+      "confirmVoid": "إلغاء التعيين",
+      "noAssignments": "لا توجد تكليفات بعد",
+      "noAssignmentsHint": "انشر مندوباً لبدء تعيين الطلبات.",
+      "order": "الطلب",
+      "viewOrder": "عرض الطلب"
     },
     "deliveryLocations": {
       "title": "سجل المواقع اللوجستية",
@@ -932,6 +939,26 @@
       "pageUnitValue": "السعر للصفحة",
       "ratePerPage": "للكل صفحة"
     },
+    "printCenters": {
+      "detailTitle": "تفاصيل المطبعة",
+      "detailSubtitle": "الملف الكامل وجميع تكليفات الطباعة لهذه المطبعة",
+      "contact": "الاتصال",
+      "location": "الموقع",
+      "address": "العنوان",
+      "status": "الحالة",
+      "active": "نشط",
+      "inactive": "معطل",
+      "totalAssignments": "إجمالي التكليفات",
+      "assignmentsByStatus": "حسب الحالة",
+      "printAssignments": "تكليفات الطباعة",
+      "orderRef": "الطلب",
+      "assignmentStatus": "الحالة",
+      "assignedAt": "تاريخ التعيين",
+      "customer": "العميل",
+      "viewOrder": "عرض الطلب",
+      "noAssignments": "لا توجد تكليفات طباعة بعد",
+      "noAssignmentsHint": "الطلبات المعينة لهذه المطبعة ستظهر هنا."
+    },
     "printOptionDetail": {
       "title": "بيان تكوين الطباعة",
       "subtitle": "المعلمات الفنية التفصيلية وبروتوكولات الإخراج للإنتاج المادي",
@@ -1173,7 +1200,10 @@
       "allocation": "التخصيص",
       "valuation": "التقييم",
       "geographicTarget": "الهدف الجغرافي",
+      "deliveryAddress": "عنوان التوصيل",
+      "noAddress": "لم يُذكر عنوان",
       "endpointDeployment": "نقطة النهاية لنشر الأصول المادية",
+      "orderPlacedBy": "المستخدم الذي أنشأ الطلب",
       "financialSettlement": "التسوية المالية",
       "assetSubtotal": "المجموع الفرعي للأصول",
       "systemSurcharge": "رسوم النظام الإضافية (الضريبة)",
@@ -1185,7 +1215,17 @@
       "reviewOperator": "مراجعة ملف المشغل",
       "loading": "جاري فك تشفير بيان المعاملة...",
       "syncError": "معاملة: فشل استرداد مدخل الدفتر",
-      "liveTrack": "تتبع الطلب مباشر"
+      "liveTrack": "تتبع الطلب مباشر",
+      "deliveryAssignment": "تعيين التوصيل",
+      "deliveryAssignmentDesc": "مندوب التوصيل المعين لهذا الطلب",
+      "printAssignment": "تعيين الطباعة",
+      "printAssignmentDesc": "المطبعة المعينة لهذا الطلب",
+      "noDeliveryAssignment": "لم يُعيَّن مندوب توصيل بعد",
+      "noPrintAssignment": "لم تُعيَّن مطبعة بعد",
+      "deliveryAgent": "مندوب التوصيل",
+      "printCenter": "المطبعة",
+      "assignmentStatus": "الحالة",
+      "assignedAt": "تاريخ التعيين"
     },
     "orderTracking": {
       "title": "القياس عن بعد المباشر",
