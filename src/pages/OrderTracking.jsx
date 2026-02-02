@@ -116,9 +116,10 @@ const OrderTracking = () => {
 
   if (!order) return null;
 
-  // Default center (e.g., Cairo) if no location yet
+  // Center: delivery location if available, else order destination (latitude/longitude), else Cairo
   const defaultCenter = [30.0444, 31.2357];
-  const mapCenter = deliveryLocation ? [deliveryLocation.lat, deliveryLocation.lng] : defaultCenter;
+  const orderDest = (order.latitude != null && order.longitude != null) ? [order.latitude, order.longitude] : null;
+  const mapCenter = deliveryLocation ? [deliveryLocation.lat, deliveryLocation.lng] : (orderDest || defaultCenter);
 
   return (
     <div className="space-y-6 page-transition pb-20">
@@ -154,6 +155,16 @@ const OrderTracking = () => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
+              {orderDest && (
+                <Marker position={orderDest}>
+                  <Popup>
+                    <div className={`p-2 ${isRTL ? 'text-right font-arabic' : 'text-left'}`}>
+                      <p className="font-black text-slate-900 uppercase tracking-tight mb-1">{t('pages.orderTracking.destination')}</p>
+                      <p className="text-xs font-bold text-slate-500">{order.address || '—'}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
               {deliveryLocation && (
                 <>
                   <ChangeView center={[deliveryLocation.lat, deliveryLocation.lng]} />

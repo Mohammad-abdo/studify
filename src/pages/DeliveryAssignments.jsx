@@ -183,6 +183,11 @@ const DeliveryAssignments = () => {
                 <span className="font-bold">{formatTime(getAssignmentTime(assignment))}</span>
                 <span className="text-[10px] text-slate-400">{t('pages.deliveryAssignments.dispatchTime')}</span>
               </div>
+              {(assignment.order?.latitude != null && assignment.order?.longitude != null) && (
+                <p className="text-[10px] font-mono text-slate-400 mb-2">
+                  📍 {assignment.order.latitude.toFixed(4)}, {assignment.order.longitude.toFixed(4)}
+                </p>
+              )}
 
               {/* Actions */}
               <div className={`flex items-center gap-2 pt-3 border-t border-slate-100 ${isRTL ? 'flex-row-reverse' : ''}`}>

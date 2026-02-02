@@ -178,6 +178,11 @@ const OrderDetail = () => {
               <p className="text-lg font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
                 {order.address || order.shippingAddress || t('pages.orderDetail.noAddress')}
               </p>
+              {(order.latitude != null && order.longitude != null) && (
+                <p className="mt-3 text-xs font-mono text-slate-500">
+                  {t('pages.orderDetail.coordinates') || 'Coordinates'}: {order.latitude.toFixed(6)}, {order.longitude.toFixed(6)}
+                </p>
+              )}
             </div>
           </div>
 

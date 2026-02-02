@@ -1202,6 +1202,7 @@
       "geographicTarget": "Geographic Target",
       "deliveryAddress": "Delivery Address",
       "noAddress": "No address provided",
+      "coordinates": "Coordinates",
       "endpointDeployment": "Endpoint for physical asset deployment",
       "orderPlacedBy": "User who placed the order",
       "financialSettlement": "Financial Settlement",

@@ -1202,6 +1202,7 @@
       "geographicTarget": "الهدف الجغرافي",
       "deliveryAddress": "عنوان التوصيل",
       "noAddress": "لم يُذكر عنوان",
+      "coordinates": "الإحداثيات",
       "endpointDeployment": "نقطة النهاية لنشر الأصول المادية",
       "orderPlacedBy": "المستخدم الذي أنشأ الطلب",
       "financialSettlement": "التسوية المالية",
