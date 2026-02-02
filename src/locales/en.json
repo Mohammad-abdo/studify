@@ -1244,7 +1244,10 @@
       "latitude": "Latitude Node",
       "longitude": "Longitude Node",
       "lastUpdate": "Last Sync",
-      "error": "Telemetry: Satellite link failed"
+      "error": "Telemetry: Satellite link failed",
+      "startPoint": "Start",
+      "currentPosition": "Current position",
+      "noDestinationCoords": "Destination coordinates not set for this order"
     },
     "materialDetail": {
       "title": "Resource Detail",

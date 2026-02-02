@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../config/api';
 import toast from 'react-hot-toast';
-import { Package, MapPin, Navigation, Clock, Phone, ArrowLeft } from 'lucide-react';
+import { Package, MapPin, Navigation, Clock, Phone } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 // Fix Leaflet marker icons
@@ -22,12 +22,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Custom marker for delivery
+// Custom marker for delivery (current position)
 const deliveryIcon = new L.Icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/4766/4766928.png',
   iconSize: [40, 40],
   iconAnchor: [20, 40],
   popupAnchor: [0, -40],
+});
+
+// Start point marker (green)
+const startIcon = new L.DivIcon({
+  className: 'custom-marker-start',
+  html: '<div style="background:#22c55e;width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+});
+
+// Destination marker (red/pin)
+const destinationIcon = new L.DivIcon({
+  className: 'custom-marker-dest',
+  html: '<div style="background:#ef4444;width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 // Component to auto-center map
@@ -46,6 +62,8 @@ const OrderTracking = () => {
 
   const [order, setOrder] = useState(null);
   const [deliveryLocation, setDeliveryLocation] = useState(null);
+  const [startLocation, setStartLocation] = useState(null);
+  const [routePoints, setRoutePoints] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,11 +72,8 @@ const OrderTracking = () => {
 
   useEffect(() => {
     if (socket && id) {
-      console.log('📡 Joining tracking room for order:', id);
       socket.emit('track_order', { orderId: id });
-
       socket.on('location_updated', (data) => {
-        console.log('📍 Real-time location received:', data);
         setDeliveryLocation({
           lat: data.latitude,
           lng: data.longitude,
@@ -66,7 +81,6 @@ const OrderTracking = () => {
           timestamp: data.timestamp
         });
       });
-
       return () => {
         socket.emit('untrack_order', { orderId: id });
         socket.off('location_updated');
@@ -80,21 +94,43 @@ const OrderTracking = () => {
       const orderData = response.data.data || response.data;
       setOrder(orderData);
 
-      // If delivery assignment exists, try to get initial location
       if (orderData.assignment?.deliveryId) {
+        const deliveryId = orderData.assignment.deliveryId;
         try {
-          const locRes = await api.get(`/delivery-locations?deliveryId=${orderData.assignment.deliveryId}&limit=1`);
-          const latestLoc = locRes.data.data?.[0];
-          if (latestLoc) {
-            setDeliveryLocation({
-              lat: latestLoc.latitude,
-              lng: latestLoc.longitude,
-              address: latestLoc.address,
-              timestamp: latestLoc.createdAt
+          // Route history (oldest first): first = start, all = path, last = latest current
+          const historyRes = await api.get(`/delivery-locations?deliveryId=${deliveryId}&order=asc&limit=50`);
+          const history = historyRes.data.data ?? historyRes.data ?? [];
+          const list = Array.isArray(history) ? history : [];
+          if (list.length > 0) {
+            const first = list[0];
+            setStartLocation({
+              lat: first.latitude,
+              lng: first.longitude,
+              address: first.address,
+              timestamp: first.createdAt
             });
+            setRoutePoints(list.map(l => [l.latitude, l.longitude]));
+            const latest = list[list.length - 1];
+            setDeliveryLocation({
+              lat: latest.latitude,
+              lng: latest.longitude,
+              address: latest.address,
+              timestamp: latest.createdAt
+            });
+          } else {
+            const latestRes = await api.get(`/delivery-locations?deliveryId=${deliveryId}&limit=1`);
+            const latestLoc = (latestRes.data.data ?? latestRes.data)?.[0];
+            if (latestLoc) {
+              setDeliveryLocation({
+                lat: latestLoc.latitude,
+                lng: latestLoc.longitude,
+                address: latestLoc.address,
+                timestamp: latestLoc.createdAt
+              });
+            }
           }
         } catch (e) {
-          console.error('Could not fetch initial delivery location', e);
+          console.error('Could not fetch delivery location history', e);
         }
       }
     } catch (error) {
@@ -116,10 +152,29 @@ const OrderTracking = () => {
 
   if (!order) return null;
 
-  // Center: delivery location if available, else order destination (latitude/longitude), else Cairo
+  // Center: delivery current if available, else start, else order destination, else Cairo
   const defaultCenter = [30.0444, 31.2357];
   const orderDest = (order.latitude != null && order.longitude != null) ? [order.latitude, order.longitude] : null;
-  const mapCenter = deliveryLocation ? [deliveryLocation.lat, deliveryLocation.lng] : (orderDest || defaultCenter);
+  const mapCenter = deliveryLocation
+    ? [deliveryLocation.lat, deliveryLocation.lng]
+    : (startLocation ? [startLocation.lat, startLocation.lng] : (orderDest || defaultCenter));
+
+  // Polyline: route (start → ... → current) → destination
+  const polylinePositions = [];
+  if (routePoints.length > 0) {
+    routePoints.forEach(p => { if (p[0] != null && p[1] != null) polylinePositions.push(p); });
+  } else if (startLocation) {
+    polylinePositions.push([startLocation.lat, startLocation.lng]);
+  }
+  if (deliveryLocation) {
+    const cur = [deliveryLocation.lat, deliveryLocation.lng];
+    const last = polylinePositions[polylinePositions.length - 1];
+    if (!last || last[0] !== cur[0] || last[1] !== cur[1]) polylinePositions.push(cur);
+  }
+  if (orderDest) polylinePositions.push(orderDest);
+
+  const hasAnyLocation = deliveryLocation || startLocation || orderDest;
+  const showWaitingOverlay = order.assignment?.deliveryId && !hasAnyLocation;
 
   return (
     <div className="space-y-6 page-transition pb-20">
@@ -138,7 +193,7 @@ const OrderTracking = () => {
         {/* Map Area */}
         <div className="xl:col-span-3">
           <div className="card-premium h-[600px] overflow-hidden relative border-none shadow-2xl">
-            {!deliveryLocation && (
+            {showWaitingOverlay && (
               <div className="absolute inset-0 z-[1000] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-10 text-center">
                 <div className="max-w-md bg-white p-8 rounded-3xl shadow-2xl">
                   <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -149,18 +204,31 @@ const OrderTracking = () => {
                 </div>
               </div>
             )}
-            
-            <MapContainer center={mapCenter} zoom={15} style={{ height: '100%', width: '100%' }}>
+
+            <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
+              {polylinePositions.length >= 2 && (
+                <Polyline positions={polylinePositions} pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8 }} />
+              )}
+              {startLocation && (
+                <Marker position={[startLocation.lat, startLocation.lng]} icon={startIcon}>
+                  <Popup>
+                    <div className={`p-2 ${isRTL ? 'text-right font-arabic' : 'text-left'}`}>
+                      <p className="font-black text-slate-900 uppercase tracking-tight mb-1">{t('pages.orderTracking.startPoint')}</p>
+                      <p className="text-xs font-bold text-slate-500">{startLocation.address || '—'}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
               {orderDest && (
-                <Marker position={orderDest}>
+                <Marker position={orderDest} icon={destinationIcon}>
                   <Popup>
                     <div className={`p-2 ${isRTL ? 'text-right font-arabic' : 'text-left'}`}>
                       <p className="font-black text-slate-900 uppercase tracking-tight mb-1">{t('pages.orderTracking.destination')}</p>
-                      <p className="text-xs font-bold text-slate-500">{order.address || '—'}</p>
+                      <p className="text-xs font-bold text-slate-500">{order.address || t('pages.orderTracking.noDestinationCoords')}</p>
                     </div>
                   </Popup>
                 </Marker>
@@ -171,7 +239,7 @@ const OrderTracking = () => {
                   <Marker position={[deliveryLocation.lat, deliveryLocation.lng]} icon={deliveryIcon}>
                     <Popup>
                       <div className={`p-2 ${isRTL ? 'text-right font-arabic' : 'text-left'}`}>
-                        <p className="font-black text-slate-900 uppercase tracking-tight mb-1">{t('pages.orderTracking.deliveryLocation')}</p>
+                        <p className="font-black text-slate-900 uppercase tracking-tight mb-1">{t('pages.orderTracking.currentPosition')}</p>
                         <p className="text-xs font-bold text-slate-500">{deliveryLocation.address || t('pages.orderTracking.moving')}</p>
                       </div>
                     </Popup>
