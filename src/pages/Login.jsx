@@ -28,7 +28,12 @@ const Login = () => {
         toast.success(t('login.accessGranted'));
         navigate('/');
       } else {
-        const msg = result.error === 'TOO_MANY_REQUESTS' ? t('login.tooManyRequests') : (result.error || t('login.verificationFailed'));
+        const msg =
+          result.error === 'TOO_MANY_REQUESTS'
+            ? t('login.tooManyRequests')
+            : result.error === 'ADMIN_ONLY'
+              ? t('login.adminOnly')
+              : (result.error || t('login.verificationFailed'));
         toast.error(msg);
       }
     } catch (error) {

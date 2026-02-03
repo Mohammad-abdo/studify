@@ -33,7 +33,15 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await api.get('/auth/profile');
-      setUser(response.data.data);
+      const userData = response.data.data;
+      // لوحة الإدارة للمسؤولين فقط — رفض أي نوع مستخدم آخر
+      if (userData?.type !== 'ADMIN') {
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+        setUser(null);
+        return;
+      }
+      setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
       localStorage.removeItem('token');
@@ -51,9 +59,16 @@ export const AuthProvider = ({ children }) => {
     loginInProgress.current = true;
     try {
       const response = await api.post('/auth/login', { phone, password });
-      const { token, user } = response.data.data;
+      const { token, user: userData } = response.data.data;
+      // لوحة الإدارة للمسؤولين فقط — رفض الدخول لأي نوع مستخدم آخر
+      if (userData?.type !== 'ADMIN') {
+        return {
+          success: false,
+          error: 'ADMIN_ONLY',
+        };
+      }
       localStorage.setItem('token', token);
-      setUser(user);
+      setUser(userData);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {

@@ -7,8 +7,9 @@ import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../config/api';
 import toast from 'react-hot-toast';
-import { Package, MapPin, Navigation, Clock, Phone } from 'lucide-react';
+import { Package, MapPin, Navigation, Clock, Phone, Route } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import { getRouteDistanceAndEta } from '../utils/osrm';
 
 // Fix Leaflet marker icons
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -64,6 +65,7 @@ const OrderTracking = () => {
   const [deliveryLocation, setDeliveryLocation] = useState(null);
   const [startLocation, setStartLocation] = useState(null);
   const [routePoints, setRoutePoints] = useState([]);
+  const [routeStats, setRouteStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +89,22 @@ const OrderTracking = () => {
       };
     }
   }, [socket, id]);
+
+  // OSRM: المسافة والوقت المتوقع بين الدليفري ووجهة الطلب
+  useEffect(() => {
+    if (!deliveryLocation || order?.latitude == null || order?.longitude == null) {
+      setRouteStats(null);
+      return;
+    }
+    let cancelled = false;
+    getRouteDistanceAndEta(
+      { lat: deliveryLocation.lat, lng: deliveryLocation.lng },
+      { lat: order.latitude, lng: order.longitude }
+    ).then((stats) => {
+      if (!cancelled && stats) setRouteStats(stats);
+    });
+    return () => { cancelled = true; };
+  }, [deliveryLocation?.lat, deliveryLocation?.lng, order?.latitude, order?.longitude]);
 
   const fetchOrder = async () => {
     try {
@@ -297,6 +315,29 @@ const OrderTracking = () => {
                 <Phone size={16} />
                 {t('pages.orderTracking.callAgent')}
               </a>
+            </div>
+          )}
+
+          {/* المسافة والوقت المتوقع (OpenStreetMap / OSRM) */}
+          {routeStats && (
+            <div className="card-premium p-6 space-y-4 bg-emerald-50 border border-emerald-100">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700 flex items-center gap-2">
+                <Route size={14} />
+                {isRTL ? 'المسافة والوقت المتوقع' : 'Distance & ETA'}
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                  <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-0.5">{isRTL ? 'المسافة' : 'Distance'}</p>
+                  <p className="font-black text-slate-900">{routeStats.distanceKm} km</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                  <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-0.5">{isRTL ? 'الوصول خلال' : 'ETA (min)'}</p>
+                  <p className="font-black text-slate-900">{routeStats.estimatedMinutes} {isRTL ? 'دقيقة' : 'min'}</p>
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-slate-500">
+                {isRTL ? 'وقت الوصول تقريباً' : 'Arrival'}: {new Date(routeStats.eta).toLocaleTimeString(isRTL ? 'ar-EG' : undefined)}
+              </p>
             </div>
           )}
 

@@ -76,9 +76,15 @@ api.interceptors.response.use(
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
       localStorage.removeItem('token');
-      // Only redirect if not already on login page
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+
+    // Handle 403 Forbidden — صلاحيات غير كافية (مثلاً دليفري يحاول واجهة أدمن)
+    if (error.response?.status === 403) {
+      localStorage.removeItem('token');
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

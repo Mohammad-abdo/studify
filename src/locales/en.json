@@ -7,6 +7,7 @@
     "authorize": "Authorize Access",
     "accessGranted": "Access Granted. Welcome back.",
     "verificationFailed": "Identity verification failed",
+    "adminOnly": "This panel is for administrators only. Use the correct app for your role (delivery, print center, doctor).",
     "authError": "A critical authentication error occurred.",
     "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
     "copyright": "© 2026 Studify Enterprise System"
