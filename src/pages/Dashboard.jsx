@@ -62,9 +62,9 @@ const Dashboard = () => {
         api.get('/books?page=1&limit=6'),
       ]);
 
-      setStats(statsRes.data.data);
-      setRecentOrders(ordersRes.data.data || []);
-      setRecentBooks(booksRes.data.data || []);
+      setStats(statsRes.data?.data ?? null);
+      setRecentOrders(Array.isArray(ordersRes.data?.data) ? ordersRes.data.data : []);
+      setRecentBooks(Array.isArray(booksRes.data?.data) ? booksRes.data.data : []);
 
       // Mock chart data for high-end look
       const days = isRTL ? ['الأحد', 'الأثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -87,11 +87,12 @@ const Dashboard = () => {
   };
 
   const mainStats = [
-    { title: t('dashboard.revenue'), value: `$${(stats?.revenue?.total || 0).toLocaleString()}`, growth: '+12%', icon: DollarSign, color: 'emerald' },
-    { title: t('dashboard.newOrders'), value: (stats?.orders?.total || 0), growth: '+5%', icon: ShoppingBag, color: 'blue' },
-    { title: t('dashboard.activeStudents'), value: (stats?.users?.students || 0), growth: '+18%', icon: Users, color: 'violet' },
-    { title: t('dashboard.totalBooks'), value: (stats?.books?.total || 0), growth: '+2%', icon: BookOpen, color: 'amber' },
+    { title: t('dashboard.revenue'), value: `$${(stats?.revenue?.total ?? 0).toLocaleString()}`, growth: '+12%', icon: DollarSign, color: 'emerald' },
+    { title: t('dashboard.newOrders'), value: stats?.orders?.total ?? 0, growth: '+5%', icon: ShoppingBag, color: 'blue' },
+    { title: t('dashboard.activeStudents'), value: stats?.users?.students ?? 0, growth: '+18%', icon: Users, color: 'violet' },
+    { title: t('dashboard.totalBooks'), value: stats?.books?.total ?? 0, growth: '+2%', icon: BookOpen, color: 'amber' },
   ];
+  const pendingPaymentCount = stats?.orders?.pendingPayment ?? 0;
 
   const colorClasses = {
     emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600',
@@ -214,6 +215,18 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Pending payment notice */}
+      {pendingPaymentCount > 0 && (
+        <div className="card-premium p-4 2xl:p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-4">
+          <p className="text-amber-800 text-sm 2xl:text-base font-bold">
+            {isRTL ? `${pendingPaymentCount} طلب بانتظار تأكيد الدفع` : `${pendingPaymentCount} order(s) awaiting payment confirmation`}
+          </p>
+          <button onClick={() => navigate('/orders?status=CREATED')} className="btn-modern-secondary text-xs py-2 px-3">
+            {isRTL ? 'عرض' : 'View'}
+          </button>
+        </div>
+      )}
+
       {/* Dense Activity Tables */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 2xl:gap-8">
         <div className="card-premium overflow-hidden">
@@ -234,18 +247,32 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map(order => (
-                  <tr key={order.id}>
-                    <td className="font-black text-slate-900 2xl:px-6 2xl:py-4">{order.id.slice(0, 8)}</td>
-                    <td className="font-medium text-slate-500 2xl:px-6 2xl:py-4">{order.user?.phone || t('dashboard.guest')}</td>
-                    <td className="font-black text-slate-900 2xl:px-6 2xl:py-4">${order.total?.toFixed(2)}</td>
-                    <td className="2xl:px-6 2xl:py-4">
-                      <span className={`badge-modern ${order.status === 'DELIVERED' ? 'badge-modern-success' : 'badge-modern-info'}`}>
-                        {order.status}
-                      </span>
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="2xl:px-6 2xl:py-8 text-center text-slate-400 text-sm font-medium">
+                      {isRTL ? 'لا توجد طلبات' : 'No orders yet'}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  recentOrders.map(order => (
+                    <tr key={order.id}>
+                      <td className="font-black text-slate-900 2xl:px-6 2xl:py-4">{order.id?.slice(0, 8) ?? '—'}</td>
+                      <td className="font-medium text-slate-500 2xl:px-6 2xl:py-4">{order.user?.phone ?? t('dashboard.guest')}</td>
+                      <td className="font-black text-slate-900 2xl:px-6 2xl:py-4">${Number(order.total ?? 0).toFixed(2)}</td>
+                      <td className="2xl:px-6 2xl:py-4">
+                        <span className={`badge-modern ${
+                          order.status === 'DELIVERED' ? 'badge-modern-success' :
+                          order.status === 'PAID' || order.status === 'PROCESSING' || order.status === 'SHIPPED' ? 'badge-modern-info' :
+                          order.status === 'CREATED' ? 'bg-amber-100 text-amber-800' :
+                          order.status === 'CANCELLED' ? 'bg-slate-100 text-slate-500' : 'badge-modern-info'
+                        }`}>
+                          {order.status}
+                          {order.paymentMethod && order.status !== 'CREATED' ? ` · ${order.paymentMethod}` : ''}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -269,16 +296,24 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentBooks.map(book => (
+                {recentBooks.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="2xl:px-6 2xl:py-8 text-center text-slate-400 text-sm font-medium">
+                      {isRTL ? 'لا توجد كتب' : 'No books yet'}
+                    </td>
+                  </tr>
+                ) : (
+                  recentBooks.map(book => (
                   <tr key={book.id}>
-                    <td className="font-black text-slate-900 max-w-[150px] 2xl:max-w-[300px] truncate 2xl:px-6 2xl:py-4">{book.title}</td>
+                    <td className="font-black text-slate-900 max-w-[150px] 2xl:max-w-[300px] truncate 2xl:px-6 2xl:py-4">{book.title ?? '—'}</td>
                     <td className="text-slate-500 font-medium 2xl:px-6 2xl:py-4">{book.doctor?.name || t('dashboard.academic')}</td>
                     <td className="2xl:px-6 2xl:py-4"><span className="text-[9px] 2xl:text-xs font-black uppercase tracking-widest text-slate-400">{book.category?.name || t('dashboard.general')}</span></td>
                     <td className="2xl:px-6 2xl:py-4">
                       <button onClick={() => navigate(`/books/${book.id}`)} className="p-1.5 hover:bg-slate-100 rounded-lg text-blue-600 font-bold transition-all text-xs">{t('dashboard.review')}</button>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
