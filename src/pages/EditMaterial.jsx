@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, FileText, Image as ImageIcon, Info, GraduationCap, Building } from 'lucide-react';
+import { Save, FileText, Image as ImageIcon, Info, GraduationCap, Building, Printer, Plus, Trash2 } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';
@@ -28,12 +28,27 @@ const EditMaterial = () => {
     departmentId: '',
     materialType: '',
   });
+  const [printOptions, setPrintOptions] = useState([]);
 
   useEffect(() => {
     fetchMaterial();
     fetchCategories();
     fetchColleges();
   }, [id]);
+
+  useEffect(() => {
+    if (id) fetchPrintOptions();
+  }, [id]);
+
+  const fetchPrintOptions = async () => {
+    try {
+      const res = await api.get(`/print-options?materialId=${id}&limit=100`);
+      const list = res.data?.data ?? res.data ?? [];
+      setPrintOptions(Array.isArray(list) ? list : []);
+    } catch {
+      setPrintOptions([]);
+    }
+  };
 
   useEffect(() => {
     if (formData.collegeId) {
@@ -244,6 +259,76 @@ const EditMaterial = () => {
               label={t('pages.editMaterial.assetVisualMatrix')}
               multiple={true}
             />
+          </div>
+
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center justify-between mb-6 border-b border-slate-50 pb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl"><Printer size={24} /></div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('menu.printOptions')}</h3>
+                  <p className="text-sm font-medium text-slate-400">{isRTL ? 'إدارة خيارات الطباعة لهذه المادة' : 'Manage print options for this material'}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await api.post('/print-options', { bookId: null, materialId: id, colorType: 'COLOR', paperType: 'A4', copies: 1, doubleSide: false, enabled: true });
+                    toast.success(isRTL ? 'تمت إضافة الخيار' : 'Option added');
+                    fetchPrintOptions();
+                  } catch (e) {
+                    toast.error(e.response?.data?.message || (isRTL ? 'فشل الإضافة' : 'Failed to add'));
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200"
+              >
+                <Plus size={18} /> {isRTL ? 'إضافة خيار' : 'Add option'}
+              </button>
+            </div>
+            <div className="space-y-3">
+              {printOptions.length === 0 ? (
+                <p className="text-sm text-slate-500 py-4">{isRTL ? 'لا توجد خيارات طباعة. اضغط إضافة خيار.' : 'No print options. Click Add option.'}</p>
+              ) : (
+                printOptions.map((opt) => (
+                  <div key={opt.id} className="flex flex-wrap items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                    <span className="text-xs font-bold text-slate-600">{opt.colorType} / {opt.paperType} / {opt.copies} {isRTL ? 'نسخة' : 'copies'}</span>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!opt.enabled}
+                        onChange={async (e) => {
+                          try {
+                            await api.put(`/print-options/${opt.id}`, { enabled: e.target.checked });
+                            fetchPrintOptions();
+                          } catch (err) {
+                            toast.error(err.response?.data?.message || (isRTL ? 'فشل التحديث' : 'Update failed'));
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-xs font-bold text-slate-600">{isRTL ? 'مفعّل' : 'Enabled'}</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!window.confirm(isRTL ? 'حذف هذا الخيار؟' : 'Delete this option?')) return;
+                        try {
+                          await api.delete(`/print-options/${opt.id}`);
+                          toast.success(isRTL ? 'تم الحذف' : 'Deleted');
+                          fetchPrintOptions();
+                        } catch (err) {
+                          toast.error(err.response?.data?.message || (isRTL ? 'فشل الحذف' : 'Delete failed'));
+                        }
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

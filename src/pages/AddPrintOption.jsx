@@ -22,6 +22,7 @@ const AddPrintOption = () => {
     copies: 1,
     paperType: 'A4',
     doubleSide: false,
+    enabled: true,
   });
 
   useEffect(() => {
@@ -75,6 +76,7 @@ const AddPrintOption = () => {
         copies: formData.copies,
         paperType: formData.paperType,
         doubleSide: formData.doubleSide,
+        enabled: formData.enabled !== false,
       });
       toast.success(t('pages.addPrintOption.success'));
       navigate('/print-options');
@@ -216,6 +218,19 @@ const AddPrintOption = () => {
                 />
                 <label htmlFor="doubleSide" className={`text-sm font-bold text-slate-700 cursor-pointer ${isRTL ? 'mr-1' : 'ml-1'}`}>
                   {t('pages.addPrintOption.doubleSide')}
+                </label>
+              </div>
+              <div className="space-y-2 flex items-center gap-4 pt-2">
+                <input
+                  type="checkbox"
+                  id="enabled"
+                  name="enabled"
+                  checked={formData.enabled !== false}
+                  onChange={handleChange}
+                  className="w-5 h-5 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                />
+                <label htmlFor="enabled" className={`text-sm font-bold text-slate-700 cursor-pointer ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                  {isRTL ? 'مفعّل' : 'Enabled'}
                 </label>
               </div>
             </div>

@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save } from 'lucide-react';
+import { Save, Printer, Plus, Trash2, FileText, Image as ImageIcon } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import PageHeader from '../components/PageHeader';
 import ImageUpload from '../components/ImageUpload';
 import LoadingState from '../components/LoadingState';
+import { useLanguage } from '../context/LanguageContext';
 
 const AddMaterial = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [colleges, setColleges] = useState([]);
@@ -24,6 +27,9 @@ const AddMaterial = () => {
     departmentId: '',
     materialType: '',
   });
+  const [printOptions, setPrintOptions] = useState([
+    { colorType: 'COLOR', paperType: 'A4', copies: 1, doubleSide: false, enabled: true },
+  ]);
 
   useEffect(() => {
     fetchCategories();
@@ -87,7 +93,24 @@ const AddMaterial = () => {
         ...(formData.materialType && { materialType: formData.materialType }),
       };
 
-      await api.post('/materials', payload);
+      const materialRes = await api.post('/materials', payload);
+      const material = materialRes.data?.data || materialRes.data;
+      const materialId = material?.id;
+
+      if (materialId && printOptions.length > 0) {
+        for (const opt of printOptions) {
+          await api.post('/print-options', {
+            bookId: null,
+            materialId,
+            colorType: opt.colorType,
+            copies: Number(opt.copies) || 1,
+            paperType: opt.paperType,
+            doubleSide: Boolean(opt.doubleSide),
+            enabled: opt.enabled !== false,
+          });
+        }
+      }
+
       toast.success(t('pages.addMaterial.success'));
       navigate('/materials');
     } catch (error) {
@@ -191,6 +214,90 @@ const AddMaterial = () => {
               label={t('pages.addMaterial.assetVisualMatrix')}
               multiple={true}
             />
+          </div>
+
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center justify-between mb-6 border-b border-slate-50 pb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl"><Printer size={24} /></div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('menu.printOptions')}</h3>
+                  <p className="text-sm font-medium text-slate-400">{isRTL ? 'خيارات الطباعة للمادة (لون، ورق، نسخ، مفعّل)' : 'Print options for this material (color, paper, copies, enabled)'}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPrintOptions(prev => [...prev, { colorType: 'COLOR', paperType: 'A4', copies: 1, doubleSide: false, enabled: true }])}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200"
+              >
+                <Plus size={18} /> {isRTL ? 'إضافة خيار' : 'Add option'}
+              </button>
+            </div>
+            <div className="space-y-4">
+              {printOptions.map((opt, idx) => (
+                <div key={idx} className="flex flex-wrap items-end gap-4 p-4 bg-slate-50 rounded-xl">
+                  <div className="flex-1 min-w-[120px]">
+                    <label className="text-[10px] font-black uppercase text-slate-500">{isRTL ? 'اللون' : 'Color'}</label>
+                    <select
+                      value={opt.colorType}
+                      onChange={(e) => setPrintOptions(prev => prev.map((o, i) => i === idx ? { ...o, colorType: e.target.value } : o))}
+                      className="input-modern text-sm w-full"
+                    >
+                      <option value="COLOR">{isRTL ? 'ملون' : 'Color'}</option>
+                      <option value="BLACK_WHITE">{isRTL ? 'أبيض وأسود' : 'Black & White'}</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[100px]">
+                    <label className="text-[10px] font-black uppercase text-slate-500">{isRTL ? 'الورق' : 'Paper'}</label>
+                    <select
+                      value={opt.paperType}
+                      onChange={(e) => setPrintOptions(prev => prev.map((o, i) => i === idx ? { ...o, paperType: e.target.value } : o))}
+                      className="input-modern text-sm w-full"
+                    >
+                      <option value="A4">A4</option>
+                      <option value="A3">A3</option>
+                      <option value="LETTER">LETTER</option>
+                    </select>
+                  </div>
+                  <div className="w-20">
+                    <label className="text-[10px] font-black uppercase text-slate-500">{isRTL ? 'نسخ' : 'Copies'}</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={opt.copies}
+                      onChange={(e) => setPrintOptions(prev => prev.map((o, i) => i === idx ? { ...o, copies: parseInt(e.target.value, 10) || 1 } : o))}
+                      className="input-modern text-sm w-full"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={opt.doubleSide}
+                      onChange={(e) => setPrintOptions(prev => prev.map((o, i) => i === idx ? { ...o, doubleSide: e.target.checked } : o))}
+                      className="rounded"
+                    />
+                    <span className="text-xs font-bold text-slate-600">{isRTL ? 'وجهين' : 'Double side'}</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={opt.enabled !== false}
+                      onChange={(e) => setPrintOptions(prev => prev.map((o, i) => i === idx ? { ...o, enabled: e.target.checked } : o))}
+                      className="rounded"
+                    />
+                    <span className="text-xs font-bold text-slate-600">{isRTL ? 'مفعّل' : 'Enabled'}</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setPrintOptions(prev => prev.filter((_, i) => i !== idx))}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                    title={isRTL ? 'حذف' : 'Remove'}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
