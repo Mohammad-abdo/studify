@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { Fingerprint, Save } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import { useLanguage } from '../context/LanguageContext';
+import PageHeader from '../components/PageHeader';
 
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [user, setUser] = useState(null);

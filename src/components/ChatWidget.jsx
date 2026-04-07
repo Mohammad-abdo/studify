@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { MessageCircle, X, Send, Bot, User, Sparkles, Loader2, Trash2, Settings } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../config/api';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -39,7 +39,10 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => scrollToBottom());
+    return () => cancelAnimationFrame(id);
+  }, [messages, scrollToBottom]);
 
   useEffect(() => {
     if (isOpen) {
@@ -128,45 +131,38 @@ export default function ChatWidget() {
     return d.toLocaleTimeString(isRTL ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  return (
-    <>
-      {/* Floating button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 z-50 w-14 h-14 bg-gradient-to-br from-violet-600 to-indigo-700 text-white rounded-full shadow-2xl shadow-violet-500/30 flex items-center justify-center hover:shadow-violet-500/50 transition-shadow"
-            style={{ [isRTL ? 'left' : 'right']: '1.5rem' }}
-          >
-            <MessageCircle size={24} />
-            {messages.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-black flex items-center justify-center">
-                {messages.filter((m) => m.role === 'assistant').length}
-              </span>
-            )}
-          </motion.button>
-        )}
-      </AnimatePresence>
+  const sideOffset = { [isRTL ? 'left' : 'right']: '1.5rem' };
 
-      {/* Chat panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] bg-white rounded-3xl shadow-2xl shadow-black/20 border border-slate-200/80 flex flex-col overflow-hidden"
-            style={{
-              [isRTL ? 'left' : 'right']: '1.5rem',
-              height: 'min(600px, calc(100vh - 6rem))',
-            }}
-          >
+  return createPortal(
+    <>
+      {!isOpen && (
+        <button
+          type="button"
+          aria-label={lb('فتح المساعد', 'Open assistant')}
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 z-[100] w-14 h-14 bg-gradient-to-br from-violet-600 to-indigo-700 text-white rounded-full shadow-2xl shadow-violet-500/30 flex items-center justify-center hover:shadow-violet-500/50 transition-all duration-200 hover:scale-110 active:scale-95"
+          style={sideOffset}
+        >
+          <MessageCircle size={24} />
+          {messages.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-black flex items-center justify-center">
+              {messages.filter((m) => m.role === 'assistant').length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={lb('مساعد Studify', 'Studify Assistant')}
+          className="fixed bottom-6 z-[100] w-[400px] max-w-[calc(100vw-2rem)] bg-white rounded-3xl shadow-2xl shadow-black/20 border border-slate-200/80 flex flex-col overflow-hidden transition-opacity duration-200"
+          style={{
+            ...sideOffset,
+            height: 'min(600px, calc(100vh - 6rem))',
+          }}
+        >
             {/* Header */}
             <div className="bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 p-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
@@ -249,7 +245,7 @@ export default function ChatWidget() {
               )}
 
               {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? (isRTL ? 'flex-row-reverse' : 'flex-row-reverse') : ''}`}>
+                <div key={`${msg.role}-${msg.time}-${i}`} className={`flex gap-2.5 ${msg.role === 'user' ? (isRTL ? 'flex-row-reverse' : 'flex-row-reverse') : ''}`}>
                   {msg.role === 'assistant' && (
                     <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Bot size={14} className="text-white" />
@@ -337,9 +333,9 @@ export default function ChatWidget() {
                 </p>
               </div>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        </div>
+      )}
+    </>,
+    document.body
   );
 }

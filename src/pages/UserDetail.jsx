@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Edit, Users, Phone, Mail, Calendar, UserCheck, UserX, GraduationCap, Stethoscope, Truck, Briefcase, Shield, Building, MapPin, Fingerprint, ShieldAlert, Activity, Building2, Printer } from 'lucide-react';
+import { Edit, Users, Phone, Mail, Calendar, UserCheck, UserX, GraduationCap, Stethoscope, Truck, Briefcase, Shield, Building, MapPin, Fingerprint, ShieldAlert, Activity, Building2, Printer, CreditCard, Package, Landmark, ExternalLink } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -14,10 +14,26 @@ const UserDetail = () => {
   const isRTL = language === 'ar';
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activity, setActivity] = useState(null);
+  const [activityLoading, setActivityLoading] = useState(true);
 
   useEffect(() => {
     fetchUser();
+    fetchActivity();
   }, [id]);
+
+  const fetchActivity = async () => {
+    try {
+      setActivityLoading(true);
+      const res = await api.get(`/admin/users/${id}/financial-activity`);
+      setActivity(res.data.data || null);
+    } catch {
+      toast.error(t('pages.userDetail.activityFailed'));
+      setActivity(null);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
 
   const fetchUser = async () => {
     try {
@@ -155,6 +171,19 @@ const UserDetail = () => {
   const profileInfo = getUserProfileInfo(user);
   const { icon: TypeIcon, color: typeColor, bg: typeBg, label: typeLabel } = getUserTypeStyles(user.type);
 
+  const summary = activity?.summary;
+  const txStatusClass = (s) => {
+    if (s === 'COMPLETED') return 'bg-emerald-50 text-emerald-700';
+    if (s === 'PENDING') return 'bg-amber-50 text-amber-700';
+    if (s === 'FAILED') return 'bg-rose-50 text-rose-700';
+    return 'bg-slate-100 text-slate-600';
+  };
+  const orderStatusClass = (s) => {
+    if (s === 'PAID' || s === 'DELIVERED' || s === 'COMPLETED') return 'bg-emerald-50 text-emerald-700';
+    if (s === 'CANCELLED') return 'bg-slate-100 text-slate-500';
+    return 'bg-blue-50 text-blue-700';
+  };
+
   return (
     <div className="space-y-10 page-transition pb-20">
       <PageHeader
@@ -257,6 +286,197 @@ const UserDetail = () => {
               </div>
             </div>
           )}
+
+          {/* Payments & financial activity */}
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-8 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-100"><CreditCard size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('pages.userDetail.paymentsTitle')}</h3>
+                <p className="text-sm font-medium text-slate-400">{t('pages.userDetail.paymentsSubtitle')}</p>
+              </div>
+            </div>
+
+            {activityLoading ? (
+              <div className="py-16 flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pages.userDetail.loadingActivity')}</span>
+              </div>
+            ) : activity && summary ? (
+              <>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                  <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600/80 mb-1">{t('pages.userDetail.retailPaidTotal')}</p>
+                    <p className="text-xl font-black text-emerald-800">${Number(summary.paidRetailTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-[10px] font-bold text-emerald-600/70 mt-1">{summary.retailOrderCount} {t('menu.orders')}</p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-violet-50/80 border border-violet-100">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-violet-600/80 mb-1">{t('pages.userDetail.printPaidTotal')}</p>
+                    <p className="text-xl font-black text-violet-800">${Number(summary.paidPrintTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-[10px] font-bold text-violet-600/70 mt-1">{summary.printOrderCount} {t('pages.userDetail.sectionPrint')}</p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-cyan-50/80 border border-cyan-100">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600/80 mb-1">{t('pages.userDetail.wholesaleTotal')}</p>
+                    <p className="text-xl font-black text-cyan-800">${Number(summary.wholesaleTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-[10px] font-bold text-cyan-600/70 mt-1">{summary.wholesaleOrderCount} {t('pages.userDetail.sectionWholesale')}</p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">{t('pages.userDetail.ledgerEntries')}</p>
+                    <p className="text-xl font-black text-slate-900">{summary.financialTransactionCount}</p>
+                    <p className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1"><Landmark size={12} /> {t('menu.transactions')}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-10">
+                  {/* Ledger */}
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><Landmark size={16} /> {t('pages.userDetail.sectionTransactions')}</h4>
+                    {activity.financialTransactions?.length ? (
+                      <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 text-left rtl:text-right">
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.refShort')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.cashFlow')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.netAmount')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('common.status')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.auditTrail')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.timestamp')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {activity.financialTransactions.map((tx) => (
+                              <tr key={tx.id} className="border-t border-slate-50 hover:bg-slate-50/50">
+                                <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{tx.id.slice(0, 8)}…</td>
+                                <td className="px-4 py-3 font-bold text-slate-800">{tx.type}</td>
+                                <td className="px-4 py-3 font-black">${Number(tx.amount || 0).toFixed(2)}</td>
+                                <td className="px-4 py-3"><span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${txStatusClass(tx.status)}`}>{tx.status}</span></td>
+                                <td className="px-4 py-3 text-slate-500 max-w-[200px] truncate" title={tx.description || ''}>{tx.description || '—'}</td>
+                                <td className="px-4 py-3 text-[11px] text-slate-400 whitespace-nowrap">{new Date(tx.createdAt).toLocaleString(isRTL ? 'ar-EG' : undefined)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400 font-medium py-6">{t('pages.userDetail.noRecords')}</p>
+                    )}
+                  </div>
+
+                  {/* Retail orders */}
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><Package size={16} /> {t('pages.userDetail.sectionRetail')}</h4>
+                    {activity.orders?.length ? (
+                      <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 text-left rtl:text-right">
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.orderTotal')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('common.status')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.itemCount')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.paymentMethod')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.timestamp')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {activity.orders.map((o) => (
+                              <tr key={o.id} className="border-t border-slate-50 hover:bg-slate-50/50">
+                                <td className="px-4 py-3 font-black text-slate-900">${Number(o.total || 0).toFixed(2)}</td>
+                                <td className="px-4 py-3"><span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${orderStatusClass(o.status)}`}>{o.status}</span></td>
+                                <td className="px-4 py-3 text-slate-600">{o.items?.length ?? 0}</td>
+                                <td className="px-4 py-3 text-slate-600">{o.paymentMethod || '—'}</td>
+                                <td className="px-4 py-3 text-[11px] text-slate-400 whitespace-nowrap">{o.paidAt ? new Date(o.paidAt).toLocaleString(isRTL ? 'ar-EG' : undefined) : '—'}</td>
+                                <td className="px-4 py-3">
+                                  <button type="button" onClick={() => navigate(`/orders/${o.id}`)} className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800">
+                                    {t('pages.userDetail.viewOrder')} <ExternalLink size={12} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400 font-medium py-6">{t('pages.userDetail.noRecords')}</p>
+                    )}
+                  </div>
+
+                  {/* Print orders */}
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><Printer size={16} /> {t('pages.userDetail.sectionPrint')}</h4>
+                    {activity.printOrders?.length ? (
+                      <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 text-left rtl:text-right">
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.refShort')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.orderTotal')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('common.status')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.copiesLabel')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.timestamp')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {activity.printOrders.map((p) => (
+                              <tr key={p.id} className="border-t border-slate-50 hover:bg-slate-50/50">
+                                <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{p.id.slice(0, 8)}…</td>
+                                <td className="px-4 py-3 font-black">${Number(p.price || 0).toFixed(2)}</td>
+                                <td className="px-4 py-3"><span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${orderStatusClass(p.status)}`}>{p.status}</span></td>
+                                <td className="px-4 py-3 text-slate-600">{p.copies}</td>
+                                <td className="px-4 py-3 text-[11px] text-slate-400 whitespace-nowrap">{p.paidAt ? new Date(p.paidAt).toLocaleString(isRTL ? 'ar-EG' : undefined) : '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400 font-medium py-6">{t('pages.userDetail.noRecords')}</p>
+                    )}
+                  </div>
+
+                  {/* Wholesale */}
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><Building2 size={16} /> {t('pages.userDetail.sectionWholesale')}</h4>
+                    {activity.wholesaleOrders?.length ? (
+                      <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 text-left rtl:text-right">
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.orderTotal')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('common.status')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.userDetail.itemCount')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400">{t('pages.financialTransactions.timestamp')}</th>
+                              <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-400" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {activity.wholesaleOrders.map((w) => (
+                              <tr key={w.id} className="border-t border-slate-50 hover:bg-slate-50/50">
+                                <td className="px-4 py-3 font-black text-slate-900">${Number(w.total || 0).toFixed(2)}</td>
+                                <td className="px-4 py-3"><span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${orderStatusClass(w.status)}`}>{w.status}</span></td>
+                                <td className="px-4 py-3 text-slate-600">{w.items?.length ?? 0}</td>
+                                <td className="px-4 py-3 text-[11px] text-slate-400 whitespace-nowrap">{new Date(w.createdAt).toLocaleString(isRTL ? 'ar-EG' : undefined)}</td>
+                                <td className="px-4 py-3">
+                                  <button type="button" onClick={() => navigate(`/wholesale-orders/${w.id}`)} className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800">
+                                    {t('pages.userDetail.viewWholesale')} <ExternalLink size={12} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400 font-medium py-6">{t('pages.userDetail.noRecords')}</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-slate-400 font-medium py-6">{t('pages.userDetail.noRecords')}</p>
+            )}
+          </div>
         </div>
 
         {/* Action Sidebar */}

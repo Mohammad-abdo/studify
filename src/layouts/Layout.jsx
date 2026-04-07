@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -161,7 +161,7 @@ const Layout = () => {
 
     if (hasChildren) {
       return (
-        <div key={item.key} className="mb-1.5">
+        <div className="mb-1.5">
           <button
             onClick={() => setExpandedMenus(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
             className={`w-full flex items-center justify-between px-3 xl:px-3.5 py-2.5 rounded-xl transition-all duration-200 ${
@@ -195,7 +195,6 @@ const Layout = () => {
 
     return (
       <Link
-        key={item.path}
         to={item.path}
         className={`flex items-center gap-2.5 px-3 xl:px-3.5 py-2.5 rounded-xl mb-1.5 transition-all duration-200 ${
           isActive ? 'bg-slate-900 text-white shadow-xl shadow-slate-200 font-bold' : 'text-slate-600 hover:bg-slate-50'
@@ -230,7 +229,11 @@ const Layout = () => {
             {menuItems.map((section, idx) => (
               <div key={idx} className="mb-6 xl:mb-6">
                 <h4 className={`px-3 xl:px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>{section.section}</h4>
-                {section.items.map(item => renderMenuItem(item))}
+                {section.items.map((item) => (
+                  <Fragment key={item.path || item.key || item.label}>
+                    {renderMenuItem(item)}
+                  </Fragment>
+                ))}
               </div>
             ))}
           </nav>
