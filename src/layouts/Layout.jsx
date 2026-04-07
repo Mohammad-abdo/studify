@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import ChatWidget from '../components/ChatWidget';
 import {
   LayoutDashboard,
   BookOpen,
@@ -125,6 +126,9 @@ const Layout = () => {
           { icon: Printer, label: isRTL ? 'المطابع' : 'Print Centers', path: '/print-centers' },
         ],
       },
+    ]},
+    { section: isRTL ? 'دوائر الدولة' : 'Government', items: [
+      { icon: Building2, label: isRTL ? 'دوائر الدولة' : 'Government Depts.', path: '/institute' },
     ]},
     { section: t('menu.sections.system'), items: [
       { icon: UserCheck, label: t('menu.approvals'), path: '/approvals' },
@@ -317,6 +321,8 @@ const Layout = () => {
           </div>
         </main>
       </div>
+
+      <ChatWidget />
     </div>
   );
 };

@@ -76,10 +76,10 @@ const Dashboard = () => {
 
     } catch (error) {
       if (error.response?.status === 429) {
-        toast.error(isRTL ? 'تم تجاوز الحد المسموح من الطلبات. يرجى المحاولة لاحقاً.' : 'Too many requests. Please try again later.');
+        toast.error(t('dashboard.errors.tooManyRequests'));
       } else {
         console.error(error);
-        toast.error(isRTL ? 'فشل تحميل بيانات لوحة التحكم' : 'Failed to load dashboard data');
+        toast.error(t('dashboard.errors.loadFailed'));
       }
     } finally {
       setLoading(false);
@@ -219,10 +219,10 @@ const Dashboard = () => {
       {pendingPaymentCount > 0 && (
         <div className="card-premium p-4 2xl:p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-4">
           <p className="text-amber-800 text-sm 2xl:text-base font-bold">
-            {isRTL ? `${pendingPaymentCount} طلب بانتظار تأكيد الدفع` : `${pendingPaymentCount} order(s) awaiting payment confirmation`}
+            {t('dashboard.pendingPaymentBanner').replace('{count}', String(pendingPaymentCount))}
           </p>
           <button onClick={() => navigate('/orders?status=CREATED')} className="btn-modern-secondary text-xs py-2 px-3">
-            {isRTL ? 'عرض' : 'View'}
+            {t('dashboard.view')}
           </button>
         </div>
       )}
@@ -250,7 +250,7 @@ const Dashboard = () => {
                 {recentOrders.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="2xl:px-6 2xl:py-8 text-center text-slate-400 text-sm font-medium">
-                      {isRTL ? 'لا توجد طلبات' : 'No orders yet'}
+                      {t('dashboard.noOrders')}
                     </td>
                   </tr>
                 ) : (
@@ -289,7 +289,7 @@ const Dashboard = () => {
             <table className="table-premium">
               <thead>
                 <tr>
-                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.title')}</th>
+                  <th className="2xl:px-6 2xl:py-4">{t('dashboard.bookTitle')}</th>
                   <th className="2xl:px-6 2xl:py-4">{t('dashboard.author')}</th>
                   <th className="2xl:px-6 2xl:py-4">{t('dashboard.category')}</th>
                   <th className="2xl:px-6 2xl:py-4">{t('dashboard.action')}</th>
@@ -299,7 +299,7 @@ const Dashboard = () => {
                 {recentBooks.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="2xl:px-6 2xl:py-8 text-center text-slate-400 text-sm font-medium">
-                      {isRTL ? 'لا توجد كتب' : 'No books yet'}
+                      {t('dashboard.noBooks')}
                     </td>
                   </tr>
                 ) : (

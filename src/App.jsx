@@ -76,6 +76,12 @@ import OrderDetail from './pages/OrderDetail';
 import OrderTracking from './pages/OrderTracking';
 import PrintOptionDetail from './pages/PrintOptionDetail';
 import AddPrintOption from './pages/AddPrintOption';
+// Institute
+import InstituteDashboard from './pages/InstituteDashboard';
+import WholesaleOrderDetail from './pages/WholesaleOrderDetail';
+import AddInstituteProduct from './pages/AddInstituteProduct';
+import EditInstituteProduct from './pages/EditInstituteProduct';
+import AddInstituteCategory from './pages/AddInstituteCategory';
 // General Pages
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
@@ -213,6 +219,12 @@ function App() {
               {/* Dashboard */}
               <Route path="dashboard-metrics" element={<DashboardMetrics />} />
               <Route path="sliders" element={<Sliders />} />
+              {/* Institute / Government */}
+              <Route path="institute" element={<InstituteDashboard />} />
+              <Route path="institute/products/add" element={<AddInstituteProduct />} />
+              <Route path="institute/products/edit/:id" element={<EditInstituteProduct />} />
+              <Route path="institute/categories/add" element={<AddInstituteCategory />} />
+              <Route path="wholesale-orders/:id" element={<WholesaleOrderDetail />} />
               <Route path="settings" element={<Settings />} />
               {/* General Pages */}
               <Route path="unauthorized" element={<Unauthorized />} />

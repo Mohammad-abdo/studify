@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Edit, Users, Phone, Mail, Calendar, UserCheck, UserX, GraduationCap, Stethoscope, Truck, Briefcase, Shield, Building, MapPin, Fingerprint, ShieldAlert, Activity } from 'lucide-react';
+import { ArrowLeft, Edit, Users, Phone, Mail, Calendar, UserCheck, UserX, GraduationCap, Stethoscope, Truck, Briefcase, Shield, Building, MapPin, Fingerprint, ShieldAlert, Activity, Building2, Printer } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -38,6 +38,8 @@ const UserDetail = () => {
       case 'DOCTOR': return { icon: Stethoscope, color: 'text-emerald-600', bg: 'bg-emerald-50', label: t('menu.doctors') };
       case 'DELIVERY': return { icon: Truck, color: 'text-amber-600', bg: 'bg-amber-50', label: t('menu.delivery') };
       case 'CUSTOMER': return { icon: Briefcase, color: 'text-violet-600', bg: 'bg-violet-50', label: t('menu.customers') };
+      case 'INSTITUTE': return { icon: Building2, color: 'text-cyan-600', bg: 'bg-cyan-50', label: t('menu.institute') };
+      case 'PRINT_CENTER': return { icon: Printer, color: 'text-slate-700', bg: 'bg-slate-100', label: t('menu.printCenter') };
       case 'ADMIN': return { icon: Shield, color: 'text-rose-600', bg: 'bg-rose-50', label: isRTL ? 'مسؤول' : 'Admin' };
       default: return { icon: Users, color: 'text-slate-600', bg: 'bg-slate-50', label: type };
     }
@@ -84,9 +86,36 @@ const UserDetail = () => {
         ],
       };
     }
+    if (user.institute) {
+      return {
+        type: t('menu.institute'),
+        name: user.name || user.phone,
+        fields: [
+          { label: isRTL ? 'معرف المعهد' : 'Institute ID', value: user.institute.id, icon: Building2 },
+          { label: isRTL ? 'الاسم المعروض' : 'Display name', value: user.name || (isRTL ? 'غير محدد' : 'Not set'), icon: Users },
+        ],
+      };
+    }
+    if (user.printCenter) {
+      return {
+        type: t('menu.printCenter'),
+        name: user.printCenter.name || user.phone,
+        fields: [
+          { label: isRTL ? 'معرف المطبعة' : 'Print center ID', value: user.printCenter.id, icon: Printer },
+          { label: isRTL ? 'اسم المطبعة' : 'Center name', value: user.printCenter.name || 'N/A', icon: Building },
+        ],
+      };
+    }
+    if (user.type === 'ADMIN') {
+      return {
+        type: 'ADMIN',
+        name: isRTL ? 'مسؤول النظام' : 'Root Administrator',
+        fields: [],
+      };
+    }
     return {
-      type: 'ADMIN',
-      name: isRTL ? 'مسؤول النظام' : 'Root Administrator',
+      type: user.type || 'USER',
+      name: user.phone,
       fields: [],
     };
   };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Filter, X, UserCheck, UserX, GraduationCap, Stethoscope, Truck, Briefcase, Shield, ChevronLeft, ChevronRight, Search, Mail, Phone, MoreHorizontal, Eye } from 'lucide-react';
+import { Users, Filter, X, UserCheck, UserX, GraduationCap, Stethoscope, Truck, Briefcase, Shield, ChevronLeft, ChevronRight, Search, Mail, Phone, MoreHorizontal, Eye, Building2, Printer } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -100,6 +100,8 @@ const UsersPage = () => {
       case 'DOCTOR': return { icon: Stethoscope, color: 'text-emerald-600', bg: 'bg-emerald-50', label: t('menu.doctors') };
       case 'DELIVERY': return { icon: Truck, color: 'text-amber-600', bg: 'bg-amber-50', label: t('menu.delivery') };
       case 'CUSTOMER': return { icon: Briefcase, color: 'text-violet-600', bg: 'bg-violet-50', label: t('menu.customers') };
+      case 'INSTITUTE': return { icon: Building2, color: 'text-cyan-600', bg: 'bg-cyan-50', label: t('menu.institute') };
+      case 'PRINT_CENTER': return { icon: Printer, color: 'text-slate-700', bg: 'bg-slate-100', label: t('menu.printCenter') };
       case 'ADMIN': return { icon: Shield, color: 'text-rose-600', bg: 'bg-rose-50', label: t('pages.users.admin') };
       default: return { icon: Users, color: 'text-slate-600', bg: 'bg-slate-50', label: type };
     }
@@ -110,7 +112,10 @@ const UsersPage = () => {
     if (user.doctor) return { name: user.doctor.name, info: user.doctor.specialization || t('pages.users.professional') };
     if (user.delivery) return { name: user.delivery.name, info: isRTL ? 'اللوجستيات' : 'Logistics' };
     if (user.customer) return { name: user.customer.entityName || user.customer.contactPerson, info: t('pages.users.merchant') };
-    return { name: t('dashboard.admin'), info: t('pages.users.rootAccess') };
+    if (user.institute) return { name: user.name || user.phone, info: t('menu.institute') };
+    if (user.printCenter) return { name: user.printCenter.name || user.phone, info: t('menu.printCenter') };
+    if (user.type === 'ADMIN') return { name: t('dashboard.admin'), info: t('pages.users.rootAccess') };
+    return { name: user.phone, info: t('pages.users.operator') };
   };
 
   const columns = [
@@ -234,6 +239,8 @@ const UsersPage = () => {
               <option value="DOCTOR">{t('menu.doctors')}</option>
               <option value="DELIVERY">{t('menu.delivery')}</option>
               <option value="CUSTOMER">{t('menu.customers')}</option>
+              <option value="INSTITUTE">{t('menu.institute')}</option>
+              <option value="PRINT_CENTER">{t('menu.printCenter')}</option>
               <option value="ADMIN">{isRTL ? 'مسؤول' : 'Administrator'}</option>
             </select>
 
