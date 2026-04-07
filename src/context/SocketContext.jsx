@@ -12,8 +12,10 @@ export const SocketProvider = ({ children }) => {
     // Only connect if user is logged in
     if (user) {
       // Use same host as API (strip /api). Default production so deployed app does not hit localhost.
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://back-studify.developteam.site/api';
-      const socketUrl = apiUrl.replace(/\/api\/?$/, '') || 'https://back-studify.developteam.site';
+      const apiUrl =
+        import.meta.env.VITE_API_URL ||
+        (import.meta.env.PROD ? 'https://studify.developteam.site/api' : 'http://localhost:6008/api');
+      const socketUrl = apiUrl.replace(/\/api\/?$/, '') || 'http://localhost:6008';
       const newSocket = io(socketUrl, {
         withCredentials: true,
         transports: ['polling', 'websocket'],
