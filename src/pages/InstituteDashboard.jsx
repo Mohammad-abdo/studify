@@ -73,12 +73,22 @@ const InstituteDashboard = () => {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [custRes, prodRes, orderRes, catRes] = await Promise.all([
-        api.get('/customers'),
+      const [statsRes, custRes, prodRes, orderRes, catRes] = await Promise.all([
+        api.get('/admin/government-circle/stats'),
+        api.get('/customers?userType=INSTITUTE&page=1&limit=10'),
         api.get('/products?isInstituteProduct=true&limit=10&page=1'),
-        api.get('/wholesale-orders?limit=10&page=1'),
-        api.get('/categories/products'),
+        api.get('/wholesale-orders?limit=10&page=1&instituteOnly=true'),
+        api.get('/categories/products?isInstituteCategory=true'),
       ]);
+
+      const gov = statsRes.data?.data || {};
+      setStats({
+        customers: gov.customers ?? 0,
+        products: gov.products ?? 0,
+        orders: gov.orders ?? 0,
+        categories: gov.categories ?? 0,
+        revenue: typeof gov.revenue === 'number' ? gov.revenue : 0,
+      });
 
       const custData = custRes.data.data || custRes.data || [];
       setCustomers(Array.isArray(custData) ? custData : []);
@@ -98,18 +108,8 @@ const InstituteDashboard = () => {
       setOrderTotal(orderRes.data.pagination?.total || (Array.isArray(ordData) ? ordData.length : 0));
 
       const allCats = catRes.data.data || catRes.data || [];
-      const instituteCats = (Array.isArray(allCats) ? allCats : []).filter(c => c.isInstituteCategory);
+      const instituteCats = Array.isArray(allCats) ? allCats : [];
       setInstituteCategories(instituteCats);
-
-      const totalRevenue = (Array.isArray(ordData) ? ordData : []).reduce((sum, o) => sum + (parseFloat(o.total) || parseFloat(o.totalAmount) || 0), 0);
-
-      setStats({
-        customers: Array.isArray(custData) ? custData.length : 0,
-        products: prodRes.data.pagination?.total || parsedProds.length,
-        orders: orderRes.data.pagination?.total || (Array.isArray(ordData) ? ordData.length : 0),
-        categories: instituteCats.length || 0,
-        revenue: totalRevenue,
-      });
     } catch (err) {
       toast.error(isRTL ? 'فشل في تحميل بيانات دوائر الدولة' : 'Failed to load government data');
       console.error(err);
@@ -139,7 +139,11 @@ const InstituteDashboard = () => {
 
   const fetchOrders = useCallback(async (pg) => {
     try {
-      const params = new URLSearchParams({ page: pg.toString(), limit: LIMIT.toString() });
+      const params = new URLSearchParams({
+        page: pg.toString(),
+        limit: LIMIT.toString(),
+        instituteOnly: 'true',
+      });
       if (orderStatusFilter) params.append('status', orderStatusFilter);
       const res = await api.get(`/wholesale-orders?${params}`);
       const data = res.data.data || res.data || [];
