@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, BookOpen, Image as ImageIcon, FileText, Printer, Plus, Trash2 } from 'lucide-react';
+import { Save, BookOpen, Image as ImageIcon, FileText, Printer, Plus, Trash2, DollarSign } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
@@ -18,6 +18,8 @@ const EditBook = () => {
   const [colleges, setColleges] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [printOptions, setPrintOptions] = useState([]);
+  const [pricing, setPricing] = useState({ READ: '', BUY: '', PRINT: '' });
+  const [existingPricingIds, setExistingPricingIds] = useState({});
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -36,7 +38,10 @@ const EditBook = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id) fetchPrintOptions();
+    if (id) {
+      fetchPrintOptions();
+      fetchPricing();
+    }
   }, [id]);
 
   const fetchPrintOptions = async () => {
@@ -46,6 +51,25 @@ const EditBook = () => {
       setPrintOptions(Array.isArray(list) ? list : []);
     } catch {
       setPrintOptions([]);
+    }
+  };
+
+  const fetchPricing = async () => {
+    try {
+      const res = await api.get(`/book-pricing?bookId=${id}&limit=100`);
+      const list = res.data?.data ?? res.data ?? [];
+      const p = { READ: '', BUY: '', PRINT: '' };
+      const ids = {};
+      if (Array.isArray(list)) {
+        list.forEach((item) => {
+          p[item.accessType] = item.price?.toString() ?? '';
+          ids[item.accessType] = item.id;
+        });
+      }
+      setPricing(p);
+      setExistingPricingIds(ids);
+    } catch {
+      setPricing({ READ: '', BUY: '', PRINT: '' });
     }
   };
 
@@ -128,6 +152,18 @@ const EditBook = () => {
       };
 
       await api.put(`/books/${id}`, payload);
+
+      for (const [accessType, price] of Object.entries(pricing)) {
+        const existingId = existingPricingIds[accessType];
+        if (price !== '' && Number(price) >= 0) {
+          if (existingId) {
+            await api.put(`/book-pricing/${existingId}`, { price: Number(price) });
+          } else {
+            await api.post('/book-pricing', { bookId: id, accessType, price: Number(price) });
+          }
+        }
+      }
+
       toast.success(t('pages.editBook.success'));
       navigate('/books');
     } catch (error) {
@@ -243,6 +279,56 @@ const EditBook = () => {
               multiple={true}
               maxImages={10}
             />
+          </div>
+
+          {/* Book Pricing — READ / BUY / PRINT */}
+          <div className="card-premium p-10 bg-white">
+            <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-6">
+              <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><DollarSign size={24} /></div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{isRTL ? 'تسعير الكتاب' : 'Book Pricing'}</h3>
+                <p className="text-sm font-medium text-slate-400">{isRTL ? 'حدد سعر كل نوع وصول (قراءة، شراء، طباعة)' : 'Set the price for each access type (Read, Buy, Print)'}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { key: 'READ', label: isRTL ? 'قراءة' : 'READ', icon: '📖', color: 'blue' },
+                { key: 'BUY', label: isRTL ? 'شراء' : 'BUY', icon: '🛒', color: 'emerald' },
+                { key: 'PRINT', label: isRTL ? 'طباعة' : 'PRINT', icon: '🖨️', color: 'amber' },
+              ].map((tier) => (
+                <div key={tier.key} className={`relative p-6 rounded-2xl border-2 transition-all ${
+                  pricing[tier.key] !== '' ? `border-${tier.color}-200 bg-${tier.color}-50/30` : 'border-slate-100 bg-slate-50/50'
+                }`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{tier.icon}</span>
+                    <div>
+                      <span className="text-xs font-black uppercase tracking-widest text-slate-500">{tier.label}</span>
+                      {existingPricingIds[tier.key] && (
+                        <span className="block text-[9px] font-bold text-emerald-500 uppercase">{isRTL ? 'محفوظ' : 'Saved'}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <span className={`absolute top-1/2 -translate-y-1/2 text-lg font-black text-slate-300 ${isRTL ? 'right-4' : 'left-4'}`}>$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={pricing[tier.key]}
+                      onChange={(e) => setPricing(prev => ({ ...prev, [tier.key]: e.target.value }))}
+                      placeholder="0.00"
+                      className={`input-modern font-black text-2xl text-slate-900 py-4 ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
+                    />
+                  </div>
+                  {pricing[tier.key] !== '' && (
+                    <p className="mt-2 text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                      {isRTL ? 'سعر السوق' : 'Market Price'}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="card-premium p-10 bg-white">

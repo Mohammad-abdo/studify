@@ -30,9 +30,12 @@ const AddInstituteCategory = () => {
   const fetchParentCategories = async () => {
     setLoadingParents(true);
     try {
-      const res = await api.get('/categories/products?isInstituteCategory=true');
+      const res = await api.get('/categories/products');
       const cats = res.data.data || res.data || [];
-      setParentCategories(Array.isArray(cats) ? cats : []);
+      const list = Array.isArray(cats) ? cats : [];
+      // Only main institute categories (name must not contain " / " — matches seed-institute.js)
+      const mains = list.filter((c) => c.isInstituteCategory && !String(c.name || '').includes(' / '));
+      setParentCategories(mains);
     } catch {
       toast.error(isRTL ? 'فشل تحميل الفئات الرئيسية' : 'Failed to load main categories');
     } finally {

@@ -36,7 +36,10 @@ const InstituteDashboard = () => {
   const [orderPage, setOrderPage] = useState(1);
   const [orderTotal, setOrderTotal] = useState(0);
   const [orderStatusFilter, setOrderStatusFilter] = useState('');
+  const [categoryView, setCategoryView] = useState('main');
   const LIMIT = 10;
+
+  const CATEGORY_SEP = ' / ';
 
   const labels = {
     title: isRTL ? 'دوائر الدولة' : 'Government Departments',
@@ -56,6 +59,10 @@ const InstituteDashboard = () => {
     search: isRTL ? 'البحث في دوائر الدولة...' : 'Search government records...',
     parentCats: isRTL ? 'الفئات الرئيسية' : 'Main Categories',
     subCats: isRTL ? 'الفئات الفرعية' : 'Sub Categories',
+    addMainCat: isRTL ? 'إضافة فئة رئيسية' : 'Add main category',
+    addSubCat: isRTL ? 'إضافة فئة فرعية' : 'Add sub category',
+    parentCol: isRTL ? 'الفئة الرئيسية' : 'Parent',
+    deleteCat: isRTL ? 'حذف الفئة؟' : 'Delete category?',
     noCustomers: isRTL ? 'لا يوجد عملاء مسجلين' : 'No clients registered',
     noProducts: isRTL ? 'لا توجد منتجات دوائر الدولة' : 'No government products',
     noOrders: isRTL ? 'لا توجد طلبات جملة' : 'No wholesale orders',
@@ -376,9 +383,9 @@ const InstituteDashboard = () => {
     },
   ];
 
-  const categoryColumns = [
+  const categoryMainColumns = [
     {
-      header: isRTL ? 'الفئة' : 'Category',
+      header: isRTL ? 'الفئة الرئيسية' : 'Main category',
       accessor: 'name',
       render: (c) => (
         <div className="flex items-center gap-4">
@@ -388,7 +395,7 @@ const InstituteDashboard = () => {
           <div className="flex flex-col">
             <span className="font-black text-slate-900 tracking-tight">{c.name}</span>
             <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">
-              {isRTL ? 'فئة دوائر الدولة' : 'Government Category'}
+              {isRTL ? 'دوائر الدولة' : 'Government'}
             </span>
           </div>
         </div>
@@ -399,17 +406,58 @@ const InstituteDashboard = () => {
       accessor: 'products',
       align: 'center',
       render: (c) => (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-sm font-black text-slate-700">
-          {c._count?.products ?? c.products?.length ?? '—'}
+        <span className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg bg-slate-100 text-sm font-black text-slate-700">
+          {c.productCount ?? c._count?.products ?? c.products?.length ?? '—'}
         </span>
       ),
     },
     {
-      header: isRTL ? 'الكلية' : 'College',
-      accessor: 'college',
+      header: isRTL ? 'التاريخ' : 'Date',
+      accessor: 'createdAt',
+      hideOnMobile: true,
       render: (c) => (
-        <span className="text-sm font-bold text-slate-500">
-          {c.college?.name || '—'}
+        <span className="text-xs font-bold text-slate-500">
+          {new Date(c.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+        </span>
+      ),
+    },
+  ];
+
+  const categorySubColumns = [
+    {
+      header: labels.parentCol,
+      accessor: 'parent',
+      render: (c) => (
+        <span className="text-sm font-black text-indigo-700">{parentNameFromSub(c.name)}</span>
+      ),
+    },
+    {
+      header: isRTL ? 'الفرع' : 'Sub',
+      accessor: 'subLabel',
+      render: (c) => (
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-indigo-50 text-indigo-500">
+            <Layers size={16} />
+          </div>
+          <span className="font-bold text-slate-900">{subLabelFromSub(c.name)}</span>
+        </div>
+      ),
+    },
+    {
+      header: isRTL ? 'الاسم الكامل' : 'Full name',
+      accessor: 'name',
+      hideOnMobile: true,
+      render: (c) => (
+        <span className="text-xs font-mono text-slate-500 truncate max-w-[200px] block">{c.name}</span>
+      ),
+    },
+    {
+      header: isRTL ? 'المنتجات' : 'Products',
+      accessor: 'products',
+      align: 'center',
+      render: (c) => (
+        <span className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg bg-slate-100 text-sm font-black text-slate-700">
+          {c.productCount ?? c._count?.products ?? '—'}
         </span>
       ),
     },
@@ -433,10 +481,54 @@ const InstituteDashboard = () => {
       || (c.phone?.toLowerCase() || c.user?.phone?.toLowerCase() || '').includes(q);
   });
 
-  const filteredCategories = instituteCategories.filter((c) => {
+  const instituteMainCategories = instituteCategories.filter(
+    (c) => !String(c.name || '').includes(CATEGORY_SEP)
+  );
+  const instituteSubCategories = instituteCategories.filter((c) =>
+    String(c.name || '').includes(CATEGORY_SEP)
+  );
+
+  const filteredMainCategories = instituteMainCategories.filter((c) => {
     if (!searchTerm) return true;
     return (c.name?.toLowerCase() || '').includes(searchTerm.toLowerCase());
   });
+  const filteredSubCategories = instituteSubCategories.filter((c) => {
+    if (!searchTerm) return true;
+    return (c.name?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+  });
+
+  const parentNameFromSub = (fullName) => {
+    const s = String(fullName || '');
+    const i = s.indexOf(CATEGORY_SEP);
+    if (i === -1) return '—';
+    return s.slice(0, i);
+  };
+  const subLabelFromSub = (fullName) => {
+    const s = String(fullName || '');
+    const i = s.indexOf(CATEGORY_SEP);
+    if (i === -1) return s;
+    return s.slice(i + CATEGORY_SEP.length);
+  };
+
+  const handleDeleteCategory = async (cat) => {
+    const result = await Swal.fire({
+      title: labels.deleteCat,
+      text: `"${cat.name}"`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: isRTL ? 'حذف' : 'Delete',
+      reverseButtons: isRTL,
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/categories/products/${cat.id}`);
+      toast.success(isRTL ? 'تم حذف الفئة' : 'Category deleted');
+      fetchAll();
+    } catch {
+      toast.error(isRTL ? 'تعذر الحذف (قد توجد منتجات مرتبطة)' : 'Delete failed (products may still use this category)');
+    }
+  };
 
   const tabIcons = { customers: Users, products: Package, orders: ShoppingCart, categories: Tag };
 
@@ -606,37 +698,87 @@ const InstituteDashboard = () => {
             )
           )}
 
-          {/* Categories Tab */}
+          {/* Categories Tab — main vs sub (same convention as seed-institute: "Main / Sub") */}
           {activeTab === 'categories' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                     <Layers size={16} className="text-blue-600" />
                   </div>
                   <h3 className="text-lg font-black text-slate-900">
-                    {isRTL ? 'فئات دوائر الدولة' : 'Government Categories'}
+                    {isRTL ? 'فئات دوائر الدولة' : 'Government categories'}
                   </h3>
-                  <span className="text-xs font-black text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">{filteredCategories.length}</span>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/institute/categories/add?type=main')}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-blue-700 transition-all"
+                  >
+                    <Plus size={16} />
+                    {labels.addMainCat}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/institute/categories/add?type=sub')}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-indigo-700 transition-all"
+                  >
+                    <Plus size={16} />
+                    {labels.addSubCat}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex rounded-2xl bg-slate-100 p-1 max-w-md">
                 <button
-                  onClick={() => navigate('/institute/categories/add')}
-                  className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-200/50 hover:shadow-blue-300/60 transition-all"
+                  type="button"
+                  onClick={() => setCategoryView('main')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${
+                    categoryView === 'main' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  }`}
                 >
-                  <Plus size={18} />
-                  {isRTL ? 'إضافة فئة' : 'Add Category'}
+                  {labels.parentCats} ({instituteMainCategories.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCategoryView('sub')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${
+                    categoryView === 'sub' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  {labels.subCats} ({instituteSubCategories.length})
                 </button>
               </div>
-              {filteredCategories.length === 0 ? (
-                <EmptyBlock icon={Tag} message={labels.noCategories} />
-              ) : (
-                <DataTable
-                  data={filteredCategories}
-                  columns={categoryColumns}
-                  loading={false}
-                  searchable={false}
-                  onEdit={(c) => navigate(`/categories/edit/products/${c.id}`)}
-                />
+
+              {categoryView === 'main' && (
+                filteredMainCategories.length === 0 ? (
+                  <EmptyBlock icon={Tag} message={labels.noCategories} />
+                ) : (
+                  <DataTable
+                    data={filteredMainCategories}
+                    columns={categoryMainColumns}
+                    loading={false}
+                    searchable={false}
+                    onEdit={(c) => navigate(`/categories/edit/products/${c.id}`)}
+                    onDelete={handleDeleteCategory}
+                  />
+                )
+              )}
+
+              {categoryView === 'sub' && (
+                filteredSubCategories.length === 0 ? (
+                  <EmptyBlock icon={Layers} message={labels.noCategories} />
+                ) : (
+                  <DataTable
+                    data={filteredSubCategories}
+                    columns={categorySubColumns}
+                    loading={false}
+                    searchable={false}
+                    onEdit={(c) => navigate(`/categories/edit/products/${c.id}`)}
+                    onDelete={handleDeleteCategory}
+                  />
+                )
               )}
             </div>
           )}
