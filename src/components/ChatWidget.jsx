@@ -97,6 +97,7 @@ export default function ChatWidget() {
       }
 
       let errMsg;
+      // Backend uses HTTP 503 (not 429) for OpenAI quota so axios does not auto-retry.
       if (code === 'AI_QUOTA_EXCEEDED') {
         errMsg = lb(
           'تم تجاوز حصة خدمة الذكاء الاصطناعي. يرجى شحن رصيد OpenAI من platform.openai.com',

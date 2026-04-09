@@ -39,8 +39,13 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 429 Too Many Requests
+    // Handle 429 Too Many Requests (do not retry chatbot — retries waste OpenAI quota / confuse errors)
     if (error.response?.status === 429) {
+      const url = originalRequest.url || '';
+      if (url.includes('chatbot')) {
+        return Promise.reject(error);
+      }
+
       const requestKey = originalRequest.url + (originalRequest.method || 'get');
       const retryCount = rateLimitRetries.get(requestKey) || 0;
       const maxRetries = 2;
