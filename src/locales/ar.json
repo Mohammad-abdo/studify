@@ -84,6 +84,7 @@
     "transactions": "المعاملات",
     "reports": "التقارير",
     "importLogs": "سجلات الاستيراد",
+    "productImportExport": "استيراد/تصدير المنتجات",
     "assignments": "التكليفات",
     "wallets": "المحافظ",
     "locations": "المواقع",
@@ -132,6 +133,28 @@
     }
   },
   "pages": {
+    "productImportExport": {
+      "title": "استيراد/تصدير المنتجات",
+      "subtitle": "تصدير المنتجات وشرائح التسعير إلى CSV أو استيراد التحديثات إلى النظام.",
+      "exportTitle": "تصدير CSV",
+      "exportSubtitle": "تنزيل أحدث نسخة من المنتجات والتسعير.",
+      "importTitle": "استيراد CSV",
+      "importSubtitle": "رفع ملفات CSV لإضافة/تحديث المنتجات وشرائح التسعير.",
+      "downloadProducts": "تنزيل products.csv",
+      "downloadPricing": "تنزيل product_pricing.csv",
+      "downloadProductsTemplate": "تنزيل قالب المنتجات",
+      "downloadPricingTemplate": "تنزيل قالب التسعير",
+      "productsCsv": "ملف المنتجات (products.csv)",
+      "pricingCsv": "ملف شرائح التسعير (product_pricing.csv)",
+      "upload": "رفع",
+      "importHint": "نصيحة: ارفع ملف المنتجات أولاً ثم ملف التسعير. لمنتجات الجهات: يجب توفير basePrice أو شرائح التسعير.",
+      "lastResult": "نتيجة آخر استيراد",
+      "created": "تم الإنشاء",
+      "updated": "تم التحديث",
+      "skipped": "تم التجاوز",
+      "errors": "الأخطاء",
+      "moreErrors": "أخطاء إضافية: {count}"
+    },
     "books": {
       "title": "مكتبة المؤسسة",
       "subtitle": "إدارة الكتب والمواد الدراسية العالمية",

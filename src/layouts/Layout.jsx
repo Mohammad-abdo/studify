@@ -89,6 +89,7 @@ const Layout = () => {
       { icon: BookOpen, label: t('menu.books'), path: '/books' },
       { icon: FileText, label: t('menu.materials'), path: '/materials' },
       { icon: Package, label: t('menu.products'), path: '/products' },
+      { icon: Upload, label: t('menu.productImportExport'), path: '/product-import-export' },
     ]},
     { section: t('menu.sections.userManagement'), items: [
       {

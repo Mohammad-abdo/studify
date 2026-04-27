@@ -84,6 +84,7 @@
     "transactions": "Transactions",
     "reports": "Reports",
     "importLogs": "Import Logs",
+    "productImportExport": "Product Import/Export",
     "assignments": "Assignments",
     "wallets": "Wallets",
     "locations": "Locations",
@@ -132,6 +133,28 @@
     }
   },
   "pages": {
+    "productImportExport": {
+      "title": "Product Import/Export",
+      "subtitle": "Export products and pricing tiers to CSV, or import updates back into the system.",
+      "exportTitle": "Export CSV",
+      "exportSubtitle": "Download the latest products and pricing snapshots.",
+      "importTitle": "Import CSV",
+      "importSubtitle": "Upload CSV files to create/update products and pricing tiers.",
+      "downloadProducts": "Download products.csv",
+      "downloadPricing": "Download product_pricing.csv",
+      "downloadProductsTemplate": "Download products template",
+      "downloadPricingTemplate": "Download pricing template",
+      "productsCsv": "Products CSV (products.csv)",
+      "pricingCsv": "Pricing tiers CSV (product_pricing.csv)",
+      "upload": "Upload",
+      "importHint": "Tip: Import products first, then import pricing tiers. For institute products, either basePrice or pricing tiers are required.",
+      "lastResult": "Last import result",
+      "created": "Created",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "errors": "Errors",
+      "moreErrors": "More errors: {count}"
+    },
     "books": {
       "title": "Enterprise Library",
       "subtitle": "Global study materials and book management",
