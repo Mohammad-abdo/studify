@@ -154,7 +154,9 @@ const PrintOptionDetail = () => {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('pages.printOptionDetail.status')}</span>
-                  <span className="badge-modern badge-modern-success">{t('pages.printOptionDetail.active')}</span>
+                  <span className={`badge-modern ${printOption.enabled ? 'badge-modern-success' : 'badge-modern-info'}`}>
+                    {printOption.enabled ? t('pages.printOptionDetail.active') : (isRTL ? 'معطّل' : 'Disabled')}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('pages.printOptionDetail.created')}</span>

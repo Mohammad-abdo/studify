@@ -90,6 +90,8 @@ export default function ChatWidget() {
       }
     } catch (err) {
       const code = err.response?.data?.error?.code;
+      const serverMsg = err.response?.data?.error?.message;
+
       if (code === 'AI_NOT_CONFIGURED' || code === 'AI_INVALID_KEY') {
         setAiConfigured(false);
         setMessages((prev) => prev.slice(0, -1));
@@ -97,14 +99,15 @@ export default function ChatWidget() {
       }
 
       let errMsg;
-      // Backend uses HTTP 503 (not 429) for OpenAI quota so axios does not auto-retry.
       if (code === 'AI_QUOTA_EXCEEDED') {
         errMsg = lb(
-          'تم تجاوز حصة خدمة الذكاء الاصطناعي. يرجى شحن رصيد OpenAI من platform.openai.com',
-          'AI quota exceeded. Please add credits at platform.openai.com/billing'
+          'تم الوصول إلى حد الطلبات. يرجى الانتظار لحظة والمحاولة مجدداً.',
+          'Rate limit reached. Please wait a moment and try again.'
         );
+      } else if (code === 'AI_MODEL_ERROR') {
+        errMsg = lb('نموذج الذكاء الاصطناعي غير متاح حالياً.', 'AI model is currently unavailable.');
       } else {
-        errMsg = err.response?.data?.error?.message || lb('حدث خطأ، يرجى المحاولة لاحقاً', 'Something went wrong, please try again.');
+        errMsg = serverMsg || lb('حدث خطأ، يرجى المحاولة لاحقاً', 'Something went wrong, please try again.');
       }
       setMessages((prev) => [...prev, { role: 'assistant', content: errMsg, time: Date.now(), isError: true }]);
     } finally {
@@ -214,12 +217,12 @@ export default function ChatWidget() {
                     <h4 className="font-black text-slate-800 text-sm">{lb('خدمة الذكاء الاصطناعي غير مفعّلة', 'AI Service Not Configured')}</h4>
                     <p className="text-[11px] text-slate-400 mt-2 font-medium leading-relaxed">
                       {lb(
-                        'يرجى إضافة مفتاح OpenAI API في ملف .env الخاص بالسيرفر لتفعيل المساعد الذكي',
-                        'Please set your OPENAI_API_KEY in the backend .env file to enable the AI assistant'
+                        'يرجى إضافة مفتاح Gemini API في ملف .env الخاص بالسيرفر لتفعيل المساعد الذكي',
+                        'Please set your GEMINI_API_KEY in the backend .env file to enable the AI assistant'
                       )}
                     </p>
                     <div className="mt-3 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200">
-                      <code className="text-[10px] text-slate-600 font-mono">OPENAI_API_KEY=sk-...</code>
+                      <code className="text-[10px] text-slate-600 font-mono">GEMINI_API_KEY=AIza...</code>
                     </div>
                     <button
                       onClick={checkStatus}

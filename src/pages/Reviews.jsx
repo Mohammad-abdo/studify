@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Star, X, Search, Filter, MessageSquare, Calendar } from 'lucide-react';
+import { Star, X, Search, Filter, MessageSquare, Calendar, Trash2 } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import DataTable from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
 import EmptyState from '../components/EmptyState';
@@ -29,6 +30,27 @@ const Reviews = () => {
       setReviews([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (review) => {
+    const result = await Swal.fire({
+      title: isRTL ? 'حذف المراجعة' : 'Delete Review',
+      text: isRTL ? 'هل أنت متأكد من حذف هذه المراجعة؟' : 'Are you sure you want to delete this review?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f43f5e',
+      confirmButtonText: isRTL ? 'حذف' : 'Delete',
+      reverseButtons: isRTL,
+    });
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/reviews/${review.id}`);
+        toast.success(isRTL ? 'تم حذف المراجعة' : 'Review deleted');
+        fetchReviews();
+      } catch (error) {
+        toast.error(isRTL ? 'فشل حذف المراجعة' : 'Failed to delete review');
+      }
     }
   };
 
@@ -109,6 +131,19 @@ const Reviews = () => {
           <Calendar size={12} />
           <span className="text-xs">{new Date(review.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : undefined)}</span>
         </div>
+      ),
+    },
+    {
+      header: isRTL ? 'الإجراءات' : 'Actions',
+      accessor: 'actions',
+      align: 'right',
+      render: (review) => (
+        <button
+          onClick={() => handleDelete(review)}
+          className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+        >
+          <Trash2 size={18} />
+        </button>
       ),
     },
   ];

@@ -110,7 +110,7 @@ const Delivery = () => {
       accessor: 'userId',
       hideOnMobile: true,
       render: (delivery) => (
-        <span className="text-[10px] font-mono text-slate-300">#{delivery.userId.slice(0, 12)}</span>
+        <span className="text-[10px] font-mono text-slate-300">#{delivery.userId?.slice(0, 12)}</span>
       )
     },
     {

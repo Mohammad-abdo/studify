@@ -87,11 +87,10 @@ api.interceptors.response.use(
       }
     }
 
-    // Handle 403 Forbidden — صلاحيات غير كافية (مثلاً دليفري يحاول واجهة أدمن)
+    // Handle 403 Forbidden — insufficient permissions (e.g. delivery user accessing admin UI)
     if (error.response?.status === 403) {
-      localStorage.removeItem('token');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      if (window.location.pathname !== '/unauthorized') {
+        window.location.href = '/unauthorized';
       }
     }
 

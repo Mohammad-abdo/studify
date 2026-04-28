@@ -11,6 +11,7 @@ import AddProduct from './pages/AddProduct';
 import EditProduct from './pages/EditProduct';
 import Orders from './pages/Orders';
 import Users from './pages/Users';
+import AddUser from './pages/AddUser';
 import UserDetail from './pages/UserDetail';
 import EditUser from './pages/EditUser';
 import Settings from './pages/Settings';
@@ -53,8 +54,12 @@ import PrintCenterForm from './pages/PrintCenterForm';
 import PrintCenterDetail from './pages/PrintCenterDetail';
 // Pricing
 import BookPricing from './pages/BookPricing';
+import AddBookPricing from './pages/AddBookPricing';
+import EditBookPricing from './pages/EditBookPricing';
 import PrintOptions from './pages/PrintOptions';
 import ProductPricing from './pages/ProductPricing';
+import AddProductPricing from './pages/AddProductPricing';
+import EditProductPricing from './pages/EditProductPricing';
 // Financial & Reports
 import FinancialTransactions from './pages/FinancialTransactions';
 import Reports from './pages/Reports';
@@ -65,7 +70,11 @@ import DeliveryWallets from './pages/DeliveryWallets';
 import DeliveryLocations from './pages/DeliveryLocations';
 // Dashboard
 import DashboardMetrics from './pages/DashboardMetrics';
+import AddDashboardMetric from './pages/AddDashboardMetric';
+import EditDashboardMetric from './pages/EditDashboardMetric';
 import Sliders from './pages/Sliders';
+import AddSlider from './pages/AddSlider';
+import EditSlider from './pages/EditSlider';
 // Materials
 import Materials from './pages/Materials';
 import AddMaterial from './pages/AddMaterial';
@@ -157,6 +166,7 @@ function App() {
               <Route path="orders" element={<Orders />} />
               <Route path="orders/:id" element={<OrderDetail />} />
               <Route path="orders/:id/track" element={<OrderTracking />} />
+              <Route path="users/add" element={<AddUser />} />
               <Route path="users/edit/:id" element={<EditUser />} />
               <Route path="users/:id" element={<UserDetail />} />
               <Route path="users" element={<Users />} />
@@ -203,11 +213,15 @@ function App() {
               <Route path="materials/:id" element={<MaterialDetail />} />
               {/* Pricing */}
               <Route path="book-pricing" element={<BookPricing />} />
+              <Route path="book-pricing/add" element={<AddBookPricing />} />
+              <Route path="book-pricing/edit/:id" element={<EditBookPricing />} />
               <Route path="print-options" element={<PrintOptions />} />
               <Route path="print-options/add" element={<AddPrintOption />} />
               <Route path="print-options/edit/:id" element={<PrintOptionDetail />} />
               <Route path="print-options/:id" element={<PrintOptionDetail />} />
               <Route path="product-pricing" element={<ProductPricing />} />
+              <Route path="product-pricing/add" element={<AddProductPricing />} />
+              <Route path="product-pricing/edit/:id" element={<EditProductPricing />} />
               {/* Financial & Reports */}
               <Route path="financial-transactions" element={<FinancialTransactions />} />
               <Route path="reports" element={<Reports />} />
@@ -218,7 +232,11 @@ function App() {
               <Route path="delivery-locations" element={<DeliveryLocations />} />
               {/* Dashboard */}
               <Route path="dashboard-metrics" element={<DashboardMetrics />} />
+              <Route path="dashboard-metrics/add" element={<AddDashboardMetric />} />
+              <Route path="dashboard-metrics/edit/:key" element={<EditDashboardMetric />} />
               <Route path="sliders" element={<Sliders />} />
+              <Route path="sliders/add" element={<AddSlider />} />
+              <Route path="sliders/edit/:id" element={<EditSlider />} />
               {/* Institute / Government */}
               <Route path="institute" element={<InstituteDashboard />} />
               <Route path="institute/products/add" element={<AddInstituteProduct />} />

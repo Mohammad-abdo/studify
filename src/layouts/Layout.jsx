@@ -44,6 +44,10 @@ import {
   Globe,
   User,
   Check,
+  Layers,
+  BookMarked,
+  ScrollText,
+  PanelTop,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Logo from '../components/Logo';
@@ -89,6 +93,29 @@ const Layout = () => {
       { icon: BookOpen, label: t('menu.books'), path: '/books' },
       { icon: FileText, label: t('menu.materials'), path: '/materials' },
       { icon: Package, label: t('menu.products'), path: '/products' },
+      {
+        icon: DollarSign,
+        label: isRTL ? 'التسعيرة' : 'Pricing',
+        key: 'pricing',
+        children: [
+          { icon: BookMarked, label: isRTL ? 'تسعيرة الكتب' : 'Book Pricing', path: '/book-pricing' },
+          { icon: TrendingUp, label: isRTL ? 'تسعيرة المنتجات' : 'Product Pricing', path: '/product-pricing' },
+          { icon: Printer, label: isRTL ? 'خيارات الطباعة' : 'Print Options', path: '/print-options' },
+        ],
+      },
+    ]},
+    { section: isRTL ? 'الأكاديمي' : 'Academic', items: [
+      {
+        icon: Building2,
+        label: isRTL ? 'الأكاديمي' : 'Academic',
+        key: 'academic',
+        children: [
+          { icon: Building2, label: isRTL ? 'الكليات' : 'Colleges', path: '/colleges' },
+          { icon: Layers, label: isRTL ? 'الأقسام' : 'Departments', path: '/departments' },
+          { icon: Tag, label: isRTL ? 'التصنيفات' : 'Categories', path: '/categories' },
+          { icon: Star, label: isRTL ? 'التقييمات' : 'Reviews', path: '/reviews' },
+        ],
+      },
     ]},
     { section: t('menu.sections.userManagement'), items: [
       {
@@ -127,11 +154,36 @@ const Layout = () => {
         ],
       },
     ]},
+    { section: isRTL ? 'المحتوى' : 'Content', items: [
+      { icon: Image, label: isRTL ? 'الشرائح' : 'Sliders', path: '/sliders' },
+      {
+        icon: ScrollText,
+        label: isRTL ? 'إدارة المحتوى' : 'CMS',
+        key: 'cms',
+        children: [
+          { icon: PanelTop, label: isRTL ? 'الانضمام' : 'Onboarding', path: '/onboarding' },
+          { icon: FileText, label: isRTL ? 'الصفحات الثابتة' : 'Static Pages', path: '/static-pages' },
+        ],
+      },
+    ]},
+    { section: isRTL ? 'المالية' : 'Financial', items: [
+      {
+        icon: DollarSign,
+        label: isRTL ? 'المالية' : 'Financial',
+        key: 'financial',
+        children: [
+          { icon: DollarSign, label: isRTL ? 'المعاملات' : 'Transactions', path: '/financial-transactions' },
+          { icon: FileBarChart, label: isRTL ? 'التقارير' : 'Reports', path: '/reports' },
+          { icon: Upload, label: isRTL ? 'سجلات الاستيراد' : 'Import Logs', path: '/import-logs' },
+        ],
+      },
+    ]},
     { section: isRTL ? 'دوائر الدولة' : 'Government', items: [
       { icon: Building2, label: isRTL ? 'دوائر الدولة' : 'Government Depts.', path: '/institute' },
     ]},
     { section: t('menu.sections.system'), items: [
       { icon: UserCheck, label: t('menu.approvals'), path: '/approvals' },
+      { icon: BarChart3, label: isRTL ? 'مقاييس اللوحة' : 'Dashboard Metrics', path: '/dashboard-metrics' },
       { icon: Settings, label: t('common.settings'), path: '/settings' },
     ]}
   ];
@@ -157,7 +209,9 @@ const Layout = () => {
     const Icon = item.icon;
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedMenus[item.key];
-    const isActive = item.path ? location.pathname === item.path : item.children?.some(c => location.pathname === c.path);
+    const isActive = item.path
+      ? location.pathname === item.path
+      : item.children?.some(c => location.pathname === c.path || location.pathname.startsWith(c.path + '/'));
 
     if (hasChildren) {
       return (
@@ -181,7 +235,7 @@ const Layout = () => {
                   key={child.path}
                   to={child.path}
                   className={`flex items-center gap-2.5 px-3 xl:px-3.5 py-2 rounded-lg text-xs xl:text-sm transition-all ${
-                    location.pathname === child.path ? 'text-blue-600 font-bold bg-blue-50/30' : 'text-slate-500 hover:text-slate-900'
+                    (location.pathname === child.path || location.pathname.startsWith(child.path + '/')) ? 'text-blue-600 font-bold bg-blue-50/30' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   <span className="truncate">{child.label}</span>
@@ -305,7 +359,6 @@ const Layout = () => {
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user?.email || (isRTL ? 'لا يوجد بريد إلكتروني' : 'No email set')}</p>
                   </div>
                   <Link to="/settings" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 font-medium"><UserCircle size={18} /> {t('common.settings')}</Link>
-                  <Link to="/settings" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 font-medium"><Settings size={18} /> {isRTL ? 'تهيئة النظام' : 'Platform Config'}</Link>
                   <div className="h-px bg-slate-100 my-2 mx-5"></div>
                   <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-3 text-sm text-rose-600 hover:bg-rose-50 font-bold">
                     <LogOut size={18} /> {t('common.logout')}
