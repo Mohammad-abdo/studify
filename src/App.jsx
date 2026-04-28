@@ -64,6 +64,7 @@ import EditProductPricing from './pages/EditProductPricing';
 import FinancialTransactions from './pages/FinancialTransactions';
 import Reports from './pages/Reports';
 import ImportLogs from './pages/ImportLogs';
+import ProductImportExport from './pages/ProductImportExport';
 // Delivery
 import DeliveryAssignments from './pages/DeliveryAssignments';
 import DeliveryWallets from './pages/DeliveryWallets';
@@ -226,6 +227,7 @@ function App() {
               <Route path="financial-transactions" element={<FinancialTransactions />} />
               <Route path="reports" element={<Reports />} />
               <Route path="import-logs" element={<ImportLogs />} />
+              <Route path="product-import-export" element={<ProductImportExport />} />
               {/* Delivery */}
               <Route path="delivery-assignments" element={<DeliveryAssignments />} />
               <Route path="delivery-wallets" element={<DeliveryWallets />} />
