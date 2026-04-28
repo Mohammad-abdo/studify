@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, X, Search, Filter, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Package, X, Search, Filter, ShoppingBag, ArrowRight, Upload } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -196,6 +196,15 @@ const Products = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/product-import-export')}
+              className="px-4 py-3.5 2xl:py-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all font-black text-[10px] 2xl:text-xs uppercase tracking-widest inline-flex items-center gap-2"
+              title={t('menu.productImportExport')}
+            >
+              <Upload size={16} />
+              {t('menu.productImportExport')}
+            </button>
             <button className="p-3.5 2xl:p-4 bg-slate-50 text-slate-400 rounded-2xl hover:text-slate-900 transition-all">
               <Filter size={20} />
             </button>

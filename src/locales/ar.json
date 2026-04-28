@@ -23,6 +23,7 @@
     "cancel": "إلغاء",
     "loading": "جاري التحميل...",
     "noData": "لا توجد بيانات",
+    "noResults": "لم يتم العثور على نتائج",
     "noResultsFound": "لم يتم العثور على نتائج",
     "noResultsDesc": "جرب كلمات رئيسية مختلفة أو تحقق من الفلاتر",
     "noDataAvailable": "لا توجد بيانات متاحة",
@@ -135,7 +136,7 @@
   "pages": {
     "productImportExport": {
       "title": "استيراد/تصدير المنتجات",
-      "subtitle": "تصدير المنتجات وشرائح التسعير إلى CSV أو استيراد التحديثات إلى النظام.",
+      "subtitle": "تصدير/استيراد المنتجات والتسعير عبر CSV أو ملف Excel واحد (ورقتان). الصور المضمنة في ورقة المنتجات تُرفع وتُحفظ كروابط.",
       "exportTitle": "تصدير CSV",
       "exportSubtitle": "تنزيل أحدث نسخة من المنتجات والتسعير.",
       "importTitle": "استيراد CSV",
@@ -153,7 +154,23 @@
       "updated": "تم التحديث",
       "skipped": "تم التجاوز",
       "errors": "الأخطاء",
-      "moreErrors": "أخطاء إضافية: {count}"
+      "moreErrors": "أخطاء إضافية: {count}",
+      "xlsxSection": "ملف Excel (موصى به)",
+      "downloadImportTemplate": "تنزيل قالب الاستيراد (قائمة الفئات)",
+      "downloadWorkbook": "تنزيل products_export.xlsx",
+      "importTemplateTitle": "قالب الاستيراد",
+      "importTemplateSubtitle": "تنزيل قالب Excel مع قوائم منسدلة للفئات والمنتجات.",
+      "exportWorkbookTitle": "تصدير ملف العمل",
+      "exportWorkbookSubtitle": "تنزيل أحدث ملف عمل للمنتجات والتسعير.",
+      "uploadWorkbookTitle": "رفع ملف العمل",
+      "uploadWorkbookSubtitle": "ارفع ملف .xlsx بعد تعبئته لإنشاء المنتجات والتسعير.",
+      "uploadWorkbookButton": "رفع ملف العمل",
+      "xlsxSheetsHint": "الأوراق: Products و ProductPricing — نفس أعمدة قوالب CSV.",
+      "xlsxImportSection": "استيراد ملف Excel",
+      "workbookXlsx": "ملف العمل (.xlsx)",
+      "uploadWorkbook": "رفع ملف العمل",
+      "xlsxImageHint": "ضع الصور في ورقة المنتجات ومربوطة بصف المنتج (ليس صف العناوين). تُدمج مع أي روابط في imageUrls.",
+      "pricingSummary": "ورقة التسعير"
     },
     "books": {
       "title": "مكتبة المؤسسة",

@@ -90,6 +90,12 @@ const Layout = () => {
       { icon: FileText, label: t('menu.materials'), path: '/materials' },
       { icon: Package, label: t('menu.products'), path: '/products' },
       { icon: Upload, label: t('menu.productImportExport'), path: '/product-import-export' },
+      { icon: Building2, label: t('menu.colleges'), path: '/colleges' },
+      { icon: Building2, label: t('menu.departments'), path: '/departments' },
+      { icon: Tag, label: t('menu.categories'), path: '/categories' },
+      { icon: DollarSign, label: t('menu.bookPricing'), path: '/book-pricing' },
+      { icon: DollarSign, label: t('menu.productPricing'), path: '/product-pricing' },
+      { icon: Printer, label: t('menu.printOptions'), path: '/print-options' },
     ]},
     { section: t('menu.sections.userManagement'), items: [
       {
@@ -133,6 +139,14 @@ const Layout = () => {
     ]},
     { section: t('menu.sections.system'), items: [
       { icon: UserCheck, label: t('menu.approvals'), path: '/approvals' },
+      { icon: Star, label: t('menu.reviews'), path: '/reviews' },
+      { icon: Wallet, label: t('menu.transactions'), path: '/financial-transactions' },
+      { icon: FileBarChart, label: t('menu.reports'), path: '/reports' },
+      { icon: Upload, label: t('menu.importLogs'), path: '/import-logs' },
+      { icon: BarChart3, label: t('menu.dashboardMetrics'), path: '/dashboard-metrics' },
+      { icon: Image, label: t('menu.sliders'), path: '/sliders' },
+      { icon: Globe, label: t('menu.onboarding'), path: '/onboarding' },
+      { icon: FileText, label: t('menu.staticPages'), path: '/static-pages' },
       { icon: Settings, label: t('common.settings'), path: '/settings' },
     ]}
   ];
