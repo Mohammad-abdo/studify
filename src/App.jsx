@@ -199,7 +199,9 @@ function App() {
               <Route path="user-roles/add" element={<AddUserRole />} />
               {/* Profiles */}
               <Route path="students" element={<Students />} />
+              <Route path="students/add" element={<Navigate to="/users/add?type=STUDENT" replace />} />
               <Route path="doctors" element={<Doctors />} />
+              <Route path="doctors/add" element={<Navigate to="/users/add?type=DOCTOR" replace />} />
               <Route path="doctors/:id" element={<DoctorDetail />} />
               <Route path="customers" element={<Customers />} />
               <Route path="delivery" element={<Delivery />} />

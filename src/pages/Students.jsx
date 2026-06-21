@@ -100,8 +100,8 @@ const Students = () => {
       align: 'right',
       render: (student) => (
         <div className="flex items-center justify-end gap-1">
-          <button onClick={() => navigate(`/students/${student.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Eye size={18} /></button>
-          <button onClick={() => navigate(`/students/edit/${student.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
+          <button onClick={() => navigate(`/users/${student.user?.id}`)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Eye size={18} /></button>
+          <button onClick={() => navigate(`/users/edit/${student.user?.id}`)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
           <button onClick={() => handleDelete(student)} className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
         </div>
       ),
@@ -122,7 +122,7 @@ const Students = () => {
         subtitle={t('pages.students.subtitle')}
         breadcrumbs={[{ label: t('menu.students') }]}
         actionLabel={t('pages.students.addStudent')}
-        actionPath="/students/add"
+        actionPath="/users/add?type=STUDENT"
       />
 
       <div className="card-premium p-4 2xl:p-6 bg-white border-none shadow-xl shadow-slate-200/50">

@@ -60,7 +60,7 @@ const DoctorDetail = () => {
         breadcrumbs={[{ label: t('menu.doctors'), path: '/doctors' }, { label: doctor.name || t('pages.doctors.staffMember') }]}
         backPath="/doctors"
         actionLabel={t('pages.doctors.modifyPractitioner')}
-        actionPath={`/doctors/edit/${id}`}
+        actionPath={`/users/edit/${doctor.user?.id}`}
       />
 
       <div className="flex flex-col xl:flex-row gap-10 items-start">
@@ -206,7 +206,7 @@ const DoctorDetail = () => {
           <div className="card-premium p-8 bg-white border-2 border-slate-900 shadow-2xl shadow-slate-200">
             <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-8">{t('pages.doctors.modifyPractitioner')}</h4>
             <button
-              onClick={() => navigate(`/doctors/edit/${id}`)}
+              onClick={() => navigate(`/users/edit/${doctor.user?.id}`)}
               className="w-full btn-modern-primary py-4 rounded-2xl flex items-center justify-center gap-3"
             >
               <Edit size={18} /> {t('pages.doctors.modifyPractitioner')}
