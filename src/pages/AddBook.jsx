@@ -17,6 +17,7 @@ const AddBook = () => {
   const [categories, setCategories] = useState([]);
   const [colleges, setColleges] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,6 +27,7 @@ const AddBook = () => {
     categoryId: '',
     collegeId: '',
     departmentId: '',
+    doctorId: '',
   });
   const [pricing, setPricing] = useState({
     READ: '',
@@ -39,7 +41,17 @@ const AddBook = () => {
   useEffect(() => {
     fetchCategories();
     fetchColleges();
+    fetchDoctors();
   }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await api.get('/doctors');
+      setDoctors(response.data.data || response.data || []);
+    } catch (error) {
+      toast.error(isRTL ? 'فشل تحميل الأطباء' : 'Failed to load doctors');
+    }
+  };
 
   useEffect(() => {
     if (formData.collegeId) {
@@ -124,6 +136,7 @@ const AddBook = () => {
         ...(formData.imageUrls.length > 0 && { imageUrls: formData.imageUrls }),
         totalPages: parseInt(formData.totalPages),
         categoryId: formData.categoryId,
+        doctorId: formData.doctorId,
         ...(formData.collegeId && { collegeId: formData.collegeId }),
         ...(formData.departmentId && { departmentId: formData.departmentId }),
       };
@@ -400,6 +413,22 @@ const AddBook = () => {
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-10">{t('pages.addBook.institutionalMapping')}</h3>
             <div className="space-y-8">
               <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{isRTL ? 'الطبيب (المساهم)' : 'Doctor (Contributor)'}</label>
+                  <select
+                    name="doctorId"
+                    value={formData.doctorId}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-black text-white focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                  >
+                    <option value="" className="text-slate-900">{isRTL ? 'اختر الطبيب' : 'Select Doctor'}</option>
+                    {doctors.map((doctor) => (
+                      <option key={doctor.id} value={doctor.id} className="text-slate-900">{doctor.name}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{t('pages.addBook.targetCollege')}</label>
                   <select
