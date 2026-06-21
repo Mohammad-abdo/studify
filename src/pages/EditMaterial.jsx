@@ -254,7 +254,7 @@ const EditMaterial = () => {
               </div>
             </div>
             <ImageUpload
-              images={formData.imageUrls}
+              value={formData.imageUrls}
               onChange={(urls) => setFormData(prev => ({ ...prev, imageUrls: Array.isArray(urls) ? urls : [urls] }))}
               label={t('pages.editMaterial.assetVisualMatrix')}
               multiple={true}

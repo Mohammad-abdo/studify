@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Shield } from 'lucide-react';
+import { ArrowLeft, Save, Shield, Key } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const AddRole = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [loading, setLoading] = useState(false);
   const [permissions, setPermissions] = useState([]);
   const [formData, setFormData] = useState({

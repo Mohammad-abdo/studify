@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Plus, X } from 'lucide-react';
+import { ArrowRight, Plus, X, Search, Edit, Trash2 } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
 import DataTable from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
+import Swal from 'sweetalert2';
+import { useLanguage } from '../context/LanguageContext';
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

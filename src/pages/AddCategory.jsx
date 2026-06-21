@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Tag } from 'lucide-react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
+import { useLanguage } from '../context/LanguageContext';
 
 const AddCategory = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [loading, setLoading] = useState(false);
   const categoryType = searchParams.get('type') || 'books'; // 'books' or 'products'
   const [formData, setFormData] = useState({
