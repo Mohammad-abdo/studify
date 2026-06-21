@@ -67,6 +67,7 @@ import ImportLogs from './pages/ImportLogs';
 import ProductImportExport from './pages/ProductImportExport';
 // Delivery
 import DeliveryAssignments from './pages/DeliveryAssignments';
+import DeliveryAssignmentForm from './pages/DeliveryAssignmentForm';
 import DeliveryWallets from './pages/DeliveryWallets';
 import DeliveryLocations from './pages/DeliveryLocations';
 // Dashboard
@@ -232,6 +233,8 @@ function App() {
               <Route path="product-import-export" element={<ProductImportExport />} />
               {/* Delivery */}
               <Route path="delivery-assignments" element={<DeliveryAssignments />} />
+              <Route path="delivery-assignments/add" element={<DeliveryAssignmentForm />} />
+              <Route path="delivery-assignments/edit/:id" element={<DeliveryAssignmentForm />} />
               <Route path="delivery-wallets" element={<DeliveryWallets />} />
               <Route path="delivery-locations" element={<DeliveryLocations />} />
               {/* Dashboard */}
